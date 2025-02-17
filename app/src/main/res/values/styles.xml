@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme using Material Components DayNight NoActionBar -->
+    <style name="Theme.HabitGuard" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize your theme colors -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorSecondary">@color/teal_200</item>
+        <!-- Optionally set a transparent status bar and window background -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/white</item>
+    </style>
+
+</resources>
