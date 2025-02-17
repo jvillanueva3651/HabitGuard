@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/welcomeTextView"
@@ -12,5 +13,12 @@
         android:text="Welcome to HabitGuard!"
         android:textSize="24sp"
         android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/signOutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign Out"
+        android:layout_marginTop="24dp" />
 
 </LinearLayout>
