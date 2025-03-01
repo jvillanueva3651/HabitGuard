@@ -11,6 +11,9 @@ import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
 
+    private val eventsMap = mutableMapOf<String, MutableList<String>>()
+    private val eventList = mutableListOf<String>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

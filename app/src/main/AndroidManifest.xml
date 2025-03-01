@@ -13,6 +13,12 @@
         android:theme="@style/Theme.HabitGuard"
         tools:targetApi="31">
         <activity
+            android:name=".ui.gallery.EventEditActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.gallery.WeekViewActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
@@ -29,7 +35,7 @@
             android:exported="false" />
         <activity
             android:name=".SideActivity"
-            android:exported="false"/>
+            android:exported="false" />
     </application>
 
 </manifest>
