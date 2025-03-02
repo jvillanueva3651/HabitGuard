@@ -61,6 +61,9 @@ class MainActivity : AppCompatActivity() {
         }
         habitRecyclerView.adapter = habitAdapter
 
+        setupViewToggle()
+        setupFAB()
+
         // Existing sign-out code
         val signOutButton = findViewById<Button>(R.id.signOutButton)
         signOutButton.setOnClickListener {
@@ -145,6 +148,44 @@ class MainActivity : AppCompatActivity() {
         db.collection("users").document(userId).collection("habits")
             .document(habit.id)
             .update("completedDates", newCompletedDates)
+    }
+
+    private fun setupViewToggle() {
+        val toggleGroup = findViewById<MaterialButtonToggleGroup>(R.id.viewToggleGroup)
+        toggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                when (checkedId) {
+                    R.id.dailyViewButton -> showDailyView()
+                    R.id.weeklyViewButton -> showWeeklyView()
+                    R.id.monthlyViewButton -> showMonthlyView()
+                }
+            }
+        }
+    }
+
+    private fun showMonthlyView() {
+        calendarRecyclerView.visibility = View.VISIBLE
+        habitRecyclerView.visibility = View.GONE
+        loadCalendarDates()
+    }
+
+    private fun showWeeklyView() {
+        calendarRecyclerView.visibility = View.GONE
+        habitRecyclerView.visibility = View.VISIBLE
+        // TODO: Implement weekly-specific logic
+    }
+
+    private fun showDailyView() {
+        calendarRecyclerView.visibility = View.GONE
+        habitRecyclerView.visibility = View.VISIBLE
+        // TODO: Implement daily-specific logic
+    }
+
+    private fun setupFAB() {
+        findViewById<FloatingActionButton>(R.id.fabAddHabit).setOnClickListener {
+            val intent = Intent(this, CreateHabitActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
 
