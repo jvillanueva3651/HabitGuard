@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                         firestoreActivity.updateUserData()
                     }
                 } else {
-                    // Handle sign-in failure
+                    // TODO: Handle sign-in failure
                 }
             }
     }
