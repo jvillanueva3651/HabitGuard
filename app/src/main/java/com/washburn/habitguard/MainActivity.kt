@@ -35,7 +35,6 @@ class MainActivity : AppCompatActivity() {
             finish()  // finish() so user can't come back by pressing back
         }
 
-        signInUser("email@example.com", "password123")
     }
 
     private fun signInUser(email: String, password: String) {
