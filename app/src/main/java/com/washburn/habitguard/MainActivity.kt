@@ -8,9 +8,12 @@ import android.widget.Button
 
 import android.widget.CalendarView
 import android.widget.TextView
+import com.google.firebase.auth.FirebaseAuth
+import com.habitguard.FirestoreActivity
 
 class MainActivity : AppCompatActivity() {
-
+    private val auth = FirebaseAuth.getInstance()
+    private val firestoreActivity = FirestoreActivity()
     private val eventsMap = mutableMapOf<String, MutableList<String>>()
     private val eventList = mutableListOf<String>()
 
@@ -31,5 +34,23 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SideActivity::class.java))
             finish()  // finish() so user can't come back by pressing back
         }
+
+        signInUser("email@example.com", "password123")
+    }
+
+    private fun signInUser(email: String, password: String) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    val uid = user?.uid
+                    if (uid != null) {
+                        firestoreActivity.updateUserData()
+                    }
+                } else {
+                    // Handle sign-in failure
+                }
+            }
     }
 }
+
