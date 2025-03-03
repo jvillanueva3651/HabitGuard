@@ -25,8 +25,12 @@ class MainActivity : AppCompatActivity() {
         val dateView: TextView = findViewById(R.id.date_view)
 
         calendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val date = (dayOfMonth.toString() + "-" + (month + 1) + "-" + year)
-            dateView.text = date
+            val selectedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
+            dateView.text = selectedDate
+
+            val intent = Intent(this, HabitListActivity::class.java)
+            intent.putExtra("selectedDate", selectedDate)
+            startActivity(intent)
         }
 
         val gotoMain = findViewById<Button>(R.id.gotoMain)
