@@ -13,10 +13,13 @@
         android:theme="@style/Theme.HabitGuard"
         tools:targetApi="31">
         <activity
-            android:name=".ui.gallery.EventEditActivity"
+            android:name=".DailyCalendarActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.gallery.WeekViewActivity"
+            android:name=".WeekViewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EventEditActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"

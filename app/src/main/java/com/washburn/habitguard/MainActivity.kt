@@ -1,104 +1,65 @@
 package com.washburn.habitguard
 
-import android.app.AlertDialog
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.widget.Button
-import android.widget.CalendarView
-import android.widget.EditText
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import java.time.LocalDate
+import java.util.ArrayList
 
-class MainActivity : AppCompatActivity() {
+@RequiresApi(Build.VERSION_CODES.O)
+class MainActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
 
-    // Map to store events (date -> event description)
-    private val eventsMap = mutableMapOf<String, String>()
-    private val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    private lateinit var monthYearText: TextView
+    private lateinit var calendarRecyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        initWidgets()
+        CalendarUtils.selectedDate = LocalDate.now()
+        setMonthView()
+    }
 
-        val calendar: CalendarView = findViewById(R.id.calendar)
-        val eventListView: TextView = findViewById(R.id.event_list_view)
-        val addEventButton: Button = findViewById(R.id.add_event_button)
+    private fun initWidgets() {
+        calendarRecyclerView = findViewById(R.id.calendarRecyclerView)
+        monthYearText = findViewById(R.id.monthYearTV)
+    }
 
-        // Set up CalendarView listener
-        calendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val selectedDate = formatDate(dayOfMonth, month, year)
-            val eventDescription = eventsMap[selectedDate]
+    private fun setMonthView() {
+        monthYearText.text = CalendarUtils.monthYearFromDate(CalendarUtils.selectedDate)
+        val daysInMonth = CalendarUtils.daysInMonthArray()
 
-            if (eventDescription != null) {
-                // Display the event description for the selected date
-                eventListView.text = "Event: $eventDescription"
-            } else {
-                eventListView.text = "No event for this date"
-            }
-        }
+        val calendarAdapter = CalendarAdapter(daysInMonth, this)
+        val layoutManager = GridLayoutManager(applicationContext, 7)
+        calendarRecyclerView.layoutManager = layoutManager
+        calendarRecyclerView.adapter = calendarAdapter
+    }
 
-        // Set up Add Event button
-        addEventButton.setOnClickListener {
-            val selectedDate = getSelectedDate(calendar)
-            if (selectedDate.isNotEmpty()) {
-                showEventInputDialog(selectedDate)
-            } else {
-                Toast.makeText(this, "Please select a date first", Toast.LENGTH_SHORT).show()
-            }
+    fun previousMonthAction(view: View) {
+        CalendarUtils.selectedDate = CalendarUtils.selectedDate.minusMonths(1)
+        setMonthView()
+    }
+
+    fun nextMonthAction(view: View) {
+        CalendarUtils.selectedDate = CalendarUtils.selectedDate.plusMonths(1)
+        setMonthView()
+    }
+
+    override fun onItemClick(position: Int, date: LocalDate) {
+        if (date != null) {
+            CalendarUtils.selectedDate = date
+            setMonthView()
         }
     }
 
-    /**
-     * Show a dialog to input event description.
-     */
-    private fun showEventInputDialog(date: String) {
-        val inputDialog = AlertDialog.Builder(this)
-        inputDialog.setTitle("Add Event for $date")
-        inputDialog.setMessage("Enter event description:")
-
-        // Use EditText for user input
-        val input = EditText(this)
-        inputDialog.setView(input)
-
-        inputDialog.setPositiveButton("Add") { _, _ ->
-            val eventDescription = input.text.toString()
-            if (eventDescription.isNotEmpty()) {
-                // Save the event description for the selected date
-                eventsMap[date] = eventDescription
-                Toast.makeText(this, "Event added to $date", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Event description cannot be empty", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        inputDialog.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss()
-        }
-
-        inputDialog.show()
-    }
-
-    /**
-     * Format the date as a string.
-     */
-    private fun formatDate(day: Int, month: Int, year: Int): String {
-        val calendar = Calendar.getInstance()
-        calendar.set(year, month, day)
-        return dateFormatter.format(calendar.time)
-    }
-
-    /**
-     * Get the selected date from the CalendarView.
-     */
-    private fun getSelectedDate(calendar: CalendarView): String {
-        val dateMillis = calendar.date
-        val calendarInstance = Calendar.getInstance()
-        calendarInstance.timeInMillis = dateMillis
-        return formatDate(
-            calendarInstance.get(Calendar.DAY_OF_MONTH),
-            calendarInstance.get(Calendar.MONTH),
-            calendarInstance.get(Calendar.YEAR)
-        )
+    fun weeklyAction(view: View) {
+        startActivity(Intent(this, WeekViewActivity::class.java))
     }
 }
