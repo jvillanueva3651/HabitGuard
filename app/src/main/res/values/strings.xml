@@ -15,4 +15,6 @@
     <string name="menu_slideshow">Slideshow</string>
     <string name="forward">forward</string>
     <string name="back">back</string>
+    <string name="u003c"><![CDATA[<-]]></string>
+    <string name="u003e"><![CDATA[->]]></string>
 </resources>

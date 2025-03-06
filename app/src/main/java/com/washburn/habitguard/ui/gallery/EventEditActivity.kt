@@ -1,4 +1,4 @@
-package com.washburn.habitguard
+package com.washburn.habitguard.ui.gallery
 
 import android.os.Build
 import android.os.Bundle
@@ -7,6 +7,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.washburn.habitguard.R
 import java.time.LocalTime
 
 @RequiresApi(Build.VERSION_CODES.O)

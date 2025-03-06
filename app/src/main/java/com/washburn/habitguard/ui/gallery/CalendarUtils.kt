@@ -1,4 +1,4 @@
-package com.washburn.habitguard
+package com.washburn.habitguard.ui.gallery
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -38,7 +38,7 @@ object CalendarUtils {
         return date.format(formatter)
     }
 
-    fun daysInMonthArray(): ArrayList<LocalDate> {
+    fun daysInMonthArray(date: LocalDate): ArrayList<LocalDate> {
         val daysInMonthArray = ArrayList<LocalDate>()
 
         val yearMonth = YearMonth.from(selectedDate)

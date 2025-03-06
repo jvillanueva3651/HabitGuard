@@ -1,4 +1,4 @@
-package com.washburn.habitguard
+package com.washburn.habitguard.ui.gallery
 
 import android.content.Intent
 import android.os.Build
@@ -10,8 +10,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.washburn.habitguard.R
 import java.time.LocalDate
-import java.util.ArrayList
 
 @RequiresApi(Build.VERSION_CODES.O)
 class WeekViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {

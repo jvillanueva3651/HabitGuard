@@ -1,4 +1,4 @@
-package com.washburn.habitguard
+package com.washburn.habitguard.ui.gallery
 
 import android.content.Intent
 import android.os.Build
@@ -8,6 +8,7 @@ import android.widget.ListView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.washburn.habitguard.R
 import java.time.LocalTime
 import java.time.format.TextStyle
 import java.util.ArrayList

@@ -1,4 +1,4 @@
-package com.washburn.habitguard
+package com.washburn.habitguard.ui.gallery
 
 import java.time.LocalTime
 

@@ -1,4 +1,4 @@
-package com.washburn.habitguard
+package com.washburn.habitguard.ui.gallery
 
 import android.content.Context
 import android.os.Build
@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import com.washburn.habitguard.R
 
 @RequiresApi(Build.VERSION_CODES.O)
 class EventAdapter(context: Context, events: List<Event>) :
