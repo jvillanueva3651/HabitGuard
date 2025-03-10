@@ -14,20 +14,22 @@
             android:id="@+id/dateText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"/>
+            android:textSize="14sp" />
 
-        <LinearLayout
-            android:id="@+id/habitIndicators"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"/>
-
+        <!-- Habit indicator dot -->
+        <View
+            android:id="@+id/habitIndicator"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/indicator_circle"
+            android:visibility="invisible" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/darker_gray"/>
+        android:layout_gravity="bottom"
+        android:background="@android:color/darker_gray" />
 
 </FrameLayout>

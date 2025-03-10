@@ -34,7 +34,7 @@
             android:text="Monthly"/>
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
-    <!-- Calendar RecyclerView -->
+    <!-- Calendar RecyclerView (Monthly view) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/calendarRecyclerView"
         android:layout_width="match_parent"
@@ -43,7 +43,7 @@
         android:padding="8dp"
         android:clipToPadding="false"/>
 
-    <!-- Habit List RecyclerView -->
+    <!-- Habit RecyclerView (Daily view) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/habitRecyclerView"
         android:layout_width="match_parent"

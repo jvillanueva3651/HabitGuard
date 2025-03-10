@@ -19,16 +19,13 @@ class AuthActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
 
-        // Initialize Firebase Auth
         auth = Firebase.auth
 
-        // Get UI elements
         val emailEditText = findViewById<EditText>(R.id.emailEditText)
         val passwordEditText = findViewById<EditText>(R.id.passwordEditText)
         val signUpButton = findViewById<Button>(R.id.signUpButton)
         val loginButton = findViewById<Button>(R.id.loginButton)
 
-        // Sign Up Button Click
         signUpButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
@@ -37,7 +34,6 @@ class AuthActivity : AppCompatActivity() {
             }
         }
 
-        // Login Button Click
         loginButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
@@ -47,7 +43,6 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    // Validate email and password
     private fun validateInputs(email: String, password: String): Boolean {
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             showToast("Invalid email")
@@ -60,13 +55,11 @@ class AuthActivity : AppCompatActivity() {
         return true
     }
 
-    // Register a new user
     private fun registerUser(email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     showToast("Registration successful!")
-                    // Redirect to MainActivity
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 } else {
@@ -75,7 +68,6 @@ class AuthActivity : AppCompatActivity() {
             }
     }
 
-    // Login existing user
     private fun loginUser(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
@@ -89,17 +81,13 @@ class AuthActivity : AppCompatActivity() {
             }
     }
 
-    // Show Toast messages
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    // Check if user is already logged in
     override fun onStart() {
         super.onStart()
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            // Redirect to MainActivity
+        if (auth.currentUser != null) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }

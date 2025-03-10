@@ -1,22 +1,24 @@
 package com.washburn.habitguard
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
-import java.util.*
 
 class HabitAdapter(
     private val habits: List<Habit>,
-    private val onHabitToggled: (Habit, Boolean) -> Unit
+    private val date: String, // the date associated with these habits
+    private val onEdit: (Habit) -> Unit,
+    private val onDelete: (Habit) -> Unit
 ) : RecyclerView.Adapter<HabitAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val habitCheckbox: CheckBox = view.findViewById(R.id.habitCheckbox)
         val habitName: TextView = view.findViewById(R.id.habitName)
-        val habitStreak: TextView = view.findViewById(R.id.habitStreak)
+        val habitTime: TextView = view.findViewById(R.id.habitTime)
+        val editButton: ImageButton = view.findViewById(R.id.editButton)
+        val deleteButton: ImageButton = view.findViewById(R.id.deleteButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -27,31 +29,15 @@ class HabitAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val habit = habits[position]
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        holder.habitName.text = habit.name
+        holder.habitTime.text = "${habit.startTime} - ${habit.endTime}"
 
-        with(holder) {
-            habitName.text = habit.name
-            habitCheckbox.isChecked = habit.completedDates.contains(today)
-            habitStreak.text = "Current streak: ${calculateStreak(habit.completedDates)} days"
-
-            habitCheckbox.setOnCheckedChangeListener { _, isChecked ->
-                onHabitToggled(habit, isChecked)
-            }
+        holder.editButton.setOnClickListener {
+            onEdit(habit)
         }
-    }
-
-    private fun calculateStreak(dates: List<String>): Int {
-        val sortedDates = dates.sortedDescending()
-        var streak = 0
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        sortedDates.forEach { dateStr ->
-            val date = dateFormat.parse(dateStr)!!
-            calendar.add(Calendar.DAY_OF_YEAR, -1)
-            if (date.after(calendar.time)) streak++ else return streak
+        holder.deleteButton.setOnClickListener {
+            onDelete(habit)
         }
-        return streak
     }
 
     override fun getItemCount() = habits.size

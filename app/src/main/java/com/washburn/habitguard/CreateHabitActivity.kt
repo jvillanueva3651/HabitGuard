@@ -1,65 +1,121 @@
 package com.washburn.habitguard
 
+import android.app.DatePickerDialog
 import android.os.Bundle
-import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.washburn.habitguard.databinding.ActivityCreateHabitBinding
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.UUID
 
 class CreateHabitActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityCreateHabitBinding
+    private lateinit var habitNameEditText: EditText
+    private lateinit var habitDescriptionEditText: EditText
+    private lateinit var habitStartTimeEditText: EditText
+    private lateinit var habitEndTimeEditText: EditText
+    private lateinit var dateButton: Button
+    private lateinit var saveButton: Button
+
     private val db = Firebase.firestore
-    private val auth = FirebaseAuth.getInstance()
+
+    private var selectedDate: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCreateHabitBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_create_habit)
 
-        // Setup frequency spinner
-        ArrayAdapter.createFromResource(
-            this,
-            R.array.habit_frequencies,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.frequencySpinner.adapter = adapter
+        habitNameEditText = findViewById(R.id.habitNameEditText)
+        habitDescriptionEditText = findViewById(R.id.habitDescriptionEditText)
+        habitStartTimeEditText = findViewById(R.id.habitStartTimeEditText)
+        habitEndTimeEditText = findViewById(R.id.habitEndTimeEditText)
+        dateButton = findViewById(R.id.dateButton)
+        saveButton = findViewById(R.id.saveButton)
+
+        dateButton.text = selectedDate
+
+        dateButton.setOnClickListener {
+            showDatePicker()
         }
 
-        binding.saveButton.setOnClickListener {
-            val name = binding.habitNameEditText.text.toString().trim()
-            val frequency = binding.frequencySpinner.selectedItem.toString()
-            val targetDays = binding.targetDaysEditText.text.toString().toIntOrNull() ?: 1
-
-            if (name.isEmpty()) {
-                Toast.makeText(this, "Habit name required", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            saveHabitToFirestore(
-                Habit(
-                    name = name,
-                    type = frequency.lowercase(),
-                    targetDays = targetDays
-                )
-            )
+        saveButton.setOnClickListener {
+            saveHabit()
         }
     }
 
-    private fun saveHabitToFirestore(habit: Habit) {
-        val userId = auth.currentUser?.uid ?: return
-        db.collection("users").document(userId).collection("habits")
-            .add(habit)
-            .addOnSuccessListener {
-                Toast.makeText(this, "Habit created!", Toast.LENGTH_SHORT).show()
-                finish()
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                val cal = Calendar.getInstance()
+                cal.set(year, month, dayOfMonth)
+                selectedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.time)
+                dateButton.text = selectedDate
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
+
+    private fun saveHabit() {
+        val name = habitNameEditText.text.toString().trim()
+        val description = habitDescriptionEditText.text.toString().trim()
+        val startTime = habitStartTimeEditText.text.toString().trim()
+        val endTime = habitEndTimeEditText.text.toString().trim()
+
+        if (name.isEmpty() || description.isEmpty() || startTime.isEmpty() || endTime.isEmpty()) {
+            Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Create a new Habit with a unique ID
+        val habit = Habit(
+            id = UUID.randomUUID().toString(),
+            name = name,
+            description = description,
+            startTime = startTime,
+            endTime = endTime
+        )
+
+        // Convert habit to a map
+        val habitMap = mapOf(
+            "id" to habit.id,
+            "name" to habit.name,
+            "description" to habit.description,
+            "startTime" to habit.startTime,
+            "endTime" to habit.endTime
+        )
+
+        // Save habit to Firestore under "Habits" collection, document with id = selectedDate
+        val habitDocRef = db.collection("Habits").document(selectedDate)
+        habitDocRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                habitDocRef.update("habits", FieldValue.arrayUnion(habitMap))
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Habit added!", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error adding habit: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            } else {
+                // Create new document with habits array
+                habitDocRef.set(mapOf("habits" to listOf(habitMap)))
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Habit added!", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error adding habit: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
-            .addOnFailureListener {
-                Toast.makeText(this, "Failed to save habit", Toast.LENGTH_SHORT).show()
-            }
+        }
     }
 }
