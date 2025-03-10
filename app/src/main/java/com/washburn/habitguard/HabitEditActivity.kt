@@ -24,44 +24,79 @@ class HabitEditActivity : AppCompatActivity() {
             return
         }
 
+        val isEditMode = intent.getBooleanExtra("isEditMode", false)
         val etHabitName = findViewById<EditText>(R.id.etHabitName)
         val etHabitDescription = findViewById<EditText>(R.id.etHabitDescription)
         val btnSaveHabit = findViewById<Button>(R.id.btnSaveHabit)
 
-        btnSaveHabit.setOnClickListener {
-            val name = etHabitName.text.toString().trim()
-            val description = etHabitDescription.text.toString().trim()
+        // If editing, prefill the fields with the existing habit data.
+        var oldName = ""
+        var oldDescription = ""
+        if (isEditMode) {
+            oldName = intent.getStringExtra("oldName") ?: ""
+            oldDescription = intent.getStringExtra("oldDescription") ?: ""
+            etHabitName.setText(oldName)
+            etHabitDescription.setText(oldDescription)
+        }
 
-            if (name.isEmpty()) {
+        btnSaveHabit.setOnClickListener {
+            val newName = etHabitName.text.toString().trim()
+            val newDescription = etHabitDescription.text.toString().trim()
+
+            if (newName.isEmpty()) {
                 Toast.makeText(this, "Please enter a habit name", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Build a habit data map.
-            val habitData = hashMapOf(
-                "name" to name,
-                "description" to description
+            val newHabitData = hashMapOf(
+                "name" to newName,
+                "description" to newDescription
             )
 
-            // Attempt to update the document by adding the new habit to the "habits" array.
-            db.collection("Habits").document(selectedDate)
-                .update("habits", FieldValue.arrayUnion(habitData))
-                .addOnSuccessListener {
-                    Toast.makeText(this, "Habit added!", Toast.LENGTH_SHORT).show()
-                    finish()  // Return to the habit list
-                }
-                .addOnFailureListener { exception ->
-                    // If the document does not exist yet, create it.
-                    db.collection("Habits").document(selectedDate)
-                        .set(hashMapOf("habits" to listOf(habitData)))
-                        .addOnSuccessListener {
-                            Toast.makeText(this, "Habit added!", Toast.LENGTH_SHORT).show()
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Error adding habit: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-                }
+            if (isEditMode) {
+                // In edit mode, remove the old habit then add the updated habit.
+                val oldHabitData = hashMapOf(
+                    "name" to oldName,
+                    "description" to oldDescription
+                )
+                db.collection("Habits").document(selectedDate)
+                    .update("habits", FieldValue.arrayRemove(oldHabitData))
+                    .addOnSuccessListener {
+                        // Now add the updated habit.
+                        db.collection("Habits").document(selectedDate)
+                            .update("habits", FieldValue.arrayUnion(newHabitData))
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "Habit updated!", Toast.LENGTH_SHORT).show()
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Error updating habit: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error removing old habit: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            } else {
+                // In add mode, try to update the document (or create it if it doesn't exist).
+                db.collection("Habits").document(selectedDate)
+                    .update("habits", FieldValue.arrayUnion(newHabitData))
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Habit added!", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .addOnFailureListener { exception ->
+                        // If document doesn't exist, create it.
+                        db.collection("Habits").document(selectedDate)
+                            .set(hashMapOf("habits" to listOf(newHabitData)))
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "Habit added!", Toast.LENGTH_SHORT).show()
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Error adding habit: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+            }
         }
     }
 }
