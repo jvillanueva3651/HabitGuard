@@ -48,7 +48,8 @@ class FirestoreActivity {
                 "Event Description" to "EventDesc",
                 "Start Time" to "StartTime",
                 "End Time" to "EndTime",
-                "Recurring Event" to "Recurring"
+                "Recurring Event" to "Recurring",
+                "Date" to "Date"
                 // Add other calendar fields here...
             )
 

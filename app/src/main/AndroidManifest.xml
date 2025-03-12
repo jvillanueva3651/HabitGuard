@@ -36,6 +36,9 @@
         <activity
             android:name=".SideActivity"
             android:exported="false" />
+        <activity android:name=".HabitListActivity" />
+        <activity android:name=".HabitEditActivity" />
+
     </application>
 
 </manifest>
