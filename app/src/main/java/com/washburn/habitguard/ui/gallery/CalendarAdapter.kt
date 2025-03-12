@@ -29,15 +29,25 @@ class CalendarAdapter(
 
     override fun onBindViewHolder(holder: CalendarViewHolder, position: Int) {
         val date = days[position]
-        holder.dayOfMonth.text = date!!.dayOfMonth.toString()
+        if (date != null) {
+            holder.dayOfMonth.text = date.dayOfMonth.toString()
 
-        if (date == CalendarUtils.selectedDate) {
-            holder.parentView.setBackgroundColor(Color.LTGRAY)
+            // Highlight the selected date
+            if (date == CalendarUtils.selectedDate) {
+                holder.parentView.setBackgroundColor(Color.LTGRAY)
+            } else {
+                holder.parentView.setBackgroundColor(Color.TRANSPARENT) // Reset background for non-selected dates
+            }
+
+            // Set text color based on the month
+            holder.dayOfMonth.setTextColor(
+                if (date.month == CalendarUtils.selectedDate.month) Color.BLACK else Color.LTGRAY
+            )
+        } else {
+            // Handle null dates (e.g., empty cells in the calendar grid)
+            holder.dayOfMonth.text = ""
+            holder.parentView.setBackgroundColor(Color.TRANSPARENT)
         }
-
-        holder.dayOfMonth.setTextColor(
-            if (date!!.month == CalendarUtils.selectedDate.month) Color.BLACK else Color.LTGRAY
-        )
     }
 
     override fun getItemCount(): Int {

@@ -7,6 +7,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.R
 import java.time.LocalTime
 
@@ -18,6 +19,7 @@ class EventEditActivity : AppCompatActivity() {
     private lateinit var eventTimeTV: TextView
 
     private var time: LocalTime = LocalTime.now()
+    private lateinit var firestoreHelper: FirestoreHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +27,8 @@ class EventEditActivity : AppCompatActivity() {
         initWidgets()
         eventDateTV.text = "Date: ${CalendarUtils.formattedDate(CalendarUtils.selectedDate)}"
         eventTimeTV.text = "Time: ${CalendarUtils.formattedTime(time)}"
+
+        firestoreHelper = FirestoreHelper()
     }
 
     private fun initWidgets() {
