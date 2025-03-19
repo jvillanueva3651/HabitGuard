@@ -7,12 +7,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class HabitListActivity : AppCompatActivity(), HabitAdapter.OnHabitActionListener {
-
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
     private val habitList = mutableListOf<Habit>()
     private lateinit var habitAdapter: HabitAdapter
     private lateinit var selectedDate: String
@@ -20,6 +21,12 @@ class HabitListActivity : AppCompatActivity(), HabitAdapter.OnHabitActionListene
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_habit_list)
+
+        val userId = auth.currentUser?.uid ?: run {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
         selectedDate = intent.getStringExtra("selectedDate") ?: run {
             Toast.makeText(this, "No date selected.", Toast.LENGTH_SHORT).show()
@@ -32,12 +39,10 @@ class HabitListActivity : AppCompatActivity(), HabitAdapter.OnHabitActionListene
         habitAdapter = HabitAdapter(habitList, this)
         recyclerView.adapter = habitAdapter
 
-        // Load habits from Firestore
-        loadHabits()
+        loadHabits(userId)
 
         val fabAddHabit = findViewById<FloatingActionButton>(R.id.fabAddHabit)
         fabAddHabit.setOnClickListener {
-            // Launch HabitEditActivity in add mode (edit mode = false)
             val intent = Intent(this, HabitEditActivity::class.java)
             intent.putExtra("selectedDate", selectedDate)
             intent.putExtra("isEditMode", false)
@@ -45,37 +50,46 @@ class HabitListActivity : AppCompatActivity(), HabitAdapter.OnHabitActionListene
         }
     }
 
-    private fun loadHabits() {
-        db.collection("Habits").document(selectedDate).get()
+    private fun loadHabits(userId: String) {
+        db.collection("HabitGuard")
+            .document(userId)
+            .collection("Habits")
+            .document(selectedDate)
+            .get()
             .addOnSuccessListener { document ->
+                habitList.clear()
                 if (document.exists()) {
-                    habitList.clear()  // clear previous data
                     val habitsData = document.get("habits") as? List<Map<String, Any>>
                     habitsData?.forEach { habitMap ->
-                        val name = habitMap["name"] as? String ?: ""
-                        val description = habitMap["description"] as? String ?: ""
-                        habitList.add(Habit(name, description))
+                        habitList.add(Habit(
+                            name = habitMap["name"] as? String ?: "",
+                            description = habitMap["description"] as? String ?: "",
+                            date = habitMap["date"] as? String ?: ""
+                        ))
                     }
-                    habitAdapter.notifyDataSetChanged()
-                } else {
-                    Toast.makeText(this, "No habits found for $selectedDate", Toast.LENGTH_SHORT).show()
                 }
+                habitAdapter.notifyDataSetChanged()
             }
             .addOnFailureListener { exception ->
                 Toast.makeText(this, "Error loading habits: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-    // Delete
     override fun onDelete(habit: Habit, position: Int) {
+        val userId = auth.currentUser?.uid ?: return
+
         val habitMap = hashMapOf(
             "name" to habit.name,
-            "description" to habit.description
+            "description" to habit.description,
+            "date" to habit.date
         )
-        db.collection("Habits").document(selectedDate)
+
+        db.collection("HabitGuard")
+            .document(userId)
+            .collection("Habits")
+            .document(habit.date)
             .update("habits", FieldValue.arrayRemove(habitMap))
             .addOnSuccessListener {
-                Toast.makeText(this, "Habit deleted", Toast.LENGTH_SHORT).show()
                 habitList.removeAt(position)
                 habitAdapter.notifyItemRemoved(position)
             }
@@ -84,9 +98,7 @@ class HabitListActivity : AppCompatActivity(), HabitAdapter.OnHabitActionListene
             }
     }
 
-    // Edit
     override fun onEdit(habit: Habit, position: Int) {
-        // Launch HabitEditActivity in edit mode.
         val intent = Intent(this, HabitEditActivity::class.java)
         intent.putExtra("selectedDate", selectedDate)
         intent.putExtra("isEditMode", true)
@@ -97,6 +109,6 @@ class HabitListActivity : AppCompatActivity(), HabitAdapter.OnHabitActionListene
 
     override fun onResume() {
         super.onResume()
-        loadHabits()
+        auth.currentUser?.uid?.let { loadHabits(it) }
     }
 }

@@ -1,5 +1,5 @@
 package com.washburn.habitguard
-
+/*
 import android.os.Bundle
 
 import android.content.Intent
@@ -57,3 +57,4 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+*/

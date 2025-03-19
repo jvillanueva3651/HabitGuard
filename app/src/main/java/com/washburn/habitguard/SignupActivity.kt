@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class SignupActivity : AppCompatActivity() {
@@ -19,6 +21,7 @@ class SignupActivity : AppCompatActivity() {
     lateinit var tvRedirectLogin: TextView
 
     private lateinit var auth: FirebaseAuth
+    private val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,14 +60,45 @@ class SignupActivity : AppCompatActivity() {
             return
         }
 
-        auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(this) {
-            if (it.isSuccessful) {
-                Toast.makeText(this, "Successfully Singed Up", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, LoginActivity::class.java)
-                startActivity(intent)
-                finish()
+        auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(this) { task ->
+            if (task.isSuccessful) {
+                val userId = auth.currentUser?.uid ?: run {
+                    Toast.makeText(this, "Authentication error", Toast.LENGTH_SHORT).show()
+                    return@addOnCompleteListener
+                }
+
+                val userData = hashMapOf(
+                    "email" to email,
+                    "createdAt" to FieldValue.serverTimestamp(),
+                    "habits" to hashMapOf(
+                        "daily" to emptyList<String>(),
+                        "weekly" to emptyList<String>(),
+                        "monthly" to emptyList<String>()
+                    )
+                )
+
+                db.collection("HabitGuard")
+                    .document(userId)
+                    .set(userData)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Successfully Signed Up", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this, LoginActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+
+                    //Rollback auth creation if fails
+                    .addOnFailureListener { e ->
+                        auth.currentUser?.delete()
+                        Toast.makeText(
+                            this,
+                            "Failed to create user profile: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
             } else {
-                Toast.makeText(this, "Singed Up Failed!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Sign Up Failed!", Toast.LENGTH_SHORT).show()
             }
         }
     }

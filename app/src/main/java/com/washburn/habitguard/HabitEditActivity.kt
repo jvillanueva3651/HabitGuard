@@ -5,20 +5,25 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class HabitEditActivity : AppCompatActivity() {
-
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_habit_edit)
 
-        // Retrieve the selected date from the intent extras.
-        val selectedDate = intent.getStringExtra("selectedDate")
-        if (selectedDate == null) {
+        val userId = auth.currentUser?.uid ?: run {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        val selectedDate = intent.getStringExtra("selectedDate") ?: run {
             Toast.makeText(this, "No date provided", Toast.LENGTH_SHORT).show()
             finish()
             return
@@ -29,7 +34,6 @@ class HabitEditActivity : AppCompatActivity() {
         val etHabitDescription = findViewById<EditText>(R.id.etHabitDescription)
         val btnSaveHabit = findViewById<Button>(R.id.btnSaveHabit)
 
-        // If editing, prefill the fields with the existing habit data.
         var oldName = ""
         var oldDescription = ""
         if (isEditMode) {
@@ -48,23 +52,27 @@ class HabitEditActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            val habitRef = db.collection("HabitGuard")
+                .document(userId)
+                .collection("Habits")
+                .document(selectedDate)
+
             val newHabitData = hashMapOf(
                 "name" to newName,
-                "description" to newDescription
+                "description" to newDescription,
+                "date" to selectedDate
             )
 
             if (isEditMode) {
-                // In edit mode, remove the old habit then add the updated habit.
                 val oldHabitData = hashMapOf(
                     "name" to oldName,
-                    "description" to oldDescription
+                    "description" to oldDescription,
+                    "date" to selectedDate
                 )
-                db.collection("Habits").document(selectedDate)
-                    .update("habits", FieldValue.arrayRemove(oldHabitData))
+
+                habitRef.update("habits", FieldValue.arrayRemove(oldHabitData))
                     .addOnSuccessListener {
-                        // Now add the updated habit.
-                        db.collection("Habits").document(selectedDate)
-                            .update("habits", FieldValue.arrayUnion(newHabitData))
+                        habitRef.update("habits", FieldValue.arrayUnion(newHabitData))
                             .addOnSuccessListener {
                                 Toast.makeText(this, "Habit updated!", Toast.LENGTH_SHORT).show()
                                 finish()
@@ -77,17 +85,13 @@ class HabitEditActivity : AppCompatActivity() {
                         Toast.makeText(this, "Error removing old habit: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
             } else {
-                // In add mode, try to update the document (or create it if it doesn't exist).
-                db.collection("Habits").document(selectedDate)
-                    .update("habits", FieldValue.arrayUnion(newHabitData))
+                habitRef.update("habits", FieldValue.arrayUnion(newHabitData))
                     .addOnSuccessListener {
                         Toast.makeText(this, "Habit added!", Toast.LENGTH_SHORT).show()
                         finish()
                     }
                     .addOnFailureListener { exception ->
-                        // If document doesn't exist, create it.
-                        db.collection("Habits").document(selectedDate)
-                            .set(hashMapOf("habits" to listOf(newHabitData)))
+                        habitRef.set(hashMapOf("habits" to listOf(newHabitData)))
                             .addOnSuccessListener {
                                 Toast.makeText(this, "Habit added!", Toast.LENGTH_SHORT).show()
                                 finish()

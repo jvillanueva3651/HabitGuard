@@ -2,6 +2,7 @@ package com.washburn.habitguard
 
 data class Habit(
     val name: String = "",
-    val description: String = ""
+    val description: String = "",
+    val date: String = ""
 )
 

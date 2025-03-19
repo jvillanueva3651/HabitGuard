@@ -39,6 +39,16 @@ class Event(
                 onSuccess = onSuccess,
                 onFailure = onFailure
             )
+            firestoreHelper.saveCalendarEvent(
+                eventName = event.name,
+                eventDescription = "",
+                startTime = event.time.toString(),
+                endTime = event.time.plusHours(1).toString(),
+                isRecurring = false,
+                date = event.date.toString(),
+                onSuccess = onSuccess,
+                onFailure = onFailure
+            )
         }
     }
 }
