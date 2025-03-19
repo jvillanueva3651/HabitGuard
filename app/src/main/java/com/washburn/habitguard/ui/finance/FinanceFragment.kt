@@ -1,10 +1,9 @@
-package com.washburn.habitguard.ui.slideshow
+package com.washburn.habitguard.ui.finance
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -12,14 +11,15 @@ import android.widget.ListView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.washburn.habitguard.R
 
-class SlideshowFragment : Fragment() {
+class FinanceFragment : Fragment() {
 
-    private val viewModel: SlideshowViewModel by viewModels()
+    private val viewModel: FinanceViewModel by viewModels()
 
     private lateinit var balanceTextView: TextView
     private lateinit var transactionListView: ListView
@@ -29,7 +29,7 @@ class SlideshowFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_slideshow, container, false)
+        val view = inflater.inflate(R.layout.fragment_finance, container, false)
 
         // Initialize views
         balanceTextView = view.findViewById(R.id.balanceTextView)
@@ -42,6 +42,11 @@ class SlideshowFragment : Fragment() {
         // Observe balance changes
         viewModel.balance.observe(viewLifecycleOwner, Observer { balance ->
             balanceTextView.text = "Balance: $${"%.2f".format(balance)}"
+            when {
+                balance < 0 -> balanceTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+                balance > 0 -> balanceTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
+                else -> balanceTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.yellow))
+            }
         })
 
         // Observe transaction history changes
@@ -92,7 +97,16 @@ class SlideshowFragment : Fragment() {
                 // Transaction row
                 val transactionView = layoutInflater.inflate(android.R.layout.simple_list_item_1, parent, false)
                 val textView = transactionView.findViewById<TextView>(android.R.id.text1)
-                textView.text = transactions[position - 1]
+                val transaction = transactions[position - 1]
+                textView.text = transaction
+
+                // Set text color based on transaction type
+                when {
+                    transaction.startsWith("Income") -> textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
+                    transaction.startsWith("Expense") -> textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+                    transaction.startsWith("Failed Expense") -> textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.yellow))
+                }
+
                 transactionView
             }
         }

@@ -1,4 +1,4 @@
-package com.washburn.habitguard.ui.gallery
+package com.washburn.habitguard.ui.calendar
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -41,16 +41,16 @@ object CalendarUtils {
     fun daysInMonthArray(date: LocalDate): ArrayList<LocalDate> {
         val daysInMonthArray = ArrayList<LocalDate>()
 
-        val yearMonth = YearMonth.from(selectedDate)
+        val yearMonth = YearMonth.from(date) // Use the passed `date` parameter
         val daysInMonth = yearMonth.lengthOfMonth()
 
-        val prevMonth = selectedDate.minusMonths(1)
-        val nextMonth = selectedDate.plusMonths(1)
+        val prevMonth = date.minusMonths(1)
+        val nextMonth = date.plusMonths(1)
 
         val prevYearMonth = YearMonth.from(prevMonth)
         val prevDaysInMonth = prevYearMonth.lengthOfMonth()
 
-        val firstOfMonth = selectedDate.withDayOfMonth(1)
+        val firstOfMonth = date.withDayOfMonth(1)
         val dayOfWeek = firstOfMonth.dayOfWeek.value
 
         for (i in 1..42) {
@@ -62,7 +62,7 @@ object CalendarUtils {
                     LocalDate.of(nextMonth.year, nextMonth.month, i - dayOfWeek - daysInMonth)
                 )
                 else -> daysInMonthArray.add(
-                    LocalDate.of(selectedDate.year, selectedDate.month, i - dayOfWeek)
+                    LocalDate.of(date.year, date.month, i - dayOfWeek) // Use the passed `date` parameter
                 )
             }
         }

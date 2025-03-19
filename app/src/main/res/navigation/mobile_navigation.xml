@@ -12,14 +12,15 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.washburn.habitguard.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_calendar"
+        android:name="com.washburn.habitguard.ui.calendar.CalendarFragment"
+        android:label="@string/menu_calendar"
+        tools:layout="@layout/fragment_calendar"
+        tools:targetApi="o" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.washburn.habitguard.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_finance"
+        android:name="com.washburn.habitguard.ui.finance.FinanceFragment"
+        android:label="@string/menu_finance"
+        tools:layout="@layout/fragment_finance" />
 </navigation>

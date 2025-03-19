@@ -1,0 +1,10 @@
+<!-- ic_moon.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#757575"
+        android:pathData="M12,3c0,0 -6,1.5 -6,9s6,9 6,9 6,-1.5 6,-9 -6,-9 -6,-9zM12,2c0.55,0 1,0.45 1,1 0,0.55 -0.45,1 -1,1 -0.55,0 -1,-0.45 -1,-1 0,-0.55 0.45,-1 1,-1z" />
+</vector>

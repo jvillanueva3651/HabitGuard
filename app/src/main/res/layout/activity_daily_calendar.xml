@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.gallery.DailyCalendarActivity">
+    tools:context=".ui.calendar.DailyCalendarActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/u003c"
+            android:text="u003c"
             android:textStyle="bold"
             android:onClick="previousDayAction"
             android:textSize="20sp"/>
@@ -37,7 +37,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/u003e"
+            android:text="u003e"
             android:textStyle="bold"
             android:onClick="nextDayAction"
             android:textSize="20sp"/>

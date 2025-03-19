@@ -1,10 +1,10 @@
-package com.washburn.habitguard.ui.slideshow
+package com.washburn.habitguard.ui.finance
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class SlideshowViewModel : ViewModel() {
+class FinanceViewModel : ViewModel() {
 
     private val _balance = MutableLiveData(0.00)
     val balance: LiveData<Double> get() = _balance

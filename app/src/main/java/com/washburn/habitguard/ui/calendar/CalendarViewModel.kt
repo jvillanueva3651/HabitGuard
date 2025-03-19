@@ -1,4 +1,4 @@
-package com.washburn.habitguard.ui.gallery
+package com.washburn.habitguard.ui.calendar
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -8,22 +8,19 @@ import androidx.lifecycle.ViewModel
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
-class GalleryViewModel : ViewModel() {
+class CalendarViewModel : ViewModel() {
 
     private val _selectedDate = MutableLiveData<LocalDate>()
     val selectedDate: LiveData<LocalDate> get() = _selectedDate
 
     init {
-        // Initialize with the current date
         _selectedDate.value = LocalDate.now()
     }
 
-    // Function to update the selected date
     fun setSelectedDate(date: LocalDate) {
         _selectedDate.value = date
     }
 
-    // Functions to navigate to the previous and next month
     fun goToPreviousMonth() {
         _selectedDate.value = _selectedDate.value?.minusMonths(1)
     }

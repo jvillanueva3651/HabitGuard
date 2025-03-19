@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.gallery.WeekViewActivity">
+    tools:context=".ui.calendar.WeekViewActivity">
 
     <Button
         android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/u003c"
+            android:text="u003c"
             android:textStyle="bold"
             android:onClick="previousWeekAction"
             android:textSize="20sp"/>
@@ -47,7 +47,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/u003e"
+            android:text="u003e"
             android:textStyle="bold"
             android:onClick="nextWeekAction"
             android:textSize="20sp"/>

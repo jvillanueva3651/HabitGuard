@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">HabitGuard</string>
-    <string name="title_activity_auth">AuthActivity</string>
-    <string name="title_activity_main">activity_main</string>
     <string name="title_activity_side">SideActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -11,10 +9,6 @@
     <string name="action_settings">Settings</string>
 
     <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
-    <string name="forward">forward</string>
-    <string name="back">back</string>
-    <string name="u003c"><![CDATA[<-]]></string>
-    <string name="u003e"><![CDATA[->]]></string>
+    <string name="menu_calendar">Calendar</string>
+    <string name="menu_finance">Finance</string>
 </resources>

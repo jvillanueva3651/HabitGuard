@@ -1,4 +1,4 @@
-package com.washburn.habitguard.ui.gallery
+package com.washburn.habitguard.ui.calendar
 
 import android.content.Context
 import android.os.Build
