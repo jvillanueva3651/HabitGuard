@@ -42,7 +42,10 @@ class FirestoreHelper {
                 "Alternate Phone Number" to alternatePhoneNumber
             )
 
-            db.collection("UserInfo").document(uid)
+            db.collection("HabitGuard")
+                .document(uid)
+                .collection("UserInfo")
+                .document("profile")
                 .set(userInfoData, SetOptions.merge())
                 .addOnSuccessListener {
                     onSuccess()
@@ -78,8 +81,11 @@ class FirestoreHelper {
                 "Date" to date
             )
 
-            db.collection("UserCalendar").document(uid)
-                .set(userCalendarData, SetOptions.merge())
+            db.collection("HabitGuard")
+                .document(uid)
+                .collection("Calendar")
+                .document()
+                .set(userCalendarData)
                 .addOnSuccessListener {
                     onSuccess()
                 }
@@ -101,29 +107,25 @@ class FirestoreHelper {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        val firebaseUser: FirebaseUser? = firebaseAuth.currentUser
-        if (firebaseUser != null) {
-            val uid = firebaseUser.uid
-            val eventData = hashMapOf(
-                "Event" to eventName,
-                "Event Description" to eventDescription,
-                "Start Time" to startTime,
-                "End Time" to endTime,
-                "Recurring Event" to isRecurring,
-                "Date" to date
-            )
-
-            // Add a new document with a generated ID
-            db.collection("UserCalendar").document(uid).collection("Events")
-                .add(eventData)
-                .addOnSuccessListener {
-                    onSuccess()
-                }
-                .addOnFailureListener { exception ->
-                    onFailure(exception)
-                }
-        } else {
-            onFailure(Exception("User not signed in."))
+        val user = firebaseAuth.currentUser ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
         }
+
+        val eventData = hashMapOf(
+            "name" to eventName,
+            "description" to eventDescription,
+            "start" to startTime,
+            "end" to endTime,
+            "recurring" to isRecurring,
+            "date" to date
+        )
+
+        db.collection("HabitGuard")
+            .document(user.uid)
+            .collection("Calendar")
+            .add(eventData)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
     }
 }

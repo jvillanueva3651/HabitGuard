@@ -111,7 +111,7 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
                 }
             }
-        } else {
+        } else {    // Offline login NOT IMPLEMENTED YET
             val sharedPreferences = EncryptedSharedPreferences.create(
                 applicationContext,
                 "SecureLoginPrefs",

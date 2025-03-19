@@ -4,43 +4,39 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.ListView
-import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.washburn.habitguard.R
+import com.washburn.habitguard.databinding.ActivityWeekViewBinding
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
 class WeekViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
 
-    private lateinit var monthYearText: TextView
-    private lateinit var calendarRecyclerView: RecyclerView
-    private lateinit var eventListView: ListView
+    private lateinit var binding: ActivityWeekViewBinding // View Binding instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_week_view)
+
+        binding = ActivityWeekViewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         initWidgets()
         setWeekView()
     }
 
     private fun initWidgets() {
-        calendarRecyclerView = findViewById(R.id.calendarRecyclerView)
-        monthYearText = findViewById(R.id.monthYearTV)
-        eventListView = findViewById(R.id.eventListView)
+        binding.calendarRecyclerView.layoutManager = GridLayoutManager(applicationContext, 7)
     }
 
     private fun setWeekView() {
-        monthYearText.text = CalendarUtils.monthYearFromDate(CalendarUtils.selectedDate)
-        val days = CalendarUtils.daysInWeekArray(CalendarUtils.selectedDate)
+        binding.monthYearTV.text = CalendarUtils.monthYearFromDate(CalendarUtils.selectedDate)
 
+        val days = CalendarUtils.daysInWeekArray(CalendarUtils.selectedDate)
         val calendarAdapter = CalendarAdapter(days, this)
-        val layoutManager = GridLayoutManager(applicationContext, 7)
-        calendarRecyclerView.layoutManager = layoutManager
-        calendarRecyclerView.adapter = calendarAdapter
+        binding.calendarRecyclerView.adapter = calendarAdapter
+
+        // Update event list
         setEventAdapter()
     }
 
@@ -67,7 +63,7 @@ class WeekViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
     private fun setEventAdapter() {
         val dailyEvents = Event.eventsForDate(CalendarUtils.selectedDate)
         val eventAdapter = EventAdapter(applicationContext, dailyEvents)
-        eventListView.adapter = eventAdapter
+        binding.eventListView.adapter = eventAdapter
     }
 
     fun newEventAction(view: View) {

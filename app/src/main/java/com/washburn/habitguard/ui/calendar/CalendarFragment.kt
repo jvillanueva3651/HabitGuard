@@ -20,6 +20,7 @@ class CalendarFragment : Fragment(), CalendarAdapter.OnItemListener {
 
     private lateinit var binding: FragmentCalendarBinding
     private lateinit var viewModel: CalendarViewModel
+    private lateinit var calendarAdapter: CalendarAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,14 +35,6 @@ class CalendarFragment : Fragment(), CalendarAdapter.OnItemListener {
 
         viewModel = ViewModelProvider(this)[CalendarViewModel::class.java]
 
-        viewModel.selectedDate.observe(viewLifecycleOwner) { date ->
-            setMonthView(date)
-        }
-
-        initWidgets()
-
-        setMonthView(viewModel.selectedDate.value ?: LocalDate.now())
-
         binding.previousMonthButton.setOnClickListener {
             viewModel.goToPreviousMonth()
         }
@@ -50,34 +43,39 @@ class CalendarFragment : Fragment(), CalendarAdapter.OnItemListener {
             viewModel.goToNextMonth()
         }
 
-        binding.weeklyActionButton.setOnClickListener {
-            weeklyAction()
+        viewModel.selectedDate.observe(viewLifecycleOwner) { date ->
+            setMonthView(date)
         }
 
+        initWidgets()
+
+        setMonthView(viewModel.selectedDate.value ?: LocalDate.now())
+
+        binding.weeklyActionButton.setOnClickListener {
+            startActivity(Intent(requireContext(), WeekViewActivity::class.java))
+        }
+
+        binding.addDotButton.setOnClickListener {
+            val selectedDate = viewModel.selectedDate.value
+            if (selectedDate != null) {
+                calendarAdapter.addDotIndicator(selectedDate)
+            }
+        }
     }
 
     private fun initWidgets() {
-        val calendarRecyclerView = binding.calendarRecyclerView
-
-        calendarRecyclerView.layoutManager = GridLayoutManager(requireContext(), 7)
+        binding.calendarRecyclerView.layoutManager = GridLayoutManager(requireContext(), 7)
     }
 
     private fun setMonthView(date: LocalDate) {
         binding.monthYearTV.text = monthYearFromDate(date)
         val daysInMonth = daysInMonthArray(date)
 
-        val calendarAdapter = CalendarAdapter(daysInMonth, this)
-
+        calendarAdapter = CalendarAdapter(daysInMonth, this)
         binding.calendarRecyclerView.adapter = calendarAdapter
     }
 
     override fun onItemClick(position: Int, date: LocalDate) {
-        date.let {
-            viewModel.setSelectedDate(it)
-        }
-    }
-
-    private fun weeklyAction() {
-        requireActivity().startActivity(Intent(requireContext(), WeekViewActivity::class.java))
+        viewModel.setSelectedDate(date)
     }
 }

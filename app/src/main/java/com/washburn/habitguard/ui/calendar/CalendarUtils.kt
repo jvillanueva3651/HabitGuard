@@ -40,32 +40,33 @@ object CalendarUtils {
 
     fun daysInMonthArray(date: LocalDate): ArrayList<LocalDate> {
         val daysInMonthArray = ArrayList<LocalDate>()
-
-        val yearMonth = YearMonth.from(date) // Use the passed `date` parameter
+        val yearMonth = YearMonth.from(date)
         val daysInMonth = yearMonth.lengthOfMonth()
-
-        val prevMonth = date.minusMonths(1)
-        val nextMonth = date.plusMonths(1)
-
-        val prevYearMonth = YearMonth.from(prevMonth)
-        val prevDaysInMonth = prevYearMonth.lengthOfMonth()
 
         val firstOfMonth = date.withDayOfMonth(1)
         val dayOfWeek = firstOfMonth.dayOfWeek.value
 
-        for (i in 1..42) {
-            when {
-                i <= dayOfWeek -> daysInMonthArray.add(
-                    LocalDate.of(prevMonth.year, prevMonth.month, prevDaysInMonth + i - dayOfWeek)
-                )
-                i > daysInMonth + dayOfWeek -> daysInMonthArray.add(
-                    LocalDate.of(nextMonth.year, nextMonth.month, i - dayOfWeek - daysInMonth)
-                )
-                else -> daysInMonthArray.add(
-                    LocalDate.of(date.year, date.month, i - dayOfWeek) // Use the passed `date` parameter
-                )
-            }
+        // Add previous month's days
+        val prevMonth = date.minusMonths(1)
+        val prevYearMonth = YearMonth.from(prevMonth)
+        val prevDaysInMonth = prevYearMonth.lengthOfMonth()
+
+        for (i in dayOfWeek downTo 1) {
+            daysInMonthArray.add(LocalDate.of(prevMonth.year, prevMonth.month, prevDaysInMonth - i + 1))
         }
+
+        // Add current month's days
+        for (i in 1..daysInMonth) {
+            daysInMonthArray.add(LocalDate.of(date.year, date.month, i))
+        }
+
+        // Add next month's days
+        val nextMonth = date.plusMonths(1)
+        val remainingCells = 42 - daysInMonthArray.size
+        for (i in 1..remainingCells) {
+            daysInMonthArray.add(LocalDate.of(nextMonth.year, nextMonth.month, i))
+        }
+
         return daysInMonthArray
     }
 
