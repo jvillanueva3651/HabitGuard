@@ -16,11 +16,15 @@ class EventAdapter(context: Context, events: List<Event>) :
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val event = getItem(position)
+
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.event_cell, parent, false)
 
         val eventCellTV = view.findViewById<TextView>(R.id.eventCellTV)
-        val eventTitle = "${event?.name} ${CalendarUtils.formattedTime(event?.time)}"
-        eventCellTV.text = eventTitle
+
+        if (event != null) {
+            val eventTitle = "${event.name} ${CalendarUtils.formattedTime(event.time)}"
+            eventCellTV.text = eventTitle
+        }
 
         return view
     }

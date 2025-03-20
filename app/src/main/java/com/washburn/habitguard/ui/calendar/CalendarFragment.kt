@@ -3,28 +3,27 @@ package com.washburn.habitguard.ui.calendar
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.LayoutInflater
+import java.time.LocalDate
+import java.util.ArrayList
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.washburn.habitguard.databinding.FragmentCalendarBinding
 import com.washburn.habitguard.ui.calendar.CalendarUtils.daysInMonthArray
 import com.washburn.habitguard.ui.calendar.CalendarUtils.monthYearFromDate
-import java.time.LocalDate
+import com.washburn.habitguard.ui.calendar.CalendarAdapter.OnItemListener
+import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
 
 @RequiresApi(Build.VERSION_CODES.O)
-class CalendarFragment : Fragment(), CalendarAdapter.OnItemListener {
+class CalendarFragment : Fragment(), OnItemListener {
 
     private lateinit var binding: FragmentCalendarBinding
-    private lateinit var viewModel: CalendarViewModel
     private lateinit var calendarAdapter: CalendarAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentCalendarBinding.inflate(inflater, container, false)
         return binding.root
@@ -33,49 +32,40 @@ class CalendarFragment : Fragment(), CalendarAdapter.OnItemListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[CalendarViewModel::class.java]
+        selectedDate = LocalDate.now()
+        setMonthView()
 
-        binding.previousMonthButton.setOnClickListener {
-            viewModel.goToPreviousMonth()
-        }
-
-        binding.nextMonthButton.setOnClickListener {
-            viewModel.goToNextMonth()
-        }
-
-        viewModel.selectedDate.observe(viewLifecycleOwner) { date ->
-            setMonthView(date)
-        }
-
-        initWidgets()
-
-        setMonthView(viewModel.selectedDate.value ?: LocalDate.now())
-
-        binding.weeklyActionButton.setOnClickListener {
-            startActivity(Intent(requireContext(), WeekViewActivity::class.java))
-        }
-
-        binding.addDotButton.setOnClickListener {
-            val selectedDate = viewModel.selectedDate.value
-            if (selectedDate != null) {
-                calendarAdapter.addDotIndicator(selectedDate)
-            }
-        }
+        binding.previousMonthButton.setOnClickListener { previousMonthAction() }
+        binding.nextMonthButton.setOnClickListener { nextMonthAction() }
+        binding.weeklyActionButton.setOnClickListener { weeklyAction() }
     }
 
-    private fun initWidgets() {
-        binding.calendarRecyclerView.layoutManager = GridLayoutManager(requireContext(), 7)
-    }
-
-    private fun setMonthView(date: LocalDate) {
-        binding.monthYearTV.text = monthYearFromDate(date)
-        val daysInMonth = daysInMonthArray(date)
+    private fun setMonthView() {
+        binding.monthYearTV.text = monthYearFromDate(selectedDate)
+        val daysInMonth: ArrayList<LocalDate> = daysInMonthArray()
 
         calendarAdapter = CalendarAdapter(daysInMonth, this)
+        val layoutManager = GridLayoutManager(requireContext(), 7)
+        binding.calendarRecyclerView.layoutManager = layoutManager
         binding.calendarRecyclerView.adapter = calendarAdapter
     }
 
+    private fun previousMonthAction() {
+        selectedDate = selectedDate.minusMonths(1)
+        setMonthView()
+    }
+
+    private fun nextMonthAction() {
+        selectedDate = selectedDate.plusMonths(1)
+        setMonthView()
+    }
+
     override fun onItemClick(position: Int, date: LocalDate) {
-        viewModel.setSelectedDate(date)
+        selectedDate = date
+        setMonthView()
+    }
+
+    private fun weeklyAction() {
+        startActivity(Intent(requireContext(), WeekViewActivity::class.java))
     }
 }

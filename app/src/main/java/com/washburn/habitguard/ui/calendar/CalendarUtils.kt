@@ -1,26 +1,26 @@
 package com.washburn.habitguard.ui.calendar
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import android.os.Build
 import androidx.annotation.RequiresApi
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.util.ArrayList
 
 @RequiresApi(Build.VERSION_CODES.O)
 object CalendarUtils {
-    var selectedDate: LocalDate = LocalDate.now()
+    lateinit var selectedDate: LocalDate
 
     fun formattedDate(date: LocalDate): String {
         val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
         return date.format(formatter)
     }
 
-    fun formattedTime(time: LocalTime?): String {
+    fun formattedTime(time: LocalTime): String {
         val formatter = DateTimeFormatter.ofPattern("hh:mm:ss a")
-        return time!!.format(formatter)
+        return time.format(formatter)
     }
 
     fun formattedShortTime(time: LocalTime): String {
@@ -38,33 +38,33 @@ object CalendarUtils {
         return date.format(formatter)
     }
 
-    fun daysInMonthArray(date: LocalDate): ArrayList<LocalDate> {
+    fun daysInMonthArray(): ArrayList<LocalDate> {
         val daysInMonthArray = ArrayList<LocalDate>()
-        val yearMonth = YearMonth.from(date)
+
+        val yearMonth = YearMonth.from(selectedDate)
         val daysInMonth = yearMonth.lengthOfMonth()
 
-        val firstOfMonth = date.withDayOfMonth(1)
-        val dayOfWeek = firstOfMonth.dayOfWeek.value
+        val prevMonth = selectedDate.minusMonths(1)
+        val nextMonth = selectedDate.plusMonths(1)
 
-        // Add previous month's days
-        val prevMonth = date.minusMonths(1)
         val prevYearMonth = YearMonth.from(prevMonth)
         val prevDaysInMonth = prevYearMonth.lengthOfMonth()
 
-        for (i in dayOfWeek downTo 1) {
-            daysInMonthArray.add(LocalDate.of(prevMonth.year, prevMonth.month, prevDaysInMonth - i + 1))
-        }
+        val firstOfMonth = selectedDate.withDayOfMonth(1)
+        val dayOfWeek = firstOfMonth.dayOfWeek.value
 
-        // Add current month's days
-        for (i in 1..daysInMonth) {
-            daysInMonthArray.add(LocalDate.of(date.year, date.month, i))
-        }
-
-        // Add next month's days
-        val nextMonth = date.plusMonths(1)
-        val remainingCells = 42 - daysInMonthArray.size
-        for (i in 1..remainingCells) {
-            daysInMonthArray.add(LocalDate.of(nextMonth.year, nextMonth.month, i))
+        for (i in 1..42) {
+            when {
+                i <= dayOfWeek -> daysInMonthArray.add(
+                    LocalDate.of(prevMonth.year, prevMonth.month, prevDaysInMonth + i - dayOfWeek)
+                )
+                i > daysInMonth + dayOfWeek -> daysInMonthArray.add(
+                    LocalDate.of(nextMonth.year, nextMonth.month, i - dayOfWeek - daysInMonth)
+                )
+                else -> daysInMonthArray.add(
+                    LocalDate.of(selectedDate.year, selectedDate.month, i - dayOfWeek)
+                )
+            }
         }
 
         return daysInMonthArray
@@ -83,14 +83,16 @@ object CalendarUtils {
     }
 
     private fun sundayForDate(current: LocalDate): LocalDate {
-        var date = current
+        var currentDate = current
         val oneWeekAgo = current.minusWeeks(1)
 
-        while (date.isAfter(oneWeekAgo)) {
-            if (date.dayOfWeek == DayOfWeek.SUNDAY) return date
-            date = date.minusDays(1)
+        while (currentDate.isAfter(oneWeekAgo)) {
+            if (currentDate.dayOfWeek == DayOfWeek.SUNDAY) {
+                return currentDate
+            }
+            currentDate = currentDate.minusDays(1)
         }
 
-        throw IllegalStateException("No Sunday found in the week before the given date.")
+        throw IllegalStateException("No Sunday found for the given date.")
     }
 }

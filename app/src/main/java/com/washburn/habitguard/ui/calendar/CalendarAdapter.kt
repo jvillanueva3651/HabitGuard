@@ -1,83 +1,61 @@
 package com.washburn.habitguard.ui.calendar
 
-import android.annotation.SuppressLint
+import java.time.LocalDate
+import java.util.ArrayList
 import android.os.Build
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.graphics.Color;
+import android.annotation.SuppressLint
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.washburn.habitguard.R
-import java.time.LocalDate
+import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
 
 @RequiresApi(Build.VERSION_CODES.O)
 class CalendarAdapter(
-    private val daysInMonth: List<LocalDate>,
+    private val days: ArrayList<LocalDate>,
     private val onItemListener: OnItemListener
-) : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>() {
-
-    interface OnItemListener {
-        fun onItemClick(position: Int, date: LocalDate)
-    }
-
-    private var selectedPosition = -1
-    private val dotIndicators = mutableSetOf<LocalDate>()
-
-    inner class CalendarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
-        val dayText: TextView = itemView.findViewById(R.id.cellDayText)
-        val dotIndicator: TextView = itemView.findViewById(R.id.cellDotIndicator)
-
-        init {
-            itemView.setOnClickListener(this)
-        }
-
-        override fun onClick(view: View) {
-            val previousPosition = selectedPosition
-            selectedPosition = adapterPosition
-            notifyItemChanged(previousPosition)
-            notifyItemChanged(selectedPosition)
-            onItemListener.onItemClick(adapterPosition, daysInMonth[adapterPosition])
-        }
-    }
+) : RecyclerView.Adapter<CalendarViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.calendar_cell, parent, false)
-        return CalendarViewHolder(view)
+        val inflater = LayoutInflater.from(parent.context)
+        val view = inflater.inflate(R.layout.calendar_cell, parent, false)
+        val layoutParams = view.layoutParams
+
+        layoutParams.height = if (days.size > 15) {
+            (parent.height * 0.166666666).toInt()
+        } else {
+            parent.height
+        }
+
+        return CalendarViewHolder(view, onItemListener, days)
     }
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: CalendarViewHolder, position: Int) {
-        val date = daysInMonth[position]
-        holder.dayText.text = date.dayOfMonth.toString()
+        val date = days[position]
 
-        // Highlight the selected date
-        if (position == selectedPosition) {
-            holder.dayText.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.teal_200))
-            holder.dayText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.white))
-        } else if (date == LocalDate.now()) {
-            holder.dayText.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.black))
-            holder.dayText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.teal_200))
+        holder.dayOfMonth.text = date.dayOfMonth.toString()
+
+        if (date == selectedDate) {
+            holder.parentView.setBackgroundColor(Color.LTGRAY)
         } else {
-            holder.dayText.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, android.R.color.transparent))
-            holder.dayText.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.black))
+            holder.parentView.setBackgroundColor(Color.TRANSPARENT)
         }
 
-        // Show/hide dot indicator
-        if (dotIndicators.contains(date)) {
-            holder.dotIndicator.visibility = View.VISIBLE
+        if (date.month == selectedDate.month) {
+            holder.dayOfMonth.setTextColor(Color.BLACK)
         } else {
-            holder.dotIndicator.visibility = View.GONE
+            holder.dayOfMonth.setTextColor(Color.LTGRAY)
         }
     }
 
     override fun getItemCount(): Int {
-        return daysInMonth.size
+        return days.size
     }
 
-    fun addDotIndicator(date: LocalDate) {
-        dotIndicators.add(date)
-        notifyDataSetChanged()
+    interface OnItemListener {
+        fun onItemClick(position: Int, date: LocalDate)
     }
 }
