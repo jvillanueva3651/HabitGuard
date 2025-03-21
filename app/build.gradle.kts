@@ -43,6 +43,10 @@ android {
 
 dependencies {
 
+    // For scheduling tasks
+    implementation (libs.androidx.work.runtime.ktx)
+    // For notifications
+    implementation (libs.androidx.core.ktx.v1120)
     // Offline storage
     implementation (libs.androidx.security.crypto)
 
