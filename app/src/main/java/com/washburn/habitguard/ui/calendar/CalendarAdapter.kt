@@ -5,7 +5,7 @@ import java.util.ArrayList
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.graphics.Color;
+import android.graphics.Color
 import android.annotation.SuppressLint
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView

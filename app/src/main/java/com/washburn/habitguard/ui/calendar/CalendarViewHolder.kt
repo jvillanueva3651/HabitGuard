@@ -1,12 +1,12 @@
 package com.washburn.habitguard.ui.calendar
 
-import android.view.View;
-import android.widget.TextView;
-import androidx.recyclerview.widget.RecyclerView;
+import android.view.View
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import android.os.Build
 import androidx.annotation.RequiresApi
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDate
+import java.util.ArrayList
 import com.washburn.habitguard.R
 
 @RequiresApi(Build.VERSION_CODES.O)

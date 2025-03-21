@@ -7,7 +7,6 @@
     android:background="@color/white"
     tools:context=".ui.calendar.CalendarFragment">
 
-    <!-- Main Calendar CardView -->
     <androidx.cardview.widget.CardView
         android:id="@+id/monthlyCardView"
         android:layout_width="0dp"
@@ -27,9 +26,8 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Daily Button -->
             <Button
-                android:onClick="dailyAction"
+                android:id="@+id/dailyActionButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -54,7 +52,7 @@
                     app:icon="@drawable/ic_arrow_up"
                     app:iconTint="@color/teal_200"
                     app:backgroundTint="@android:color/transparent"
-                    android:onClick="previousWeekAction" />
+                    android:id="@+id/previousWeekButton" />
 
                 <TextView
                     android:id="@+id/monthYearTV"
@@ -74,7 +72,7 @@
                     app:icon="@drawable/ic_arrow_down"
                     app:iconTint="@color/teal_200"
                     app:backgroundTint="@android:color/transparent"
-                    android:onClick="nextWeekAction" />
+                    android:id="@+id/nextWeekButton" />
             </LinearLayout>
 
             <!-- Weekday Labels -->
@@ -159,12 +157,12 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/calendarRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="25dp"
                 android:layout_marginTop="8dp" />
 
             <!-- New Event Button -->
             <Button
-                android:onClick="newEventAction"
+                android:id="@+id/newEventButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
