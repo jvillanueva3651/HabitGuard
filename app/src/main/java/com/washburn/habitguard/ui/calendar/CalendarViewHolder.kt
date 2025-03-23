@@ -19,6 +19,8 @@ class CalendarViewHolder(
     val parentView: View = itemView.findViewById(R.id.parentView)
     val dayOfMonth: TextView = itemView.findViewById(R.id.cellDayText)
 
+    val eventIndicator: View = itemView.findViewById(R.id.eventIndicator)
+
     init {
         itemView.setOnClickListener(this)
     }

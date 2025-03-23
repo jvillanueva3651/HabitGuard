@@ -30,18 +30,18 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical" >
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/eventDateTV"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
                     android:text="Date"
-                    android:textSize="20sp"
                     android:textAlignment="center"
                     android:textColor="@color/black"
-                    android:layout_marginEnd="16dp"
+                    android:textSize="20sp"
                     tools:ignore="HardcodedText" />
             </LinearLayout>
 
@@ -81,44 +81,93 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
+                android:gravity="center"
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/eventButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
+                    android:backgroundTint="@color/teal_700"
                     android:text="Event"
+                    android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    android:backgroundTint="@color/teal_700"
-                    android:textColor="@color/white"
-                    android:layout_marginEnd="8dp"
                     tools:ignore="ButtonStyle,HardcodedText" />
 
                 <Button
                     android:id="@+id/transactionButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
+                    android:backgroundTint="@color/teal_700"
                     android:text="Transaction"
+                    android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    android:backgroundTint="@color/teal_700"
-                    android:textColor="@color/white"
-                    android:layout_marginStart="8dp"
                     tools:ignore="ButtonStyle,HardcodedText" />
             </LinearLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/timeRecyclerView"
+
+            <androidx.cardview.widget.CardView
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:overScrollMode="never"
-                android:scrollbars="vertical"
-                tools:listitem="@layout/item_time" />
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="8dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/timeRecyclerView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="55dp"
+                    android:layout_gravity="center"
+                    android:overScrollMode="never"
+                    android:scrollbars="vertical"
+                    tools:listitem="@layout/item_time"
+                    android:visibility="invisible"/>
+
+                <LinearLayout
+                    android:id="@+id/transactionType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <ImageButton
+                        android:id="@+id/btnToggleIncome"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Toggle Transaction Type"
+                        android:src="@drawable/ic_income"
+                        app:tint="#757575"
+                        tools:ignore="HardcodedText" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="$"
+                        android:textSize="18sp"
+                        tools:ignore="HardcodedText">
+                    </TextView>
+                    <EditText
+                        android:id="@+id/editTextMoney"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:autofillHints="$"
+                        android:hint="Enter amount  "
+                        android:inputType="numberDecimal"
+                        android:maxLines="1"
+                        tools:ignore="HardcodedText" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -132,7 +181,7 @@
                     android:autofillHints="location"
                     android:backgroundTint="@color/teal_200"
                     android:ems="10"
-                    android:hint="location"
+                    android:hint="Location"
                     android:inputType="textPostalAddress"
                     android:minHeight="48dp"
                     android:textColorHint="#757575"
@@ -154,16 +203,16 @@
 
             <!-- Save Button -->
             <Button
-                android:layout_marginTop="20dp"
+                android:id="@+id/saveEventAction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save"
-                android:textStyle="bold"
-                android:id="@+id/saveEventAction"
                 android:layout_gravity="center"
-                android:textSize="20sp"
+                android:layout_marginTop="20dp"
                 android:backgroundTint="@color/teal_700"
+                android:text="Save"
                 android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
                 tools:ignore="HardcodedText" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>

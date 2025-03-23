@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import java.time.LocalTime
 import android.os.Bundle
 import android.os.Build
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,7 +18,10 @@ class EventEditActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEventEditBinding
 
     private lateinit var time: LocalTime
-    private var isTransactionMode = true
+    private var isTransactionMode = false
+    private var isCreditMode = true
+    private var isIncomeMode = true
+    private var isExpenseMode = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +31,8 @@ class EventEditActivity : AppCompatActivity() {
 
         binding.eventDateTV.text = "Date: ${CalendarUtils.formattedDate(CalendarUtils.selectedDate)} ${CalendarUtils.formattedTime(LocalTime.now())}"
 
+        binding.saveEventAction.isEnabled = false
+
         updateUIState()
 
         binding.btnToggleTransaction.setOnClickListener {
@@ -34,13 +40,13 @@ class EventEditActivity : AppCompatActivity() {
         }
 
         binding.eventButton.setOnClickListener {
-            if (!isTransactionMode) {
+            if (isTransactionMode) {
                 toggleMode() // Toggle the mode
             }
         }
 
         binding.transactionButton.setOnClickListener {
-            if (isTransactionMode) {
+            if (!isTransactionMode) {
                 toggleMode() // Toggle the mode
             }
         }
@@ -48,6 +54,8 @@ class EventEditActivity : AppCompatActivity() {
         binding.timeRecyclerView.layoutManager = LinearLayoutManager(this)
         val timePickerAdapter = TimePickerAdapter { selectedTime ->
             time = selectedTime
+
+            binding.saveEventAction.isEnabled = true
         }
         binding.timeRecyclerView.adapter = timePickerAdapter
 
@@ -58,6 +66,7 @@ class EventEditActivity : AppCompatActivity() {
         val eventName = binding.eventNameET.text.toString()
         val newEvent = Event(eventName, CalendarUtils.selectedDate, time)
         Event.eventsList.add(newEvent)
+        setResult(RESULT_OK)
         finish()
     }
 
@@ -74,6 +83,9 @@ class EventEditActivity : AppCompatActivity() {
             binding.transactionButton.alpha = 0.5f // Grayed out
             binding.eventButton.isEnabled = true
             binding.eventButton.alpha = 1f // Fully visible
+            binding.transactionType.visibility = View.VISIBLE
+            binding.timeRecyclerView.visibility = View.INVISIBLE
+            //if (isIncomeMode) {}
         } else {
             // Set icon to ic_event and enable Event button
             binding.btnToggleTransaction.setImageResource(R.drawable.ic_event)
@@ -81,6 +93,8 @@ class EventEditActivity : AppCompatActivity() {
             binding.eventButton.alpha = 0.5f // Grayed out
             binding.transactionButton.isEnabled = true
             binding.transactionButton.alpha = 1f // Fully visible
+            binding.transactionType.visibility = View.INVISIBLE
+            binding.timeRecyclerView.visibility = View.VISIBLE
         }
     }
 }

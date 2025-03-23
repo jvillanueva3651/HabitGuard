@@ -1,17 +1,14 @@
 package com.washburn.habitguard.ui.calendar
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
+import java.time.LocalDate
+import android.content.Intent
+import android.os.Bundle
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.GridLayoutManager
 import com.washburn.habitguard.databinding.ActivityWeekViewBinding
 import com.washburn.habitguard.ui.calendar.CalendarAdapter.OnItemListener
-import com.washburn.habitguard.ui.calendar.CalendarUtils.daysInMonthArray
 import com.washburn.habitguard.ui.calendar.CalendarUtils.daysInWeekArray
 import com.washburn.habitguard.ui.calendar.CalendarUtils.monthYearFromDate
 import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
@@ -38,7 +35,9 @@ class WeekViewActivity : AppCompatActivity(), OnItemListener {
         binding.monthYearTV.text = monthYearFromDate(selectedDate)
         val days = daysInWeekArray(selectedDate)
 
-        val calendarAdapter = CalendarAdapter(days, this)
+        val events = Event.eventsList
+
+        val calendarAdapter = CalendarAdapter(days, this, events)
         binding.calendarRecyclerView.layoutManager = GridLayoutManager(applicationContext, 7)
         binding.calendarRecyclerView.adapter = calendarAdapter
 

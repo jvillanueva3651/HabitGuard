@@ -1,5 +1,9 @@
+@file:Suppress("DEPRECATION")
+
 package com.washburn.habitguard.ui.calendar
 
+import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +21,7 @@ import com.washburn.habitguard.ui.calendar.CalendarUtils.monthYearFromDate
 import com.washburn.habitguard.ui.calendar.CalendarAdapter.OnItemListener
 import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
 
+@SuppressLint("NotifyDataSetChanged")
 @RequiresApi(Build.VERSION_CODES.O)
 class CalendarFragment : Fragment(), OnItemListener {
 
@@ -38,13 +43,17 @@ class CalendarFragment : Fragment(), OnItemListener {
         binding.previousMonthButton.setOnClickListener { previousMonthAction() }
         binding.nextMonthButton.setOnClickListener { nextMonthAction() }
         binding.weeklyActionButton.setOnClickListener { weeklyAction() }
+
+        binding.addDotButton.setOnClickListener { newEventAction() }
     }
 
     private fun setMonthView() {
         binding.monthYearTV.text = monthYearFromDate(selectedDate)
         val daysInMonth: ArrayList<LocalDate> = daysInMonthArray()
 
-        calendarAdapter = CalendarAdapter(daysInMonth, this)
+        val events = Event.eventsList
+
+        calendarAdapter = CalendarAdapter(daysInMonth, this, events)
         val layoutManager = GridLayoutManager(requireContext(), 7)
         binding.calendarRecyclerView.layoutManager = layoutManager
         binding.calendarRecyclerView.adapter = calendarAdapter
@@ -63,6 +72,28 @@ class CalendarFragment : Fragment(), OnItemListener {
     override fun onItemClick(position: Int, date: LocalDate) {
         selectedDate = date
         setMonthView()
+    }
+
+    private fun newEventAction() {
+        val intent = Intent(requireContext(), EventEditActivity::class.java)
+        startActivityForResult(intent, REQUEST_CODE_ADD_EVENT)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_ADD_EVENT && resultCode == RESULT_OK) {
+            calendarAdapter.notifyDataSetChanged()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        calendarAdapter.notifyDataSetChanged() // Refresh the adapter
+    }
+
+    companion object {
+        private const val REQUEST_CODE_ADD_EVENT = 1001 // Define a request code
     }
 
     private fun weeklyAction() {

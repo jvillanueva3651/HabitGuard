@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.graphics.Color
 import android.annotation.SuppressLint
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.washburn.habitguard.R
@@ -15,7 +16,9 @@ import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
 @RequiresApi(Build.VERSION_CODES.O)
 class CalendarAdapter(
     private val days: ArrayList<LocalDate>,
-    private val onItemListener: OnItemListener
+    private val onItemListener: OnItemListener,
+
+    private val events: List<Event>
 ) : RecyclerView.Adapter<CalendarViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CalendarViewHolder {
@@ -49,10 +52,20 @@ class CalendarAdapter(
         } else {
             holder.dayOfMonth.setTextColor(Color.LTGRAY)
         }
+
+        if (hasEvent(date)) {
+            holder.eventIndicator.visibility = View.VISIBLE
+        } else {
+            holder.eventIndicator.visibility = View.INVISIBLE
+        }
     }
 
     override fun getItemCount(): Int {
         return days.size
+    }
+
+    private fun hasEvent(date: LocalDate): Boolean {
+        return events.any { it.date == date }
     }
 
     interface OnItemListener {

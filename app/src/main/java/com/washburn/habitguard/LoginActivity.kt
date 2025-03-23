@@ -62,7 +62,8 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.btnGithub.setOnClickListener {
-            Toast.makeText(this, "GitHub login clicked", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, SideActivity::class.java))
+            finish()
         }
 
         binding.btnLinkedIn.setOnClickListener {
