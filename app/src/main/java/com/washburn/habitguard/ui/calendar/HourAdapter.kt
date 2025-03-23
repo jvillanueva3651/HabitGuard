@@ -1,5 +1,6 @@
 package com.washburn.habitguard.ui.calendar
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.view.LayoutInflater
@@ -30,6 +31,7 @@ class HourAdapter(context: Context, hourEvents: List<HourEvent>) :
         timeTV.text = CalendarUtils.formattedShortTime(time)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setEvents(convertView: View, events: List<Event>) {
         val event1: TextView = convertView.findViewById(R.id.event1)
         val event2: TextView = convertView.findViewById(R.id.event2)
@@ -66,7 +68,7 @@ class HourAdapter(context: Context, hourEvents: List<HourEvent>) :
     }
 
     private fun setEvent(textView: TextView, event: Event) {
-        textView.text = event.name
+        textView.text = event.eventName
         textView.visibility = View.VISIBLE
     }
 

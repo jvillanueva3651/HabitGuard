@@ -2,6 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,15 +20,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HabitGuard"
         tools:targetApi="31">
-        <activity
-            android:name=".ui.calendar.DailyCalendarActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ui.calendar.WeekViewActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ui.calendar.EventEditActivity"
-            android:exported="true" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -34,9 +33,20 @@
             android:name=".SignupActivity"
             android:exported="false" />
         <activity
+            android:name=".CameraActivity"
+            android:exported="false" />
+        <activity
             android:name=".SideActivity"
-            android:exported="true" />
-
+            android:exported="false" />
+        <activity
+            android:name=".ui.calendar.DailyCalendarActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.calendar.WeekViewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.calendar.EventEditActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -249,11 +249,19 @@
                 android:layout_marginBottom="8dp"
                 tools:ignore="HardcodedText" />
 
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/itemsRecyclerView"
+            <EditText
+                android:id="@+id/messageEditText"
                 android:layout_width="match_parent"
-                android:layout_height="200dp" />
+                android:layout_height="wrap_content"
+                android:hint="Enter your message here..."
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:maxLines="10"
+                android:gravity="top|start"
+                android:scrollbars="vertical"
+                android:padding="16dp"
+                tools:ignore="HardcodedText" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

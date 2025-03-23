@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".SignupActivity"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".SignupActivity">
+    android:background="@drawable/bg2" >
 
+    <!-- Logo ImageView with Oval Cutout -->
     <ImageView
         android:id="@+id/ivLogo"
         android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_height="160dp"
         android:layout_marginTop="50dp"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_launcher_foreground"
-        android:background="@drawable/ic_launcher_background"
+        android:scaleType="centerCrop"
+        android:src="@drawable/habit_logo"
+        android:background="@drawable/oval_cutout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -53,33 +56,69 @@
                 android:textColorHint="#757575"
                 tools:ignore="HardcodedText" />
 
-            <EditText
-                android:id="@+id/etSPassword"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:autofillHints="password"
-                android:backgroundTint="@color/teal_200"
-                android:ems="10"
-                android:hint="Password"
-                android:inputType="textPassword"
-                android:minHeight="48dp"
-                android:textColorHint="#757575"
-                tools:ignore="HardcodedText" />
+                android:layout_marginBottom="16dp">
 
-            <EditText
-                android:id="@+id/etSConfPassword"
+                <EditText
+                    android:id="@+id/etSPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="password"
+                    android:backgroundTint="@color/teal_200"
+                    android:ems="10"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:minHeight="48dp"
+                    android:textColorHint="#757575"
+                    tools:ignore="HardcodedText" />
+
+                <ImageButton
+                    android:id="@+id/btnTogglePassword"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Toggle Password Visibility"
+                    android:src="@drawable/ic_visibility_off"
+                    app:tint="#757575"
+                    tools:ignore="HardcodedText" />
+            </RelativeLayout>
+
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:autofillHints="password"
-                android:backgroundTint="@color/teal_200"
-                android:ems="10"
-                android:hint="Confirm Password"
-                android:inputType="textPassword"
-                android:minHeight="48dp"
-                android:textColorHint="#757575"
-                tools:ignore="HardcodedText" />
+                android:layout_marginBottom="16dp">
+
+                <EditText
+                    android:id="@+id/etSConfPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="password"
+                    android:backgroundTint="@color/teal_200"
+                    android:ems="10"
+                    android:hint="Confirm Password"
+                    android:inputType="textPassword"
+                    android:minHeight="48dp"
+                    android:textColorHint="#757575"
+                    tools:ignore="HardcodedText" />
+
+                <ImageButton
+                    android:id="@+id/btnToggleConfPassword"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Toggle Password Visibility"
+                    android:src="@drawable/ic_visibility_off"
+                    app:tint="#757575"
+                    tools:ignore="HardcodedText" />
+            </RelativeLayout>
 
             <Button
                 android:id="@+id/btnSSignUp"
@@ -100,9 +139,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="-------------------------------------------   or   -------------------------------------------"
+        android:text="==============   or   =============="
+        android:background="@color/white"
+        android:alpha=".5"
         android:textColor="@color/teal_700"
-        android:textSize="14sp"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardSignup"
@@ -187,8 +228,10 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:gravity="center_horizontal"
-        android:text="Already have an account? Log in here"
+        android:text="Don't have an account? Register now"
         android:textColor="@color/teal_700"
+        android:background="@color/white"
+        android:alpha=".75"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

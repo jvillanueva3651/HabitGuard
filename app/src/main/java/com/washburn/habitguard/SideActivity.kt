@@ -2,6 +2,9 @@ package com.washburn.habitguard
 
 import android.os.Bundle
 import android.view.Menu
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -11,6 +14,10 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 import com.washburn.habitguard.databinding.ActivitySideBinding
 
 class SideActivity : AppCompatActivity() {
@@ -43,6 +50,13 @@ class SideActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            fetchUserData(userId)
+        } else {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -54,5 +68,52 @@ class SideActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_side)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    private fun fetchUserData(userId: String) {
+        val db = Firebase.firestore
+        db.collection("HabitGuard")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // Extract data from the document
+                    val email = document.getString("email") ?: "No Email"
+                    val username = document.getString("username") ?: "Unknown User"
+                    val photoUrl = document.getString("photoUri")
+
+                    // Update the NavigationView header
+                    updateNavigationHeader(username, email, photoUrl)
+                } else {
+                    Toast.makeText(this, "User data not found", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Failed to fetch user data: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun updateNavigationHeader(username: String, email: String, photoUrl: String?) {
+        val navView: NavigationView = binding.navView
+        val headerView = navView.getHeaderView(0)
+
+        val imageView = headerView.findViewById<ImageView>(R.id.imageView)
+        val titleTextView = headerView.findViewById<TextView>(R.id.userNameTextView)
+        val subtitleTextView = headerView.findViewById<TextView>(R.id.userEmailTextView)
+
+        // Update the text views
+        titleTextView.text = username
+        subtitleTextView.text = email
+
+        // Load the profile image (if available)
+        if (!photoUrl.isNullOrEmpty()) {
+            Glide.with(this) // Use Glide to load the image
+                .load(photoUrl)
+                .circleCrop() // Optional: Crop the image to a circle
+                .into(imageView)
+        } else {
+            // Set a default image if no photo URL is provided
+            imageView.setImageResource(R.drawable.ic_launcher_foreground)
+        }
     }
 }

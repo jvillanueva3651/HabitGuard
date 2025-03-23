@@ -32,6 +32,7 @@ class EventEditActivity : AppCompatActivity() {
         binding.eventDateTV.text = "Date: ${CalendarUtils.formattedDate(CalendarUtils.selectedDate)} ${CalendarUtils.formattedTime(LocalTime.now())}"
 
         binding.saveEventAction.isEnabled = false
+        binding.saveEventAction.alpha = 0.5f
 
         updateUIState()
 
@@ -56,6 +57,7 @@ class EventEditActivity : AppCompatActivity() {
             time = selectedTime
 
             binding.saveEventAction.isEnabled = true
+            binding.saveEventAction.alpha = 1f
         }
         binding.timeRecyclerView.adapter = timePickerAdapter
 
@@ -64,7 +66,8 @@ class EventEditActivity : AppCompatActivity() {
 
     private fun saveEventAction() {
         val eventName = binding.eventNameET.text.toString()
-        val newEvent = Event(eventName, CalendarUtils.selectedDate, time)
+        val eventDesc = binding.messageEditText.text.toString()
+        val newEvent = Event(eventName, eventDesc, CalendarUtils.selectedDate, time)
         Event.eventsList.add(newEvent)
         setResult(RESULT_OK)
         finish()

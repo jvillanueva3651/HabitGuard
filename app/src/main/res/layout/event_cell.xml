@@ -1,18 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="60dp">
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ui.calendar.EventEditActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:layout_marginStart="20dp"
-        android:id="@+id/eventCellTV"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        android:text="Event"/>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/upperCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-</LinearLayout>
+        <!-- ScrollView inside the CardView -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            android:padding="16dp">
+
+            <!-- LinearLayout inside ScrollView -->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Event Title -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:layout_marginBottom="16dp"
+                    android:id="@+id/eventCellTV"
+                    android:textSize="24sp"
+                    android:textColor="@color/black"
+                    android:text="Event"
+                    android:textStyle="bold"
+                    tools:ignore="HardcodedText" />
+
+                <!-- Horizontal Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Event Date -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:layout_marginBottom="8dp"
+                    android:id="@+id/eventCompleteDateTimeCellTV"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:text="November 5, 2023"
+                    tools:ignore="HardcodedText" />
+
+                <!-- Horizontal Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Event Description -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:id="@+id/eventDescCellTV"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:text="This is a sample event description. It can be longer and will wrap to multiple lines if needed."
+                    tools:ignore="HardcodedText" />
+
+            </LinearLayout>
+        </ScrollView>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>
