@@ -47,6 +47,12 @@
         <activity
             android:name=".ui.calendar.EventEditActivity"
             android:exported="false" />
+        <activity
+            android:name=".settings.SettingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".settings.ProfileEditActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

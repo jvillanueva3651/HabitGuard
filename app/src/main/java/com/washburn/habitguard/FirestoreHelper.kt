@@ -32,4 +32,23 @@ class FirestoreHelper {
                 onFailure(e)
             }
     }
+
+    fun updateUserData(
+        userId: String,
+        updatedData: Map<String, Any>,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        db.collection("HabitGuard")
+            .document(userId)
+            .update(updatedData)
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                onFailure(e)
+            }
+    }
+
+    fun getUserDocument(userId: String) = db.collection("HabitGuard").document(userId).get()
 }

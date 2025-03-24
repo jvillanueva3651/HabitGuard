@@ -56,6 +56,7 @@ dependencies {
     implementation (libs.androidx.camera.view)
 
     implementation (libs.glide)
+    implementation(libs.firebase.storage.ktx)
     annotationProcessor (libs.compiler)
 
     implementation(libs.androidx.core.ktx)
