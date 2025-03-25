@@ -10,17 +10,19 @@ class Event(
     var eventName: String,
     var eventDesc: String,
     var date: LocalDate,
-    var time: LocalTime
+    var time: LocalTime,
+    var amount: Double = 0.0,
+    var transactionType: TransactionType = TransactionType.EXPENSE
 ) {
     companion object {
-        val eventsList = mutableListOf<Event>()
+        private val _events = mutableListOf<Event>()
+        val eventsList: List<Event> get() = _events.toList()
 
-        fun eventsForDate(date: LocalDate): List<Event> {
-            return eventsList.filter { it.date == date }
-        }
+        fun addEvent(event: Event) = _events.add(event)
 
-        fun eventsForDateAndTime(date: LocalDate, time: LocalTime): List<Event> {
-            return eventsList.filter { it.date == date && it.time.hour == time.hour }
-        }
+        fun eventsForDate(date: LocalDate) = _events.filter { it.date == date }
+
+        fun eventsForDateAndTime(date: LocalDate, time: LocalTime) =
+            _events.filter { it.date == date && it.time.hour == time.hour }
     }
 }

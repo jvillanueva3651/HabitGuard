@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.washburn.habitguard.ui.calendar
 
 import android.annotation.SuppressLint
@@ -21,6 +19,7 @@ import com.washburn.habitguard.ui.calendar.CalendarUtils.monthYearFromDate
 import com.washburn.habitguard.ui.calendar.CalendarAdapter.OnItemListener
 import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
 
+@Suppress("DEPRECATION")
 @SuppressLint("NotifyDataSetChanged")
 @RequiresApi(Build.VERSION_CODES.O)
 class CalendarFragment : Fragment(), OnItemListener {
@@ -37,11 +36,14 @@ class CalendarFragment : Fragment(), OnItemListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        selectedDate = LocalDate.now()
-        setMonthView()
+        selectedDate = LocalDate.now() // Initialize selectedDate
+
+        setMonthView() // Display the date for the month
 
         binding.previousMonthButton.setOnClickListener { previousMonthAction() }
+
         binding.nextMonthButton.setOnClickListener { nextMonthAction() }
+
         binding.weeklyActionButton.setOnClickListener { weeklyAction() }
 
         binding.addDotButton.setOnClickListener { newEventAction() }

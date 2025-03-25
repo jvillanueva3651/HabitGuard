@@ -32,6 +32,12 @@
             android:textColor="@android:color/white"
             android:layout_marginBottom="16dp" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/teal_700"
+            android:layout_marginBottom="8dp" />
+
         <!-- Notifications Section -->
         <TextView
             android:layout_width="wrap_content"
@@ -135,6 +141,13 @@
             android:progress="50"
             android:progressTint="@color/teal_700" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/teal_700"
+            android:layout_marginBottom="8dp" />
+
         <!-- App Info Section -->
         <TextView
             android:layout_width="wrap_content"
@@ -143,7 +156,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/teal_700"
-            android:paddingTop="16dp"
+
             android:paddingBottom="8dp" />
 
         <TextView
@@ -153,6 +166,13 @@
             android:text="Version 1.0.0"
             android:textSize="16sp"
             android:textColor="@android:color/black" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/teal_700"
+            android:layout_marginBottom="8dp" />
 
         <!-- Logout Button -->
         <Button
