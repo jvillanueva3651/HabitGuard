@@ -254,10 +254,9 @@
 
                             <ImageButton
                                 android:id="@+id/btnToggleIncome"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:scaleX="1.75"
-                                android:scaleY="1.75"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:contentDescription="Toggle Transaction Type"
                                 android:src="@drawable/ic_income"
@@ -309,7 +308,7 @@
                                         android:layout_height="wrap_content"
                                         android:text="Repeat every:"
                                         android:textSize="16sp"
-                                        tools:ignore="HardcodedText" />
+                                        tools:ignore="HardcodedText,TooDeepLayout" />
 
                                     <EditText
                                         android:id="@+id/recurrenceInterval"

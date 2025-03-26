@@ -71,7 +71,7 @@ class SignupActivity : AppCompatActivity() {
                 authHelper.signupWithEmail(
                     email = email,
                     password = pass,
-                    onSuccess = { user ->
+                    onSuccess = {
                         // Launch CameraActivity to capture photo
                         val cameraIntent = Intent(this, CameraActivity::class.java)
                         startActivityForResult(cameraIntent, REQUEST_CAMERA)
@@ -89,9 +89,8 @@ class SignupActivity : AppCompatActivity() {
         if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
             val photoUri = data?.getStringExtra("photoUri")
             if (photoUri != null) {
-                val userId = authHelper.getCurrentUser()?.uid ?: return
-                firestoreHelper.saveUserData(
-                    userId = userId,
+                firestoreHelper.saveUserInfo(
+                    userId = authHelper.getCurrentUser()?.uid ?: return,
                     email = binding.etSEmailAddress.text.toString(),
                     username = binding.etSEmailAddress.text.toString().substringBefore("@"),
                     photoUri = photoUri,

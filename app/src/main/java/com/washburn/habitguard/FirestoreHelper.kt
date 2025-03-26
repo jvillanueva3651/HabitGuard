@@ -17,7 +17,7 @@ class FirestoreHelper {
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
     // User Data
-    fun saveUserData(userId: String, email: String, username: String, photoUri: String?, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    fun saveUserInfo(userId: String, email: String, username: String, photoUri: String?, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val userData = hashMapOf(
             "email" to email,
             "username" to username,
