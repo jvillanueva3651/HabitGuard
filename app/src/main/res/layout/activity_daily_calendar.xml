@@ -37,7 +37,7 @@
 
                 <!-- Previous Day Button -->
                 <ImageButton
-                    android:onClick="previousDayAction"
+                    android:id="@+id/previousDayButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -61,7 +61,7 @@
 
                 <!-- Next Day Button -->
                 <ImageButton
-                    android:onClick="nextDayAction"
+                    android:id="@+id/nextDayButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

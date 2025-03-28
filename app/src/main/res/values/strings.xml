@@ -7,8 +7,58 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="date_format">Date: %s</string>
+
+    <!-- Wierd to suppress the warning but it works -->
+    <string name="event_with_time_format">%1$s (%2$s)</string>
+    <plurals name="more_events_count">
+        <item quantity="one">%d more event</item>
+        <item quantity="other">%d more events</item>
+    </plurals>
 
     <string name="menu_home">Home</string>
     <string name="menu_calendar">Calendar</string>
     <string name="menu_finance">Finance</string>
+
+    <!-- Strings for activity_event_edit.xml -->
+    <string name="date_activity_event_edit">Date</string>
+
+    <!-- TODO: autofillHints for event_title -->
+    <string name="autofillHints_eventNameET_activity_event_edit">Title for your event or transaction blank</string>
+    <string name="autofillHints_editTextDollars_activity_event_edit">1,000,000,000</string>
+    <string name="autofillHints_editTextCents_activity_event_edit">00</string>
+    <string name="autofillHints_eventLocationET_activity_event_edit">Location</string>
+
+    <!-- TODO: add accessibility features -->
+    <string name="accessibility_btnToggleTransaction_activity_event_edit">Toggle Transaction To Event</string>
+    <string name="accessibility_timeDivider_activity_event_edit">TODO</string>
+    <string name="accessibility_btnToggleIncome_activity_event_edit">TODO</string>
+    <string name="accessibility_map_activity_event_edit">Go to Map</string>
+
+    <string name="eventButton_activity_event_edit">event</string>
+    <string name="transactionButton_activity_event_edit">Transaction</string>
+    <string name="divider_activity_event_edit">:</string>
+    <string name="dollarSign_activity_event_edit">$</string>
+    <string name="dotDecimal_activity_event_edit">.</string>
+    <string name="cent_activity_event_edit">00</string>
+    <string name="saveEventAction_activity_event_edit">Save</string>
+    <string name="descriptionTitle_activity_event_edit">Description</string>
+    <string name="messageEditText_activity_event_edit">Enter your message here…</string>
+
+
+    <string name="back_button_content_description">back_button</string>
+    <string name="dailyActionButton_activity_week_view">Daily</string>
+    <string name="monthYearTV_activity_week_view">Feb 2021</string>
+    <string name="sun_activity_week_view">SUN</string>
+    <string name="mon_activity_week_view">MON</string>
+    <string name="tue_activity_week_view">TUE</string>
+    <string name="wed_activity_week_view">WED</string>
+    <string name="thur_activity_week_view">THUR</string>
+    <string name="fri_activity_week_view">FRI</string>
+    <string name="sat_activity_week_view">SAT</string>
+    <string name="newEventButton__activity_week_view">New Event</string>
+    <string name="descriptionTitle__activity_week_view">Description</string>
+    <string name="dateNumber_calendar_cell">1</string>
+
+
 </resources>

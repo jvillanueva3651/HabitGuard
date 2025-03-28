@@ -8,7 +8,9 @@
 package com.washburn.habitguard.firebase
 
 import android.content.Context
+import android.os.Build
 import android.util.Patterns
+import androidx.annotation.RequiresApi
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.firebase.auth.FirebaseAuth
@@ -17,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.washburn.habitguard.FirestoreHelper
 
+@RequiresApi(Build.VERSION_CODES.O)
 class FirebaseAuthHelper(private val context: Context) {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -36,7 +39,7 @@ class FirebaseAuthHelper(private val context: Context) {
                     val user = auth.currentUser
                     if (user != null) {
                         // Verify user exists in Firestore
-                        firestoreHelper.getUserDocument(user.uid).addOnCompleteListener { firestoreTask ->
+                        firestoreHelper.getUserDocument(user.uid).get().addOnCompleteListener { firestoreTask ->
                             if (firestoreTask.isSuccessful && firestoreTask.result.exists()) {
                                 if (rememberMe) {
                                     saveCredentials(email, password)

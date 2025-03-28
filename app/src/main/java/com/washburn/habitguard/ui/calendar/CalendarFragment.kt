@@ -1,7 +1,6 @@
 package com.washburn.habitguard.ui.calendar
 
 import android.annotation.SuppressLint
-import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -13,19 +12,22 @@ import java.util.ArrayList
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.databinding.FragmentCalendarBinding
 import com.washburn.habitguard.ui.calendar.CalendarUtils.daysInMonthArray
 import com.washburn.habitguard.ui.calendar.CalendarUtils.monthYearFromDate
 import com.washburn.habitguard.ui.calendar.CalendarAdapter.OnItemListener
 import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
 
-@Suppress("DEPRECATION")
 @SuppressLint("NotifyDataSetChanged")
 @RequiresApi(Build.VERSION_CODES.O)
 class CalendarFragment : Fragment(), OnItemListener {
 
     private lateinit var binding: FragmentCalendarBinding
     private lateinit var calendarAdapter: CalendarAdapter
+
+    private lateinit var firestoreHelper: FirestoreHelper
+    private var allEvents: List<Pair<String, Map<String, Any>>> = emptyList()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -36,29 +38,62 @@ class CalendarFragment : Fragment(), OnItemListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        firestoreHelper = FirestoreHelper()
         selectedDate = LocalDate.now() // Initialize selectedDate
 
-        setMonthView() // Display the date for the month
+        setupViews()
+        loadEvents()
+    }
 
-        binding.previousMonthButton.setOnClickListener { previousMonthAction() }
+    private fun setupViews() {
+        binding.apply {
+            monthYearTV.text = monthYearFromDate(selectedDate)
 
-        binding.nextMonthButton.setOnClickListener { nextMonthAction() }
+            previousMonthButton.setOnClickListener { previousMonthAction() }
+            nextMonthButton.setOnClickListener { nextMonthAction() }
+            weeklyActionButton.setOnClickListener { weeklyAction() }
+            addDotButton.setOnClickListener { newEventAction() }
 
-        binding.weeklyActionButton.setOnClickListener { weeklyAction() }
+            calendarRecyclerView.layoutManager = GridLayoutManager(requireContext(), 7)
+            calendarRecyclerView.setHasFixedSize(true)
+            calendarRecyclerView.isNestedScrollingEnabled = false
+        }
+    }
 
-        binding.addDotButton.setOnClickListener { newEventAction() }
+    private fun loadEvents() {
+        firestoreHelper.getAllUserHabits(
+            onSuccess = { habits ->
+                allEvents = habits
+                setMonthView()
+            },
+            onFailure = { e ->
+                // Handle error (e.g., show toast)
+            }
+        )
     }
 
     private fun setMonthView() {
-        binding.monthYearTV.text = monthYearFromDate(selectedDate)
-        val daysInMonth: ArrayList<LocalDate> = daysInMonthArray()
+        val daysInMonth = ArrayList(daysInMonthArray())
 
-        val events = Event.eventsList
+        // Convert events to CalendarAdapter format
+        val calendarEvents = allEvents.map { (_, eventData) ->
+            mapOf(
+                "name" to (eventData["name"] as? String ?: ""),
+                "date" to (eventData["date"] as? String ?: ""),
+                "time" to (eventData["startTime"] as? String ?: "00:00")
+            )
+        }
 
-        calendarAdapter = CalendarAdapter(daysInMonth, this, events)
-        val layoutManager = GridLayoutManager(requireContext(), 7)
-        binding.calendarRecyclerView.layoutManager = layoutManager
-        binding.calendarRecyclerView.adapter = calendarAdapter
+        calendarAdapter = CalendarAdapter(
+            daysInMonth,
+            this,
+            calendarEvents
+        )
+
+        binding.apply {
+            monthYearTV.text = monthYearFromDate(selectedDate)
+            calendarRecyclerView.adapter = calendarAdapter
+        }
     }
 
     private fun previousMonthAction() {
@@ -77,28 +112,15 @@ class CalendarFragment : Fragment(), OnItemListener {
     }
 
     private fun newEventAction() {
-        val intent = Intent(requireContext(), EventEditActivity::class.java)
-        startActivityForResult(intent, REQUEST_CODE_ADD_EVENT)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_ADD_EVENT && resultCode == RESULT_OK) {
-            calendarAdapter.notifyDataSetChanged()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        calendarAdapter.notifyDataSetChanged() // Refresh the adapter
-    }
-
-    companion object {
-        private const val REQUEST_CODE_ADD_EVENT = 1001 // Define a request code
+        startActivity(Intent(requireContext(), EventEditActivity::class.java))
     }
 
     private fun weeklyAction() {
         startActivity(Intent(requireContext(), WeekViewActivity::class.java))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadEvents() // Refresh data when returning from other screens
     }
 }

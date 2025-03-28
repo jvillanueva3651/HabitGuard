@@ -1,34 +1,56 @@
+//=======================================================================================
+// "EventEditActivity" is the backend for creating, TODO: editing, deleting habits
+// Refer to     "~/FirestoreHelper" for database operations,
+//              "./ui/calendar/EventAdapter" to take input here and create habits card there
+//
+// Get layout of activity from "layout/activity_event_edit.xml"
+//
+// Fun: 1. Check title
+//      2. Toggle between transaction and event mode
+//          a) Event have startTime and endTime (Hour & Minute)
+//          b) Transaction have amount and type (Income, Expense, Credit)
+//      3. TODO: Recurring habits 'I don't know how are we supposed to implement this, maybe later'
+//      4. TODO: Location 'Are we taking from user or have them get it from the map, then validation?'
+//      5. Description
+//=======================================================================================
 package com.washburn.habitguard.ui.calendar
 
 import android.os.Bundle
 import android.os.Build
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FieldValue
-import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.R
+import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.databinding.ActivityEventEditBinding
+import com.washburn.habitguard.ui.calendar.CalendarUtils.formattedDate
 import com.washburn.habitguard.ui.calendar.CalendarUtils.formattedShortTime
-import java.text.NumberFormat
-import java.time.LocalTime
+import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
 import java.util.*
+import java.time.LocalTime
+import java.text.NumberFormat
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.O) // Required for bunch of small calls, might be because of TODO: old syntax?
 class EventEditActivity : AppCompatActivity() {
+
+    // For referring to the habit ID
+    companion object {
+        const val EXTRA_HABIT_ID = "HABIT_ID"
+    }
 
     private lateinit var binding: ActivityEventEditBinding
     private lateinit var firestoreHelper: FirestoreHelper
 
     // Time handling with sensible defaults
-    private var startTime: LocalTime = LocalTime.now().withMinute(0) // Current hour, on the hour
-    private var endTime: LocalTime = startTime.plusHours(1) // 1 hour after start
+    private var startTime: LocalTime = LocalTime.now().withMinute(0)
+    private var endTime: LocalTime = startTime.plusHours(1)
 
     // Transaction handling
     private var currentType = TransactionType.INCOME
@@ -40,23 +62,28 @@ class EventEditActivity : AppCompatActivity() {
         binding = ActivityEventEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        currentHabitId = intent.getStringExtra(EXTRA_HABIT_ID)
+        firestoreHelper = FirestoreHelper()
+
+        // Compose UI
         initializeComponents()
-        setupEventHandlers()
-        loadExistingHabitIfEditing()
+        // Load existing habit if editing
+        loadExistingHabitIfEditing()    // TODO: load existing habit if editing
+                                        // TODO: haven't linked it to anything yet
     }
 
     private fun initializeComponents() {
-        firestoreHelper = FirestoreHelper()
-        currentHabitId = intent.getStringExtra("HABIT_ID")
+        binding.backButton.setOnClickListener { onBackPressedDispatcher.onBackPressed() } // Back button
+        binding.eventDateTV.text = getString(R.string.date_format, formattedDate(selectedDate)) // Set date text
 
-        val dateText  = "Date: ${CalendarUtils.formattedDate(CalendarUtils.selectedDate)}"
-        binding.eventDateTV.text = dateText
+        setupTimePickers() // Time Initializing
+        setupMoneyInput() // Transaction Initializing
+        setupEventHandlers() // Event Handlers making sure Time and Transaction are in sync and valid
 
-        setupTimePickers()
-        setupMoneyInput()
-        updateUI()
+        updateUI() // Update UI based on mode
     }
 
+    // Time Initializing
     private fun setupTimePickers() {
         val locale = Locale.getDefault()
         with(binding) {
@@ -67,21 +94,22 @@ class EventEditActivity : AppCompatActivity() {
                 picker.setFormatter { String.format(locale, "%02d", it) }
             }
 
-            // Configure minute pickers (0-55 in 5-minute increments)
+            // Configure minute pickers (0-59 in 1-minute increments)
             listOf(startMinutePicker, endMinutePicker).forEach { picker ->
                 picker.minValue = 0
-                picker.maxValue = 11 // 0-55 in 5 minute steps
-                picker.displayedValues = (0..11).map { (it * 5).toString().padStart(2, '0') }.toTypedArray()
+                picker.maxValue = 59 // 0-59 in 1 minute steps
+                picker.setFormatter { String.format(locale, "%02d", it) }
             }
 
             // Set initial values
             startHourPicker.value = startTime.hour
-            startMinutePicker.value = startTime.minute / 5
+            startMinutePicker.value = startTime.minute
             endHourPicker.value = endTime.hour
-            endMinutePicker.value = endTime.minute / 5
+            endMinutePicker.value = endTime.minute
         }
     }
 
+    // Transaction Initializing
     private fun setupMoneyInput() {
         binding.editTextDollars.addTextChangedListener(object : TextWatcher {
             private var current = ""
@@ -92,9 +120,9 @@ class EventEditActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 if (s.toString() != current) {
                     binding.editTextDollars.removeTextChangedListener(this)
-                    formatCurrencyInput(s)
+                    formatCurrencyInput(s) // Format US based currency format
                     binding.editTextDollars.addTextChangedListener(this)
-                    checkTransactionMode()
+                    checkTransactionMode() // Check which transaction mode in updating UI
                 }
             }
         })
@@ -105,7 +133,7 @@ class EventEditActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
     }
-
+    // Format US based currency format
     private fun formatCurrencyInput(s: Editable?) {
         val cleanString = s.toString().replace(",".toRegex(), "")
         if (cleanString.isNotEmpty()) {
@@ -119,136 +147,18 @@ class EventEditActivity : AppCompatActivity() {
             }
         }
     }
-
-    private fun setupEventHandlers() {
-        binding.apply {
-            // Time picker listeners with validation
-            startHourPicker.setOnValueChangedListener { _, _, newVal ->
-                startTime = LocalTime.of(newVal, startTime.minute)
-                validateTimes()
-            }
-            startMinutePicker.setOnValueChangedListener { _, _, newVal ->
-                startTime = LocalTime.of(startTime.hour, newVal * 5)
-                validateTimes()
-            }
-            endHourPicker.setOnValueChangedListener { _, _, newVal ->
-                endTime = LocalTime.of(newVal, endTime.minute)
-                validateTimes()
-            }
-            endMinutePicker.setOnValueChangedListener { _, _, newVal ->
-                endTime = LocalTime.of(endTime.hour, newVal * 5)
-                validateTimes()
-            }
-
-            // Mode toggle buttons
-            btnToggleTransaction.setOnClickListener { toggleTransactionMode() }
-            btnToggleIncome.setOnClickListener { if (isTransactionMode) cycleTransactionType() }
-            eventButton.setOnClickListener { if (isTransactionMode) toggleTransactionMode() }
-            transactionButton.setOnClickListener { if (!isTransactionMode) toggleTransactionMode() }
-
-            recurringCheckBox.setOnCheckedChangeListener { _, isChecked ->
-                recurrenceOptionsLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
-            }
-
-
-
-            // Save button with validation
-            saveEventAction.setOnClickListener {
-                if (validateForm()) saveOrUpdateHabit()
-            }
-        }
-    }
-
-    private fun validateTimes(): Boolean {
-        return if (startTime.isAfter(endTime)) {
-            Toast.makeText(this, "End time must be after start time", Toast.LENGTH_SHORT).show()
-            false
-        } else {
-            true
-        }
-    }
-
-    private fun validateForm(): Boolean {
-        var isValid = true
-
-        if (binding.eventNameET.text.isNullOrBlank()) {
-            binding.eventNameET.error = "Please enter a title"
-            isValid = false
-        }
-
-        if (!validateTimes()) {
-            isValid = false
-        }
-
-        return isValid
-    }
-
-    private fun loadExistingHabitIfEditing() {
-        currentHabitId?.let { habitId ->
-            firestoreHelper.getUserHabit(
-                habitId = habitId,
-                onSuccess = { habitData -> populateForm(habitData) },
-                onFailure = { e -> showError("Error loading habit: ${e.message}") }
-            )
-        }
-    }
-
-    private fun populateForm(habitData: Map<String, Any>) {
-        binding.apply {
-            // Basic fields
-            eventNameET.setText(habitData["name"].toString())
-            messageEditText.setText(habitData["description"].toString())
-            eventLocationET.setText(habitData["location"].toString())
-
-            // Time fields
-            habitData["startTime"]?.toString()?.let {
-                startTime = LocalTime.parse(it)
-                startHourPicker.value = startTime.hour
-                startMinutePicker.value = startTime.minute / 5
-            }
-            habitData["endTime"]?.toString()?.let {
-                endTime = LocalTime.parse(it)
-                endHourPicker.value = endTime.hour
-                endMinutePicker.value = endTime.minute / 5
-            }
-
-            // Transaction data
-            val amount = habitData["amount"] as? Double ?: 0.0
-            if (amount != 0.0) {
-                setCurrencyValue(abs(amount))
-                val type = habitData["transactionType"] as? String ?: "EXPENSE"
-                currentType = TransactionType.valueOf(type)
-                isTransactionMode = true
-            }
-
-            updateUI()
-        }
-    }
-
+    // Determine either a transaction or just an event (no money)
     private fun checkTransactionMode() {
         isTransactionMode = hasMoneyInput()
         updateUI()
     }
-
+    // Check if there is any money input
     private fun hasMoneyInput(): Boolean {
         return binding.editTextDollars.text?.isNotEmpty() == true ||
                 binding.editTextCents.text?.isNotEmpty() == true
     }
 
-    private fun toggleTransactionMode() {
-        isTransactionMode = !isTransactionMode
-        updateUI()
-    }
-
-    private fun cycleTransactionType() {
-        currentType = when (currentType) {
-            TransactionType.INCOME -> TransactionType.EXPENSE
-            TransactionType.EXPENSE -> TransactionType.CREDIT
-            TransactionType.CREDIT -> TransactionType.INCOME
-        }
-        updateUI()
-    }
-
+    // Update UI based on mode
     private fun updateUI() {
         binding.apply {
             // Update visibility based on mode
@@ -280,6 +190,88 @@ class EventEditActivity : AppCompatActivity() {
         }
     }
 
+    // Event Handlers making sure Time and Transaction are in sync and valid
+    private fun setupEventHandlers() {
+        binding.apply {
+            // Time picker validation
+            startHourPicker.setOnValueChangedListener { _, _, newVal ->
+                startTime = LocalTime.of(newVal, startTime.minute)
+                validateTimes()
+            }
+            startMinutePicker.setOnValueChangedListener { _, _, newVal ->
+                startTime = LocalTime.of(startTime.hour, newVal)
+                validateTimes()
+            }
+            endHourPicker.setOnValueChangedListener { _, _, newVal ->
+                endTime = LocalTime.of(newVal, endTime.minute)
+                validateTimes()
+            }
+            endMinutePicker.setOnValueChangedListener { _, _, newVal ->
+                endTime = LocalTime.of(endTime.hour, newVal)
+                validateTimes()
+            }
+
+            // Mode toggle buttons
+            btnToggleTransaction.setOnClickListener { toggleTransactionMode() }
+            btnToggleIncome.setOnClickListener { if (isTransactionMode) cycleTransactionType() }
+            eventButton.setOnClickListener { if (isTransactionMode) toggleTransactionMode() }
+            transactionButton.setOnClickListener { if (!isTransactionMode) toggleTransactionMode() }
+
+            recurringCheckBox.setOnCheckedChangeListener { _, isChecked ->
+                recurrenceOptionsLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
+            }
+
+            // Save button with validation
+            saveEventAction.setOnClickListener {
+                if (validateForm()) saveOrUpdateHabit()
+            }
+        }
+    }
+    // Validate time input
+    private fun validateTimes(): Boolean {
+        return if (startTime.isAfter(endTime)) {
+            Toast.makeText(this, "End time must be after start time", Toast.LENGTH_SHORT).show()
+            false
+        } else {
+            true
+        }
+    }
+    // Button to toggle between transaction and event mode
+    private fun toggleTransactionMode() {
+        isTransactionMode = !isTransactionMode
+        updateUI()
+    }
+    // Button to cycle through transaction types
+    private fun cycleTransactionType() {
+        currentType = when (currentType) {
+            TransactionType.INCOME -> TransactionType.EXPENSE
+            TransactionType.EXPENSE -> TransactionType.CREDIT
+            TransactionType.CREDIT -> TransactionType.INCOME
+        }
+        updateUI()
+    }
+    // Validate form input
+    private fun validateForm(): Boolean {
+        var isValid = true
+
+        if (binding.eventNameET.text.isNullOrBlank()) {
+            binding.eventNameET.error = "Please enter a title"
+            isValid = false
+        }
+
+        if (binding.eventNameET.text.isNullOrBlank()) {
+            binding.eventNameET.error = "Please enter a title"
+            isValid = false
+        }
+
+        if (!validateTimes()) {
+            isValid = false
+        }
+
+        return isValid
+    }
+
+    // Save or update habit to firestore
     private fun saveOrUpdateHabit() {
         val habitData = prepareHabitData()
 
@@ -288,14 +280,15 @@ class EventEditActivity : AppCompatActivity() {
         } else {
             createNewHabit(habitData)
         }
-    }
+    } // TODO take the ID from here to update
 
+    // Prepare data for firestore
     private fun prepareHabitData(): Map<String, Any> {
         return hashMapOf(
             "name" to binding.eventNameET.text.toString().trim(),
             "description" to binding.messageEditText.text.toString(),
             "location" to binding.eventLocationET.text.toString(),
-            "date" to CalendarUtils.selectedDate.toString(),
+            "date" to selectedDate.toString(),
             "startTime" to formattedShortTime(startTime),
             "endTime" to formattedShortTime(endTime),
             "amount" to getCurrencyValue(),
@@ -309,52 +302,7 @@ class EventEditActivity : AppCompatActivity() {
             }
         }
     }
-
-    private fun getCurrencyValue(): Double {
-        val dollars = binding.editTextDollars.text?.toString()
-            ?.replace(",", "")
-            ?.toDoubleOrNull() ?: 0.0
-
-        val cents = binding.editTextCents.text?.toString()
-            ?.toDoubleOrNull()
-            ?.div(100) ?: 0.0
-
-        val amount = dollars + cents
-        return when (currentType) {
-            TransactionType.INCOME -> amount
-            TransactionType.EXPENSE -> -amount
-            TransactionType.CREDIT -> amount
-        }
-    }
-
-    private fun setCurrencyValue(amount: Double) {
-        val absoluteAmount = abs(amount)
-        val dollars = absoluteAmount.toInt()
-        val cents = ((absoluteAmount - dollars) * 100).roundToInt()
-
-        val textDollar = dollars.toString()
-        binding.editTextDollars.setText(textDollar)
-        val textCent = "%02d".format(cents)
-        binding.editTextCents.setText(textCent)
-    }
-
-    private fun updateExistingHabit(habitData: Map<String, Any>) {
-        firestoreHelper.updateUserHabit(
-            habitId = currentHabitId!!,
-            updatedData = habitData,
-            onSuccess = { showSuccess("Habit updated successfully") },
-            onFailure = { e -> showError("Update failed: ${e.message}") }
-        )
-    }
-
-    private fun createNewHabit(habitData: Map<String, Any>) {
-        firestoreHelper.addUserHabit(
-            habitData = habitData,
-            onSuccess = { showSuccess("Habit created successfully") },
-            onFailure = { e -> showError("Creation failed: ${e.message}") }
-        )
-    }
-
+    // Prepare recurrence data for firestore
     private fun prepareRecurrenceData(): Map<String, Any> {
         return hashMapOf(
             "recurrence" to hashMapOf(
@@ -374,13 +322,112 @@ class EventEditActivity : AppCompatActivity() {
                 } else null
             )
         )
+    } // TODO still looking how to implement
+
+    // Create new habit in firestore
+    private fun createNewHabit(habitData: Map<String, Any>) {
+        firestoreHelper.addUserHabit(
+            habitData = habitData,
+            onSuccess = { id ->
+                currentHabitId = id
+                showSuccess("Habit created successfully")
+            },
+            onFailure = { e ->
+                showError("Creation failed: ${e.message}")
+            }
+        )
     }
 
+    // Update existing habit in firestore
+    private fun updateExistingHabit(habitData: Map<String, Any>) {
+        firestoreHelper.updateUserHabit(
+            habitId = currentHabitId!!,
+            updatedData = habitData,
+            onSuccess = { showSuccess("Habit updated successfully") },
+            onFailure = { e ->
+                showError("Update failed: ${e.message}")
+            }
+        )
+    } // TODO connect with the ID
+
+    // Load existing habit if editing
+    private fun loadExistingHabitIfEditing() {
+        currentHabitId?.let { habitId ->
+            firestoreHelper.getUserHabit(
+                habitId = habitId,
+                onSuccess = { habitData ->
+                    populateForm(habitData)
+                },
+                onFailure = { e ->
+                    showError("Error loading habit: ${e.message}")
+                }
+            )
+        }
+    }
+
+    // Populate form with habit data
+    private fun populateForm(habitData: Map<String, Any>) {
+        binding.apply {
+            eventNameET.setText(habitData["name"].toString())
+            messageEditText.setText(habitData["description"].toString())
+            eventLocationET.setText(habitData["location"].toString())
+
+            habitData["startTime"]?.toString()?.let {
+                startTime = LocalTime.parse(it)
+                startHourPicker.value = startTime.hour
+                startMinutePicker.value = startTime.minute
+            }
+            habitData["endTime"]?.toString()?.let {
+                endTime = LocalTime.parse(it)
+                endHourPicker.value = endTime.hour
+                endMinutePicker.value = endTime.minute
+            }
+
+            val amount = habitData["amount"] as? Double ?: 0.0
+            if (amount != 0.0) {
+                setCurrencyValue(abs(amount))
+                val type = habitData["transactionType"] as? String ?: "EXPENSE"
+                currentType = TransactionType.valueOf(type)
+                isTransactionMode = true
+            }
+
+            updateUI()
+        }
+    }
+
+    // Get currency value from input
+    private fun getCurrencyValue(): Double {
+        val dollars = binding.editTextDollars.text?.toString()
+            ?.replace(",", "")
+            ?.toDoubleOrNull() ?: 0.0
+
+        val cents = binding.editTextCents.text?.toString()
+            ?.toDoubleOrNull()
+            ?.div(100) ?: 0.0
+
+        val amount = dollars + cents
+        return when (currentType) {
+            TransactionType.INCOME -> amount
+            TransactionType.EXPENSE -> -amount
+            TransactionType.CREDIT -> amount
+        }
+    }
+    private fun setCurrencyValue(amount: Double) {
+        val absoluteAmount = abs(amount)
+        val dollars = absoluteAmount.toInt()
+        val cents = ((absoluteAmount - dollars) * 100).roundToInt()
+
+        val textDollar = dollars.toString()
+        binding.editTextDollars.setText(textDollar)
+        val textCent = "%02d".format(cents)
+        binding.editTextCents.setText(textCent)
+    }
+
+    // Toast message
     private fun showSuccess(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         finish()
     }
-
     private fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }

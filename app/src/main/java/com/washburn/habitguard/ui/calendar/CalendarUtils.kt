@@ -13,14 +13,18 @@ import androidx.annotation.RequiresApi
 object CalendarUtils {
     lateinit var selectedDate: LocalDate
 
+    fun formattedTimeFromString(timeStr: String): String {
+        return try {
+            val time = LocalTime.parse(timeStr)
+            DateTimeFormatter.ofPattern("h:mm a").format(time)
+        } catch (e: Exception) {
+            timeStr // Fallback to raw string if parsing fails
+        }
+    }
+
     fun formattedDate(date: LocalDate): String {
         val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
         return date.format(formatter)
-    }
-
-    fun formattedTime(time: LocalTime): String {
-        val formatter = DateTimeFormatter.ofPattern("hh:mm:ss a")
-        return time.format(formatter)
     }
 
     fun formattedShortTime(time: LocalTime): String {
@@ -40,30 +44,33 @@ object CalendarUtils {
 
     fun daysInMonthArray(): ArrayList<LocalDate> {
         val daysInMonthArray = ArrayList<LocalDate>()
-
         val yearMonth = YearMonth.from(selectedDate)
         val daysInMonth = yearMonth.lengthOfMonth()
 
-        val prevMonth = selectedDate.minusMonths(1)
-        val nextMonth = selectedDate.plusMonths(1)
-
-        val prevYearMonth = YearMonth.from(prevMonth)
-        val prevDaysInMonth = prevYearMonth.lengthOfMonth()
-
         val firstOfMonth = selectedDate.withDayOfMonth(1)
-        val dayOfWeek = firstOfMonth.dayOfWeek.value
+        val lastOfMonth = selectedDate.withDayOfMonth(daysInMonth)
 
-        for (i in 1..42) {
-            when {
-                i <= dayOfWeek -> daysInMonthArray.add(
-                    LocalDate.of(prevMonth.year, prevMonth.month, prevDaysInMonth + i - dayOfWeek)
-                )
-                i > daysInMonth + dayOfWeek -> daysInMonthArray.add(
-                    LocalDate.of(nextMonth.year, nextMonth.month, i - dayOfWeek - daysInMonth)
-                )
-                else -> daysInMonthArray.add(
-                    LocalDate.of(selectedDate.year, selectedDate.month, i - dayOfWeek)
-                )
+        // Add leading days from previous month (only if part of the same week)
+        if (firstOfMonth.dayOfWeek != DayOfWeek.MONDAY) {  // Adjust based on your week start (e.g., SUNDAY)
+            // Start from the last day of the previous month and go backward
+            var day = firstOfMonth.minusDays(1)
+            while (day.dayOfWeek != DayOfWeek.SUNDAY) {  // Adjust to your week's start day
+                daysInMonthArray.add(0, day)  // Insert at beginning
+                day = day.minusDays(1)
+            }
+        }
+
+        // Add all days of the current month
+        for (day in 1..daysInMonth) {
+            daysInMonthArray.add(LocalDate.of(selectedDate.year, selectedDate.month, day))
+        }
+
+        // Add trailing days from next month (only if part of the same week)
+        if (lastOfMonth.dayOfWeek != DayOfWeek.SUNDAY) {  // Adjust to your week's end day
+            var day = lastOfMonth.plusDays(1)
+            while (day.dayOfWeek != DayOfWeek.MONDAY) {  // Stop at the start of the next week
+                daysInMonthArray.add(day)
+                day = day.plusDays(1)
             }
         }
 

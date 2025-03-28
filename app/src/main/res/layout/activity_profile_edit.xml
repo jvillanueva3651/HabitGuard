@@ -220,6 +220,7 @@
             android:id="@+id/cityEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:importantForAutofill="no"
             android:inputType="text"
             android:hint="Enter city"
             android:layout_marginBottom="16dp"
@@ -257,11 +258,10 @@
 
         <EditText
             android:id="@+id/zipCodeEditText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
             android:inputType="number"
-            android:ems="5"
             android:maxLength="5"
             android:hint="Enter zip code"
             android:layout_marginBottom="16dp"

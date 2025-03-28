@@ -3,29 +3,10 @@ package com.washburn.habitguard.ui.calendar
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import android.os.Build
-import androidx.annotation.RequiresApi
-import java.time.LocalDate
-import java.util.ArrayList
 import com.washburn.habitguard.R
 
-@RequiresApi(Build.VERSION_CODES.O)
-class CalendarViewHolder(
-    itemView: View,
-    private val onItemListener: CalendarAdapter.OnItemListener,
-    private val days: ArrayList<LocalDate>
-) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
-
-    val parentView: View = itemView.findViewById(R.id.parentView)
+class CalendarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val dayOfMonth: TextView = itemView.findViewById(R.id.cellDayText)
-
     val eventIndicator: View = itemView.findViewById(R.id.eventIndicator)
-
-    init {
-        itemView.setOnClickListener(this)
-    }
-
-    override fun onClick(view: View) {
-        onItemListener.onItemClick(adapterPosition, days[adapterPosition])
-    }
+    val parentView: View = itemView.findViewById(R.id.parentView)
 }

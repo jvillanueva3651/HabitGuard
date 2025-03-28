@@ -1,78 +1,72 @@
 package com.washburn.habitguard.ui.calendar
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.TextView
 import androidx.annotation.RequiresApi
+import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.R
+import com.washburn.habitguard.databinding.HourCellBinding
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
-class HourAdapter(context: Context, hourEvents: List<HourEvent>) :
-    ArrayAdapter<HourEvent>(context, 0, hourEvents) {
+class HourAdapter(
+    context: Context,
+    hourlyEvents: List<FirestoreHelper.HourlyEventData>
+) : ArrayAdapter<FirestoreHelper.HourlyEventData>(context, 0, hourlyEvents) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val event = getItem(position)
-        val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.hour_cell, parent, false)
+        val hourEvent = getItem(position)!!
+        val binding = if (convertView != null) {
+            HourCellBinding.bind(convertView)
+        } else {
+            val view = LayoutInflater.from(context).inflate(R.layout.hour_cell, parent, false)
+            HourCellBinding.bind(view)
+        }
 
-        setHour(view, event!!.time)
-        setEvents(view, event.events)
+        setHour(binding, hourEvent.timeSlot)
+        setEvents(binding, hourEvent.events)
 
-        return view
+        return binding.root
     }
 
-    private fun setHour(convertView: View, time: LocalTime) {
-        val timeTV: TextView = convertView.findViewById(R.id.timeTV)
-        timeTV.text = CalendarUtils.formattedShortTime(time)
+    private fun setHour(binding: HourCellBinding, time: LocalTime) {
+        binding.timeTV.text = time.format(DateTimeFormatter.ofPattern("h a"))
     }
 
-    @SuppressLint("SetTextI18n")
-    private fun setEvents(convertView: View, events: List<Event>) {
-        val event1: TextView = convertView.findViewById(R.id.event1)
-        val event2: TextView = convertView.findViewById(R.id.event2)
-        val event3: TextView = convertView.findViewById(R.id.event3)
+    private fun setEvents(binding: HourCellBinding, events: List<FirestoreHelper.EventData>) {
+        val eventViews = listOf(binding.event1, binding.event2, binding.event3)
 
-        when (events.size) {
-            0 -> {
-                hideEvent(event1)
-                hideEvent(event2)
-                hideEvent(event3)
+        events.take(3).forEachIndexed { index, event ->
+            eventViews[index].apply {
+                val formattedTime =
+                    LocalTime.parse(event.time).format(DateTimeFormatter.ofPattern("h:mm a"))
+                eventViews[index].apply {
+                    text = context.getString(
+                        R.string.event_with_time_format,
+                        event.name,
+                        formattedTime
+                    )
+                    visibility = View.VISIBLE
+                }
             }
-            1 -> {
-                setEvent(event1, events[0])
-                hideEvent(event2)
-                hideEvent(event3)
-            }
-            2 -> {
-                setEvent(event1, events[0])
-                setEvent(event2, events[1])
-                hideEvent(event3)
-            }
-            3 -> {
-                setEvent(event1, events[0])
-                setEvent(event2, events[1])
-                setEvent(event3, events[2])
-            }
-            else -> {
-                setEvent(event1, events[0])
-                setEvent(event2, events[1])
-                event3.visibility = View.VISIBLE
-                event3.text = "${events.size - 2} More Events"
+
+            if (events.size > 3) {
+                binding.event3.text = context.resources.getQuantityString(
+                    R.plurals.more_events_count,
+                    events.size - 2,
+                    events.size - 2
+                )
+                binding.event3.visibility = View.VISIBLE
+            } else if (events.size < 3) {
+                eventViews.slice(events.size until 3).forEach {
+                    it.visibility = View.INVISIBLE
+                }
             }
         }
-    }
-
-    private fun setEvent(textView: TextView, event: Event) {
-        textView.text = event.eventName
-        textView.visibility = View.VISIBLE
-    }
-
-    private fun hideEvent(tv: TextView) {
-        tv.visibility = View.INVISIBLE
     }
 }

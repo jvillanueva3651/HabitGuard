@@ -8,15 +8,18 @@
 package com.washburn.habitguard
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.washburn.habitguard.databinding.ActivitySignupBinding
 import com.washburn.habitguard.firebase.FirebaseAuthHelper
 
 @Suppress("DEPRECATION")
+@RequiresApi(Build.VERSION_CODES.O)
 class SignupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignupBinding
