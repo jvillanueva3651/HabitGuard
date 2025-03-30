@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Signup Activity Layout
+  Purpose: Provides user registration interface with:
+  Structure:
+    - Email/password signup
+    - Password confirmation
+    - Social signup options
+    - Navigation to login
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,20 +18,21 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg2" >
 
-    <!-- Logo ImageView with Oval Cutout -->
+    <!-- Application Logo -->
     <ImageView
         android:id="@+id/ivLogo"
         android:layout_width="120dp"
         android:layout_height="160dp"
         android:layout_marginTop="50dp"
-        android:importantForAccessibility="no"
         android:scaleType="centerCrop"
         android:src="@drawable/habit_logo"
         android:background="@drawable/oval_cutout"
+        android:contentDescription="@string/accessibility_ivLogo_activity_login"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Signup Form Card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardSignup"
         android:layout_width="0dp"
@@ -42,6 +52,7 @@
             android:orientation="vertical"
             android:padding="24dp">
 
+            <!-- Email Input Field -->
             <EditText
                 android:id="@+id/etSEmailAddress"
                 android:layout_width="match_parent"
@@ -49,43 +60,38 @@
                 android:layout_marginBottom="16dp"
                 android:autofillHints="emailAddress"
                 android:backgroundTint="@color/teal_200"
-                android:ems="10"
-                android:hint="E-Mail"
+                android:hint="@string/autofillHints_etSEmailAddress_activity_signup"
                 android:inputType="textEmailAddress"
-                android:minHeight="48dp"
-                android:textColorHint="#757575"
-                tools:ignore="HardcodedText" />
+                android:textColorHint="#757575" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp">
 
+                <!-- Password Input Field -->
                 <EditText
                     android:id="@+id/etSPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="password"
                     android:backgroundTint="@color/teal_200"
-                    android:ems="10"
-                    android:hint="Password"
+                    android:hint="@string/autofillHints_etSPassword"
                     android:inputType="textPassword"
-                    android:minHeight="48dp"
-                    android:textColorHint="#757575"
-                    tools:ignore="HardcodedText" />
+                    android:textColorHint="#757575" />
 
+                <!-- Toggle Password Visibility Button -->
                 <ImageButton
                     android:id="@+id/btnTogglePassword"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Toggle Password Visibility"
+                    android:contentDescription="@string/btnTogglePassword_activity_signup"
                     android:src="@drawable/ic_visibility_off"
-                    app:tint="#757575"
-                    tools:ignore="HardcodedText" />
+                    app:tint="#757575" />
+
             </RelativeLayout>
 
             <RelativeLayout
@@ -93,45 +99,43 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp">
 
+                <!-- Confirm Password Input Field -->
                 <EditText
                     android:id="@+id/etSConfPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="password"
                     android:backgroundTint="@color/teal_200"
-                    android:ems="10"
-                    android:hint="Confirm Password"
+                    android:hint="@string/etSConfPassword_activity_signup"
                     android:inputType="textPassword"
-                    android:minHeight="48dp"
-                    android:textColorHint="#757575"
-                    tools:ignore="HardcodedText" />
+                    android:textColorHint="#757575" />
 
+                <!-- Toggle Password Visibility Button -->
                 <ImageButton
                     android:id="@+id/btnToggleConfPassword"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Toggle Password Visibility"
+                    android:contentDescription="@string/btnToggleConfPassword_activity_signup"
                     android:src="@drawable/ic_visibility_off"
-                    app:tint="#757575"
-                    tools:ignore="HardcodedText" />
+                    app:tint="#757575" />
+
             </RelativeLayout>
 
+            <!-- Sign Up Button -->
             <Button
                 android:id="@+id/btnSSignUp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/teal_700"
-                android:text="Sign Up"
+                android:text="@string/btnSSignUp_activity_signup"
                 android:textColor="@color/white"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                tools:ignore="HardcodedText" />
+                android:textSize="16sp" />
 
         </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
     <TextView
@@ -139,16 +143,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="==============   or   =============="
+        android:text="@string/tvOr"
         android:background="@color/white"
         android:alpha=".5"
         android:textColor="@color/teal_700"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardSignup"
-        tools:ignore="HardcodedText" />
+        app:layout_constraintTop_toBottomOf="@id/cardSignup" />
 
+    <!-- Third Party Signup Card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardSocialSignup"
         android:layout_width="0dp"
@@ -176,14 +180,15 @@
                 app:cardElevation="8dp"
                 android:layout_margin="8dp">
 
+                <!-- Google Signup -->
                 <ImageButton
                     android:id="@+id/btnGoogle"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_google"
-                    android:contentDescription="Sign in with Google"
-                    tools:ignore="HardcodedText" />
+                    android:contentDescription="@string/btnGoogle_activity_signup" />
+
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
@@ -193,14 +198,14 @@
                 app:cardElevation="8dp"
                 android:layout_margin="8dp">
 
+                <!-- Github Signup -->
                 <ImageButton
                     android:id="@+id/btnGithub"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_github"
-                    android:contentDescription="Sign in with GitHub"
-                    tools:ignore="HardcodedText" />
+                    android:contentDescription="@string/btnGithub_activity_signup" />
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
@@ -210,25 +215,29 @@
                 app:cardElevation="8dp"
                 android:layout_margin="8dp">
 
+                <!-- LinkedIn Signup -->
                 <ImageButton
                     android:id="@+id/btnLinkedIn"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_linkedin"
-                    android:contentDescription="Sign in with LinkedIn"
-                    tools:ignore="HardcodedText" />
+                    android:contentDescription="@string/btnLinkedIn_activity_signup" />
+
             </androidx.cardview.widget.CardView>
+
         </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
+    <!-- Redirect to Login -->
     <TextView
         android:id="@+id/tvRedirectLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:gravity="center_horizontal"
-        android:text="Don't have an account? Register now"
+        android:text="@string/tvRedirectLogin_activity_signup"
         android:textColor="@color/teal_700"
         android:background="@color/white"
         android:alpha=".75"
@@ -236,7 +245,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardSocialSignup"
-        tools:ignore="HardcodedText" />
+        app:layout_constraintTop_toBottomOf="@id/cardSocialSignup" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

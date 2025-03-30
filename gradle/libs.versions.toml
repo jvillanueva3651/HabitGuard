@@ -1,10 +1,11 @@
 [versions]
 agp = "8.8.2"
-cameraCore = "1.4.1"
-comGoogleAndroidGmsPlayServicesAuthApiPhone2 = "18.1.0"
+cameraCore = "1.4.2"
+comGoogleAndroidGmsPlayServicesAuthApiPhone2 = "18.2.0"
 comGoogleAndroidGmsPlayServicesAuthBase5 = "18.1.0"
 compiler = "4.16.0"
 coreKtxVersion = "1.15.0"
+firebaseAuthVersion = "23.2.0"
 glide = "4.16.0"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -13,9 +14,8 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2025.03.00"
+composeBom = "2025.03.01"
 firebase-bom = "33.11.0"
-firebaseAuth = "23.2.0"
 appcompat = "1.7.0"
 material = "1.12.0"
 constraintlayout = "2.2.1"
@@ -50,6 +50,7 @@ compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compi
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gms-play-services-identity = { module = "com.google.android.gms:play-services-identity", version.ref = "playServicesIdentity" }
+google-firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuthVersion" }
 google-firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

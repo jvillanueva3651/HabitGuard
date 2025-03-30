@@ -1,38 +1,53 @@
-// ==============================================================================================
-// LoginActivity.kt is the framework calling firebase.FirebaseAuthHelper to log in user
-// Refer to the Signup Activity for initializing user
-//
-// This will have user enter their registered email and password
-// Function: authentication, remember me, {forgot password and third party login} (NOT IMPLEMENTED)
-// ==============================================================================================
+/**===========================================================================================
+ * LoginActivity for login in user
+ * REF    : USE_BY -> .SignupActivity (other half) & .SideActivity (main)
+ *          USING  -> .firebase/FirebaseAuthHelper (authentication)
+ *          LAYOUT -> layout/activity_login.xml
+ * Purpose: Handles user authentication with email and password.
+ * Fun:  1. Email & password login (online/offline)
+ *       2. TODO: Third-party provider logins (Google, GitHub, LinkedIn)
+ *       3. TODO: Password reset functionality
+ *       4. Network status awareness
+ *       5. Remember me
+ *       6. Authentication functionality through .firebase/FirebaseAuthHelper
+============================================================================================*/
 package com.washburn.habitguard
 
-import android.content.Context
+import android.os.Build
+import android.os.Bundle
+import android.widget.Toast
 import android.content.Intent
+import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Bundle
-import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
-import android.widget.Toast
+import android.text.method.HideReturnsTransformationMethod
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import com.washburn.habitguard.databinding.ActivityLoginBinding
 import com.washburn.habitguard.firebase.FirebaseAuthHelper
+import com.washburn.habitguard.databinding.ActivityLoginBinding
 
+@RequiresApi(Build.VERSION_CODES.O)
 class LoginActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityLoginBinding
     private lateinit var authHelper: FirebaseAuthHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        authHelper = FirebaseAuthHelper(this)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        authHelper = FirebaseAuthHelper(this)
+
         loadSavedCredentials() // Remember Me
         updateNetworkStatusIndicator() // Online/Offline
+        initView()
+    }
 
+    // Initialize click listeners
+    private fun initView() {
         binding.btnTogglePassword.setOnClickListener { togglePasswordVisibility() }
 
         binding.tvForgotPassword.setOnClickListener { forgotPassword() }
@@ -48,6 +63,7 @@ class LoginActivity : AppCompatActivity() {
         binding.tvRedirectSignUp.setOnClickListener { signup() }
     }
 
+    // Load saved credentials from SharedPreferences
     private fun loadSavedCredentials() {
         val (email, password, rememberMe) = authHelper.loadSavedCredentials()
         if (rememberMe) {
@@ -57,6 +73,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    // Update network status indicator
     private fun updateNetworkStatusIndicator() {
         if (isOnline(this)) {
             binding.ivStatusIndicator.setImageResource(R.drawable.ic_online)
@@ -65,6 +82,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    // Toggle password visibility
     private fun togglePasswordVisibility() {
         if (binding.etPassword.transformationMethod == PasswordTransformationMethod.getInstance()) {
             binding.etPassword.transformationMethod = HideReturnsTransformationMethod.getInstance()
@@ -76,6 +94,7 @@ class LoginActivity : AppCompatActivity() {
         binding.etPassword.setSelection(binding.etPassword.text.length)
     }
 
+    // Handle password reset
     private fun forgotPassword() {
         val email = binding.etEmailAddress.text.toString()
         authHelper.sendPasswordResetEmail(
@@ -94,6 +113,7 @@ class LoginActivity : AppCompatActivity() {
         )
     }
 
+    // Handle user login
     private fun login() {
         val email = binding.etEmailAddress.text.toString()
         val pass = binding.etPassword.text.toString()
@@ -128,6 +148,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
+    // Check network connectivity
     private fun isOnline(context: Context): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -136,19 +157,21 @@ class LoginActivity : AppCompatActivity() {
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
+    // Handle Google sign-in
     private fun googleSignIn() {
         // Implement Google sign-in logic here
     }
-
+    // Handle GitHub sign-in
     private fun githubSignIn() {
         startActivity(Intent(this, SideActivity::class.java))
         finish()
     }
-
+    // Handle LinkedIn sign-in
     private fun linkedInSignIn() {
         // Implement LinkedIn sign-in logic here
     }
 
+    // Handle signup
     private fun signup() {
         startActivity(Intent(this, SignupActivity::class.java))
         finish()

@@ -1,18 +1,18 @@
-//=======================================================================================
-// "EventEditActivity" is the backend for creating, TODO: editing, deleting habits
-// Refer to     "~/FirestoreHelper" for database operations,
-//              "./ui/calendar/EventAdapter" to take input here and create habits card there
-//
-// Get layout of activity from "layout/activity_event_edit.xml"
-//
-// Fun: 1. Check title
-//      2. Toggle between transaction and event mode
-//          a) Event have startTime and endTime (Hour & Minute)
-//          b) Transaction have amount and type (Income, Expense, Credit)
-//      3. TODO: Recurring habits 'I don't know how are we supposed to implement this, maybe later'
-//      4. TODO: Location 'Are we taking from user or have them get it from the map, then validation?'
-//      5. Description
-//=======================================================================================
+/**===========================================================================================
+ * EventEditActivity for creating/editing habits and transactions
+ * REF    : USE_BY -> .MonthlyViewActivity, .WeeklyViewActivity, and .DailyViewActivity
+ *                      .EventAdapter
+ *          USING  -> ~/FirestoreHelper (database)
+ *          LAYOUT -> layout/activity_event_edit.xml
+ * Purpose: Handles creation and modification of calendar events and financial transactions
+ * Features:
+ *   1. Dual-mode operation (Event vs Transaction)
+ *   2. Time pickers with validation
+ *   3. Currency input formatting
+ *   4. TODO: Recurrence options (partial implementation)
+ *   5. Firestore integration for data persistence
+ *   6. Form validation
+============================================================================================*/
 package com.washburn.habitguard.ui.calendar
 
 import android.os.Bundle
@@ -46,6 +46,7 @@ class EventEditActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityEventEditBinding
+
     private lateinit var firestoreHelper: FirestoreHelper
 
     // Time handling with sensible defaults
@@ -68,8 +69,7 @@ class EventEditActivity : AppCompatActivity() {
         // Compose UI
         initializeComponents()
         // Load existing habit if editing
-        loadExistingHabitIfEditing()    // TODO: load existing habit if editing
-                                        // TODO: haven't linked it to anything yet
+        loadExistingHabitIfEditing()
     }
 
     private fun initializeComponents() {
@@ -280,7 +280,7 @@ class EventEditActivity : AppCompatActivity() {
         } else {
             createNewHabit(habitData)
         }
-    } // TODO take the ID from here to update
+    }
 
     // Prepare data for firestore
     private fun prepareHabitData(): Map<String, Any> {
@@ -348,7 +348,7 @@ class EventEditActivity : AppCompatActivity() {
                 showError("Update failed: ${e.message}")
             }
         )
-    } // TODO connect with the ID
+    }
 
     // Load existing habit if editing
     private fun loadExistingHabitIfEditing() {

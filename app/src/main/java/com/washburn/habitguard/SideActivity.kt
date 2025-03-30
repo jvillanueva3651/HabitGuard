@@ -1,32 +1,46 @@
+/**===========================================================================================
+ * SideActivity for main navigator view
+ * REF    : USE_BY -> .ui/home & .ui/calendar & .ui/finance
+ *                      .settings/[*]
+ *          USING  -> .LoginActivity
+ *          LAYOUT -> layout/content_side.xml & layout/app_bar_side.xml
+ *                      layout/nav_header_side.xml & layout/activity_side.xml
+ * Purpose: Handles navigation between fragments and etc.
+ * Fun:  1. Navigation drawer with user profile header
+ *       2. Navigation between home, calendar, and finance fragments
+ *       3. Settings menu option
+ *       4. TODO: Floating action button (placeholder functionality)
+============================================================================================*/
 package com.washburn.habitguard
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ImageView
-import android.widget.TextView
+import android.content.Intent
 import android.widget.Toast
+import android.widget.TextView
+import android.widget.ImageView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
+import androidx.navigation.ui.navigateUp
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
 import com.bumptech.glide.Glide
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
-import com.washburn.habitguard.databinding.ActivitySideBinding
 import com.washburn.habitguard.settings.SettingActivity
+import com.washburn.habitguard.databinding.ActivitySideBinding
 
 class SideActivity : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivitySideBinding
+
+    private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

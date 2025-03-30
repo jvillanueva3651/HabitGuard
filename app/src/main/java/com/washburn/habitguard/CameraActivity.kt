@@ -1,3 +1,12 @@
+/**===========================================================================================
+ * CameraActivity for userProfile picture
+ * REF    : USE_BY -> .SignupActivity
+ *          LAYOUT -> layout/activity_camera.xml
+ * Purpose: Capturing photos using the device's camera.
+ * Fun:  1. Handles camera permission requests,
+ *       2. Camera initialization,
+ *       3. Photo capture functionality.
+============================================================================================*/
 package com.washburn.habitguard
 
 import android.Manifest
@@ -16,14 +25,15 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import com.washburn.habitguard.databinding.ActivityCameraBinding
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.Locale
+import java.text.SimpleDateFormat
 
 class CameraActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCameraBinding
-    private var imageCapture: ImageCapture? = null
+    private var imageCapture: ImageCapture? = null // ImageCapture use case for taking photos
 
+    // Activity result launcher for camera permission request
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
@@ -38,34 +48,36 @@ class CameraActivity : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Request camera permission
         if (allPermissionsGranted()) {
             startCamera()
+            binding.btnCapture.setOnClickListener { takePhoto() }
         } else {
             requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
-
-        binding.btnCapture.setOnClickListener { takePhoto() }
     }
 
+    // From manifest, check if all required permissions are granted
     private fun allPermissionsGranted() = ContextCompat.checkSelfPermission(
         this, Manifest.permission.CAMERA
     ) == PackageManager.PERMISSION_GRANTED
 
+    // Initializes and starts the camera preview
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-
-            val preview = androidx.camera.core.Preview.Builder().build().also {
-                it.setSurfaceProvider(binding.previewView.surfaceProvider)
-            }
-
-            imageCapture = ImageCapture.Builder().build()
-
-            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-
             try {
+                val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+
+                val preview = androidx.camera.core.Preview.Builder().build().also {
+                    it.surfaceProvider = binding.previewView.surfaceProvider
+                }
+
+                imageCapture = ImageCapture.Builder().build()
+
+                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageCapture
@@ -76,31 +88,23 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    // Captures a photo and saves it to a file locally
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
-        val photoFile = File(
-            externalMediaDirs.firstOrNull(),
-            SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
-                .format(System.currentTimeMillis()) + ".jpg"
-        )
+        // Create a timestamped file name
+        val photoFile = createTimestampedFile()
 
+        // Set up output options
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
+        // Take the picture
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
-                    val msg = "Photo capture succeeded: $savedUri"
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-
-                    // Return the photo URI to the SignupActivity
-                    val resultIntent = Intent()
-                    resultIntent.putExtra("photoUri", savedUri.toString())
-                    setResult(RESULT_OK, resultIntent)
-                    finish()
+                    handleImageCaptureSuccess(photoFile)
                 }
 
                 override fun onError(exc: ImageCaptureException) {
@@ -108,5 +112,27 @@ class CameraActivity : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    private fun handleImageCaptureSuccess(photoFile: File) {
+        val savedUri = Uri.fromFile(photoFile)
+        showToast("Photo capture succeeded: $savedUri")
+
+        // Return the photo URI to the calling activity
+        val resultIntent = Intent().apply {
+            putExtra("photoUri", savedUri.toString())
+        }
+        setResult(RESULT_OK, resultIntent)
+        finish()
+    }
+
+    private fun createTimestampedFile(): File {
+        val timestamp = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
+            .format(System.currentTimeMillis())
+        return File(externalMediaDirs.firstOrNull(), "$timestamp.jpg")
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

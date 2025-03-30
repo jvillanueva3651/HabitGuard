@@ -1,13 +1,16 @@
-//=======================================================================================
-// "EventAdapter" is the backend for creating, editing, and deleting habits
-// Refer to     "~/FirestoreHelper" for database operations
-//              "./ui/calendar/EventEditActivity" to take input from and create habits card for ./ui/calendar/* Week TODO: , Calendar and daily.
-//
-// Get layout of card from "layout/event_cell.xml"
-//
-// Fun: 1. Load habits from database
-//      2. Handle from EventEditActivity with the others ViewActivity
-//=======================================================================================
+/**===========================================================================================
+ * EventAdapter for displaying and managing habit/event cards
+ * REF    : USE_BY -> .MonthlyViewActivity and .WeekViewActivity
+ *          USING  -> ~/FirestoreHelper (database) & .EventEditActivity (editing)
+ *          LAYOUT -> layout/event_cell.xml
+ * Purpose: Bridges between Firestore data and calendar event displays
+ * Features:
+ *   1. Displays both events and transactions in unified view
+ *   2. Handles edit/delete operations
+ *   3. Formats time and currency values
+ *   4. Manages click actions through callbacks
+ *   5. Supports transaction type visualization
+============================================================================================*/
 package com.washburn.habitguard.ui.calendar
 
 import android.os.Build
