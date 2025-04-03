@@ -13,7 +13,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
+    android:background="@drawable/bg_login"
     android:focusableInTouchMode="true"
     tools:context=".LoginActivity" >
 
@@ -35,7 +35,7 @@
         android:layout_width="120dp"
         android:layout_height="160dp"
         android:layout_marginTop="50dp"
-        android:src="@drawable/habit_logo"
+        android:src="@drawable/logo_habit_guard"
         android:background="@drawable/oval_cutout"
         android:scaleType="centerCrop"
         android:contentDescription="@string/accessibility_ivLogo_activity_login"

@@ -85,6 +85,39 @@
     <string name="btnGithub_activity_signup">Sign in with GitHub</string>
     <string name="btnLinkedIn_activity_signup">Sign in with LinkedIn</string>
     <string name="tvRedirectLogin_activity_signup">Don\'t have an account? Register now</string>
+    <string name="userProfileImageView_fragment_home">User Profile Picture</string>
+    <string name="userNameTextView_fragment_home">John Doe</string>
+    <string name="userEmailTextView_fragment_home">john.doe@example.com</string>
+    <string name="habit_analysis_fragment_home">Habit Analysis</string>
+    <string name="habitProgressTextView_fragment_home">Progress: 75%</string>
+    <string name="habitStreakTextView_fragment_home">Current Habit: Buying Groceries</string>
+    <string name="finance_analysis_fragment_home">Finance Analysis</string>
+    <string name="balanceTextView_fragment_home">Balance: $500.00</string>
+    <string name="spendingTextView_fragment_home">Monthly Spending: $200.00</string>
+    <string name="daily_streak_fragment_home">Daily Streak</string>
+    <string name="current_streak_fragment_home">Current Streak</string>
+    <string name="currentStreakTextView_fragment_home">10 days</string>
+    <string name="longest_streak_fragment_home">Longest Streak</string>
+    <string name="longestStreakTextView_fragment_home">30 days</string>
+    <string name="sun_fragment_home">Sun</string>
+    <string name="mon_fragment_home">Mon</string>
+    <string name="tue_fragment_home">Tue</string>
+    <string name="wed_fragment_home">Wed</string>
+    <string name="thu_fragment_home">Thu</string>
+    <string name="fri_fragment_home">Fri</string>
+    <string name="sat_fragment_home">Sat</string>
+    <string name="indicatorSun_fragment_home">Inactive</string>
+    <string name="indicatorMon_fragment_home">Inactive</string>
+    <string name="indicatorTue_fragment_home">Inactive</string>
+    <string name="indicatorWed_fragment_home">Inactive</string>
+    <string name="indicatorThu_fragment_home">Inactive</string>
+    <string name="indicatorFri_fragment_home">Inactive</string>
+    <string name="indicatorSat_fragment_home">Inactive</string>
+    <string name="previousDayButton_activity_daily_calendar">Previous Day</string>
+    <string name="nextDayButton_activity_daily_calendar">Next Day</string>
+    <string name="monthDayText_activity_daily_calendar">Feb 2021</string>
+    <string name="dayOfWeekTV_activity_daily_calendar">Monday</string>
+    <string name="newEventButton_activity_daily_calendar">New Event</string>
 
 
 </resources>

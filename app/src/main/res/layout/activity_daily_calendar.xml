@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".ui.calendar.DailyCalendarActivity">
+    tools:context=".ui.calendar.DailyViewActivity">
 
     <!-- Main CardView for Date Navigation and New Event Button -->
     <androidx.cardview.widget.CardView
@@ -43,9 +43,8 @@
                     android:layout_weight="1"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_arrow_up"
-                    android:contentDescription="Previous Day"
-                    app:tint="@color/teal_200"
-                    tools:ignore="ContentDescription" />
+                    android:contentDescription="@string/previousDayButton_activity_daily_calendar"
+                    app:tint="@color/teal_200" />
 
                 <!-- Date Display -->
                 <TextView
@@ -53,11 +52,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="Feb 2021"
+                    android:text="@string/monthDayText_activity_daily_calendar"
                     android:textAlignment="center"
                     android:textColor="@color/black"
-                    android:textSize="20sp"
-                    tools:ignore="HardcodedText" />
+                    android:textSize="20sp" />
 
                 <!-- Next Day Button -->
                 <ImageButton
@@ -67,9 +65,8 @@
                     android:layout_weight="1"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_arrow_down"
-                    android:contentDescription="Next Day"
-                    app:tint="@color/teal_200"
-                    tools:ignore="ContentDescription" />
+                    android:contentDescription="@string/nextDayButton_activity_daily_calendar"
+                    app:tint="@color/teal_200" />
             </LinearLayout>
 
             <!-- Day of the Week -->
@@ -77,12 +74,11 @@
                 android:id="@+id/dayOfWeekTV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Monday"
+                android:text="@string/dayOfWeekTV_activity_daily_calendar"
                 android:textAlignment="center"
                 android:textColor="@color/gray"
                 android:textSize="18sp"
-                android:layout_marginBottom="16dp"
-                tools:ignore="HardcodedText" />
+                android:layout_marginBottom="16dp" />
 
             <!-- New Event Button -->
             <Button
@@ -91,13 +87,14 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:backgroundTint="@color/teal_700"
-                android:text="New Event"
+                android:text="@string/newEventButton_activity_daily_calendar"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="16dp"
-                tools:ignore="HardcodedText" />
+                android:layout_marginBottom="16dp" />
+
         </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
     <!-- CardView for Hour ListView -->
@@ -128,6 +125,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="8dp" />
         </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

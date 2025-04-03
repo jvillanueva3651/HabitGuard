@@ -1,10 +1,18 @@
-// ==============================================================================================
-// FirebaseAuthHelper.kt is the firestore database for both login and signup
-// Refer to the FirestoreHelper for saving and updating data
-//
-// This is where firebase authentication is being called for login and signup
-// Function: logic behind login and signup firebase authentication
-// ==============================================================================================
+/**============================================================================================
+ * FirebaseAuthHelper.kt - Firebase authentication helper for login and signup
+ * REF    : USE_BY -> .LoginActivity (login) & .SignupActivity (signup)
+ *          USING  -> Firebase Authentication SDK & .FirestoreHelper (for user data)
+ * Purpose: Handles all Firebase authentication operations including:
+ *          - Email/password authentication
+ *          - Credential management (remember me)
+ *          - Password reset
+ *          - TODO: Third-party authentication (Google)
+ * Fun    :  1. Secure credential storage using EncryptedSharedPreferences
+ *           2. Email validation
+ *           3. Password strength validation
+ *           4. Offline login capability
+ *           5. Google Sign-In integration
+============================================================================================*/
 package com.washburn.habitguard.firebase
 
 import android.content.Context
@@ -19,13 +27,25 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.washburn.habitguard.FirestoreHelper
 
+import com.google.firebase.auth.GoogleAuthProvider
+
 @RequiresApi(Build.VERSION_CODES.O)
 class FirebaseAuthHelper(private val context: Context) {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val firestoreHelper = FirestoreHelper()
 
-    // Login Activity ===========================================================================
+    private val firestoreHelper = FirestoreHelper()
+    fun getFirestoreHelper(): FirestoreHelper = firestoreHelper
+
+    // Sign Out
+    fun signOut() {
+        auth.signOut()
+    }
+
+    /**============================================================================================
+    * Login Activity
+    *============================================================================================*/
+    // signInWithEmailAndPassword Login
     fun loginWithEmail(
         email: String,
         password: String,
@@ -38,7 +58,6 @@ class FirebaseAuthHelper(private val context: Context) {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     if (user != null) {
-                        // Verify user exists in Firestore
                         firestoreHelper.getUserDocument(user.uid).get().addOnCompleteListener { firestoreTask ->
                             if (firestoreTask.isSuccessful && firestoreTask.result.exists()) {
                                 if (rememberMe) {
@@ -48,7 +67,6 @@ class FirebaseAuthHelper(private val context: Context) {
                                 }
                                 onSuccess(user)
                             } else {
-                                // User authenticated but doesn't exist in Firestore
                                 auth.signOut()
                                 onFailure("User account not properly set up")
                             }
@@ -67,31 +85,27 @@ class FirebaseAuthHelper(private val context: Context) {
             }
     }
 
+    // Forgot sendPasswordResetEmail
     fun sendPasswordResetEmail(
         email: String,
-        onSuccess: () -> Unit,
-        onFailure: () -> Unit
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
     ) {
         if (email.isNotEmpty()) {
             auth.sendPasswordResetEmail(email)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        onSuccess()
+                        onSuccess("Check your email for a password reset link.")
                     } else {
-                        onFailure()
+                        onFailure("Failed to send password reset email.")
                     }
                 }
         } else {
-            onFailure()
+            onFailure("Please enter your email.")
         }
     }
 
-    fun getCurrentUser(): FirebaseUser? = auth.currentUser
-
-    fun signOut() {
-        auth.signOut()
-    }
-
+    // Save sharedPreferences
     private fun saveCredentials(email: String, password: String) {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -112,7 +126,7 @@ class FirebaseAuthHelper(private val context: Context) {
             apply()
         }
     }
-
+    // Clear sharedPreferences
     private fun clearCredentials() {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -133,7 +147,7 @@ class FirebaseAuthHelper(private val context: Context) {
             apply()
         }
     }
-
+    // Load sharedPreferences
     fun loadSavedCredentials(): Triple<String?, String?, Boolean> {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -153,14 +167,17 @@ class FirebaseAuthHelper(private val context: Context) {
 
         return Triple(email, password, rememberMe)
     }
-
+    // Offline Login
     fun checkOfflineLogin(email: String, password: String): Boolean {
         val (savedEmail, savedPassword, _) = loadSavedCredentials()
         return email == savedEmail && password == savedPassword
     }
-    // Login Activity ===========================================================================
+    //=============================================================================================
+    //=============================================================================================
 
-    // Signup Activity ==========================================================================
+    /**============================================================================================
+    * Signup Activity
+    *============================================================================================*/
     fun signupWithEmail(
         email: String,
         password: String,
@@ -171,9 +188,8 @@ class FirebaseAuthHelper(private val context: Context) {
             onFailure("Invalid email format")
             return
         }
-
         if (!isPasswordStrong(password)) {
-            onFailure("Password must be at least 8 characters long and include uppercase, lowercase, digit, and special character")
+            onFailure("Password must be 8+ chars with: A-Z, a-z, 0-9, and special char")
             return
         }
 
@@ -200,5 +216,32 @@ class FirebaseAuthHelper(private val context: Context) {
         val passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$"
         return password.matches(passwordRegex.toRegex())
     }
-    // Signup Activity ==========================================================================
+    // ============================================================================================
+
+    /**
+     * Third Party Login
+    */
+    // Google Sign In =============================================================================
+    // TODO: See LoginActivity for Google Sign In
+    fun signInWithGoogle(
+        idToken: String,
+        onSuccess: (FirebaseUser) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    if (user != null) {
+                        onSuccess(user)
+                    } else {
+                        onFailure("Google Sign-In failed: No user returned")
+                    }
+                } else {
+                    onFailure("Google authentication failed: ${task.exception?.message}")
+                }
+            }
+    }
+
 }

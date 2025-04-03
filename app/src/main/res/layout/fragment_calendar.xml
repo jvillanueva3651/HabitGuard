@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    tools:context=".ui.calendar.CalendarFragment">
+    tools:context=".ui.calendar.MonthlyViewActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -160,9 +160,11 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/calendarRecyclerView"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="16dp" />
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="16dp"
+                    android:clipToPadding="false" />
                 <Button
                     android:id="@+id/addDotButton"
                     android:layout_width="wrap_content"
@@ -216,8 +218,11 @@
                     android:id="@+id/itemsRecyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
+
             </LinearLayout>
+
         </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </ScrollView>

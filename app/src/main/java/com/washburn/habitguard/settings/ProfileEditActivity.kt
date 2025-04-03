@@ -21,6 +21,7 @@ import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.R
 import com.washburn.habitguard.databinding.ActivityProfileEditBinding
 import java.util.*
+import androidx.core.net.toUri
 
 @Suppress("DEPRECATION")
 @RequiresApi(Build.VERSION_CODES.O)
@@ -72,7 +73,7 @@ class ProfileEditActivity : AppCompatActivity() {
         // Handle Map Button for Address
         binding.mapButton.setOnClickListener {
             // Launch Google Maps or another map activity to fetch the address
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q="))
+            val intent = Intent(Intent.ACTION_VIEW, "geo:0,0?q=".toUri())
             startActivity(intent)
         }
 
@@ -101,7 +102,7 @@ class ProfileEditActivity : AppCompatActivity() {
                     if (document.exists()) {
                         populateFields(document)
                     } else {
-                        createNewProfileDocument()
+//                        createNewProfileDocument()
                     }
                 }
                 .addOnFailureListener { e ->
@@ -142,18 +143,18 @@ class ProfileEditActivity : AppCompatActivity() {
         }
     }
 
-    private fun createNewProfileDocument() {
-        currentUser?.uid?.let { userId ->
-            firestoreHelper.saveUserInfo(
-                userId,
-                currentUser.email ?: "",
-                currentUser.displayName ?: "John Doe",
-                null, // photoUri
-                { loadProfileData() },
-                { e -> showErrorToast("Failed to create profile: ${e.message}") }
-            )
-        } ?: showErrorToast("User not authenticated")
-    }
+//    private fun createNewProfileDocument() {
+//        currentUser?.uid?.let { userId ->
+//            firestoreHelper.saveUserInfo(
+//                userId,
+//                currentUser.email ?: "",
+//                currentUser.displayName ?: "John Doe",
+//                null, // photoUri
+//                { loadProfileData() },
+//                { e -> showErrorToast("Failed to create profile: ${e.message}") }
+//            )
+//        } ?: showErrorToast("User not authenticated")
+//    }
 
     private fun validateInputs(): Boolean {
         with(binding) {

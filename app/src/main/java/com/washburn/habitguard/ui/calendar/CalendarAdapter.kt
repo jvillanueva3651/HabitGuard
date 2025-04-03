@@ -10,7 +10,6 @@ import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.washburn.habitguard.R
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.ArrayList
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -19,6 +18,7 @@ class CalendarAdapter(
     private val days: ArrayList<LocalDate>,
     private val onItemListener: OnItemListener,
     private val events: List<Map<String, String>>
+
 ) : RecyclerView.Adapter<CalendarViewHolder>() {
 
     interface OnItemListener {
@@ -44,7 +44,7 @@ class CalendarAdapter(
 
     override fun onBindViewHolder(holder: CalendarViewHolder, position: Int) {
         val date = days[position]
-        val dateString = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val hasEvents = events.any { it["date"] == date.toString() }
 
         with(holder) {
             val dayOfTheMonthText = date.dayOfMonth.toString()
@@ -59,7 +59,7 @@ class CalendarAdapter(
                 if (date == CalendarUtils.selectedDate) Color.LTGRAY else Color.TRANSPARENT
             )
 
-            eventIndicator.visibility = if (hasEvent(dateString)) View.VISIBLE else View.INVISIBLE
+            eventIndicator.visibility = if (hasEvents) View.VISIBLE else View.INVISIBLE
 
             itemView.setOnClickListener {
                 onItemListener.onItemClick(position, date)
@@ -69,9 +69,4 @@ class CalendarAdapter(
     }
 
     override fun getItemCount(): Int = days.size
-
-    private fun hasEvent(dateString: String): Boolean {
-        return events.any { it["date"] == dateString }
-    }
-    
 }

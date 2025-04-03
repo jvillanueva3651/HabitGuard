@@ -22,6 +22,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import com.washburn.habitguard.firebase.FirebaseAuthHelper
 import com.washburn.habitguard.databinding.ActivitySignupBinding
 
@@ -31,6 +32,7 @@ class SignupActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignupBinding
 
     private lateinit var authHelper: FirebaseAuthHelper
+
     private lateinit var firestoreHelper: FirestoreHelper
 
     // Camera launcher
@@ -49,7 +51,7 @@ class SignupActivity : AppCompatActivity() {
         if (isGranted) {
             launchCamera()
         } else {
-            showPermissionDeniedMessage()
+            showToast("Profile picture is set to default")
         }
     }
 
@@ -60,6 +62,7 @@ class SignupActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         authHelper = FirebaseAuthHelper(this)
+
         firestoreHelper = FirestoreHelper()
 
         setupPasswordToggle(binding.etSPassword, binding.btnTogglePassword)
@@ -80,67 +83,67 @@ class SignupActivity : AppCompatActivity() {
             email.isBlank() -> showToast("Email cannot be blank")
             pass.isBlank() -> showToast("Password cannot be blank")
             pass != confirmPassword -> showToast("Password and Confirm Password do not match")
-            else -> processRegistration(email, pass)
+            else -> authHelper.signupWithEmail(
+                email = email,
+                password = pass,
+                onSuccess = { checkCameraPermissionAndLaunch() },
+                onFailure = { errorMessage -> showToast(errorMessage) }
+            )
         }
-    }
-
-    // Process user registration to authHelper
-    private fun processRegistration(email: String, password: String) {
-        authHelper.signupWithEmail(
-            email = email,
-            password = password,
-            onSuccess = { checkCameraPermissionAndLaunch() },
-            onFailure = { errorMessage -> showToast(errorMessage) }
-        )
     }
 
     // Check and request camera permission
     private fun checkCameraPermissionAndLaunch() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                launchCamera()
+        AlertDialog.Builder(this)
+            .setTitle("Profile Picture")
+            .setMessage("Would you like to add a profile picture?")
+            .setPositiveButton("Take Photo") { _, _ ->
+                when {
+                    ContextCompat.checkSelfPermission(
+                        this,
+                        android.Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED -> {
+                        launchCamera()
+                    }
+                    else -> {
+                        cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                    }
+                }
             }
-            else -> {
-                cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+            .setNegativeButton("Use Default") { _, _ ->
+                saveUserProfile()
             }
-        }
+            .show()
     }
-
     // Launch camera
     private fun launchCamera() {
         val cameraIntent = Intent(this, CameraActivity::class.java)
         cameraLauncher.launch(cameraIntent)
     }
-
     // Handle camera result
     private fun handleCameraResult(data: Intent?) {
         val photoUri = data?.getStringExtra("photoUri")
-        photoUri?.let { uri ->
-            saveUserProfile(uri)
-        } ?: showToast("Failed to capture photo")
+        saveUserProfile(photoUri)
     }
 
     // Save user profile to Firestore
-    private fun saveUserProfile(photoUri: String) {
-        val userId = authHelper.getCurrentUser()?.uid ?: run {
-            showToast("User not authenticated")
-            return
+    private fun saveUserProfile(photoUri: String? = null) {
+
+        if (photoUri == null) {
+            showToast("Failed to capture photo, photo set to default")
         }
 
+        val photoToSave = photoUri ?: "drawable://${R.drawable.ic_launcher_foreground}"
+
         firestoreHelper.saveUserInfo(
-            userId = userId,
             email = binding.etSEmailAddress.text.toString(),
             username = binding.etSEmailAddress.text.toString().substringBefore("@"),
-            photoUri = photoUri,
+            photoUri = photoToSave,
             onSuccess = {
                 showToast("Successfully Signed Up")
                 login()
             },
             onFailure = { e ->
-                authHelper.getCurrentUser()?.delete()
                 showToast("Failed to create user profile: ${e.message}")
             }
         )
@@ -172,9 +175,5 @@ class SignupActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-    }
-
-    private fun showPermissionDeniedMessage() {
-        showToast("Camera permission is required to set your profile picture")
     }
 }

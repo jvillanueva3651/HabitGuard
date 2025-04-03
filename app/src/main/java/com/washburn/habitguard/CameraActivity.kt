@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat
 class CameraActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCameraBinding
+
     private var imageCapture: ImageCapture? = null // ImageCapture use case for taking photos
 
     // Activity result launcher for camera permission request
@@ -45,6 +46,7 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

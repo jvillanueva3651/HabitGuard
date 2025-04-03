@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/nav_calendar"
-        android:name="com.washburn.habitguard.ui.calendar.CalendarFragment"
+        android:name="com.washburn.habitguard.ui.calendar.MonthlyViewActivity"
         android:label="@string/menu_calendar"
         tools:layout="@layout/fragment_calendar"
         tools:targetApi="o" />

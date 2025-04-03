@@ -18,6 +18,7 @@ import java.time.LocalTime
 class FirestoreHelper {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+
     private val db: FirebaseFirestore = Firebase.firestore
 
     companion object {
@@ -32,14 +33,13 @@ class FirestoreHelper {
     }
 
     fun saveUserInfo(
-        userId: String,
         email: String,
         username: String,
         photoUri: String?,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        val userData = hashMapOf(
+        val userInfo = hashMapOf(
             "email" to email,
             "username" to username,
             "photoUri" to photoUri,
@@ -47,10 +47,33 @@ class FirestoreHelper {
         )
 
         db.collection(HABIT_GUARD_COLLECTION)
-            .document(userId)
-            .set(userData)
+            .document(getCurrentUserId().toString())
+            .collection("UserInfo")
+            .add(userInfo)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e -> onFailure(e) }
+
+        val userLogin = hashMapOf(
+            "email" to email,
+            "lastLogin" to FieldValue.serverTimestamp()
+        )
+
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(getCurrentUserId().toString())
+            .set(userLogin)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    fun updateLastLogin(
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(getCurrentUserId().toString())
+            .update("lastLogin", FieldValue.serverTimestamp())
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { error -> onFailure(error) }
     }
 
     fun saveUserProfile(
@@ -69,7 +92,6 @@ class FirestoreHelper {
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e -> onFailure(e) }
     }
-
 
     fun addUserHabit(
         habitData: Map<String, Any>,
@@ -178,7 +200,11 @@ class FirestoreHelper {
             .addOnFailureListener { e -> onFailure(e) }
     }
 
-    fun getHourlyEvents(date: LocalDate, onSuccess: (List<HourlyEventData>) -> Unit, onFailure: (Exception) -> Unit) {
+    fun getHourlyEvents(
+        date: LocalDate,
+        onSuccess: (List<HourlyEventData>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         getAllUserHabits(
             onSuccess = { habits ->
                 val hourlyEvents = (0..23).map { hour ->

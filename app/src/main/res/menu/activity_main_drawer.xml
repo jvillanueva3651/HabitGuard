@@ -17,4 +17,6 @@
             android:icon="@drawable/ic_menu_finance"
             android:title="@string/menu_finance" />
     </group>
+
+
 </menu>

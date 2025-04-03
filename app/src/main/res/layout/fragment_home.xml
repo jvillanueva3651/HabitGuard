@@ -1,448 +1,434 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".ui.home.HomeFragment">
+    android:background="@drawable/bg_home"
+    android:fillViewport="true"
+    tools:context=".ui.home.HomeFragment" >
 
-    <LinearLayout
-        android:id="@+id/userAccountLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="24dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-        <ImageView
-            android:id="@+id/userProfileImageView"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@drawable/ic_launcher_foreground"
-            android:contentDescription="User Profile Picture"
-            android:layout_marginEnd="16dp"
-            android:scaleType="centerCrop"
-            android:background="@drawable/ic_launcher_background"
-            tools:ignore="ContentDescription" />
-
-        <LinearLayout
+        <androidx.cardview.widget.CardView
+            android:id="@+id/profileCard"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/userNameTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="John Doe"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                tools:ignore="HardcodedText" />
-
-            <TextView
-                android:id="@+id/userEmailTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="john.doe@example.com"
-                android:textSize="16sp"
-                android:textColor="@color/gray"
-                tools:ignore="HardcodedText" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/analysisCard"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/userAccountLayout">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/white">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Habit Analysis"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/teal_200"
-                        android:layout_marginBottom="8dp"
-                        tools:ignore="HardcodedText" />
-
-                    <TextView
-                        android:id="@+id/habitProgressTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Progress: 75%"
-                        android:textSize="16sp"
-                        android:textColor="@color/gray"
-                        android:layout_marginBottom="4dp"
-                        tools:ignore="HardcodedText" />
-
-                    <TextView
-                        android:id="@+id/habitStreakTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Current Habit: Buying Groceries"
-                        android:textSize="16sp"
-                        android:textColor="@color/gray"
-                        tools:ignore="HardcodedText" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/white">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Finance Analysis"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/teal_200"
-                        android:layout_marginBottom="8dp"
-                        tools:ignore="HardcodedText" />
-
-                    <TextView
-                        android:id="@+id/balanceTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Balance: $500.00"
-                        android:textSize="16sp"
-                        android:textColor="@color/gray"
-                        android:layout_marginBottom="4dp"
-                        tools:ignore="HardcodedText" />
-
-                    <TextView
-                        android:id="@+id/spendingTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Monthly Spending: $200.00"
-                        android:textSize="16sp"
-                        android:textColor="@color/gray"
-                        tools:ignore="HardcodedText" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/analysisCard">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Daily Streak"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/teal_200"
-                android:layout_marginBottom="8dp"
-                tools:ignore="HardcodedText" />
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
-                <androidx.cardview.widget.CardView
+                <ImageView
+                    android:id="@+id/userProfileImageView"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_launcher_foreground"
+                    android:contentDescription="@string/userProfileImageView_fragment_home"
+                    android:layout_marginEnd="16dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@mipmap/ic_launcher_round" />
+
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/white">
+                    android:orientation="vertical">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/userNameTextView"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:text="@string/userNameTextView_fragment_home"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Current Streak"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/teal_200"
-                            android:layout_marginBottom="4dp"
-                            tools:ignore="HardcodedText" />
-
-                        <TextView
-                            android:id="@+id/currentStreakTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 days"
-                            android:textSize="16sp"
-                            android:textColor="@color/gray"
-                            tools:ignore="HardcodedText" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/white">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/userEmailTextView"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:text="@string/userEmailTextView_fragment_home"
+                        android:textSize="16sp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Longest Streak"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/teal_200"
-                            android:layout_marginBottom="4dp"
-                            tools:ignore="HardcodedText" />
+                </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/longestStreakTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="30 days"
-                            android:textSize="16sp"
-                            android:textColor="@color/gray"
-                            tools:ignore="HardcodedText" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
             </LinearLayout>
 
-            <androidx.cardview.widget.CardView
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/analysisCard"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/profileCard">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/white">
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/habit_analysis_fragment_home"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/teal_200"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/habitProgressTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/habitProgressTextView_fragment_home"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/habitStreakTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/habitStreakTextView_fragment_home"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/finance_analysis_fragment_home"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/teal_200"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/balanceTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/balanceTextView_fragment_home"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/spendingTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/spendingTextView_fragment_home"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/analysisCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/daily_streak_fragment_home"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/teal_200"
+                    android:layout_marginBottom="8dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
 
-                     <LinearLayout
-                        android:layout_width="match_parent"
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="4dp">
 
-                        <TextView
-                            android:layout_width="0dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Sun"
-                            android:textAlignment="center"
-                            android:textColor="@color/gray"
-                            android:textSize="16sp"
-                            tools:ignore="HardcodedText" />
+                            android:orientation="vertical"
+                            android:padding="16dp">
 
-                        <TextView
-                            android:layout_width="0dp"
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/current_streak_fragment_home"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/teal_200"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/currentStreakTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/currentStreakTextView_fragment_home"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="4dp" >
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Mon"
-                            android:textAlignment="center"
-                            android:textColor="@color/gray"
-                            android:textSize="16sp"
-                            tools:ignore="HardcodedText" />
+                            android:orientation="vertical"
+                            android:padding="16dp">
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Tue"
-                            android:textAlignment="center"
-                            android:textColor="@color/gray"
-                            android:textSize="16sp"
-                            tools:ignore="HardcodedText" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/longest_streak_fragment_home"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/teal_200"
+                                android:layout_marginBottom="4dp" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Wed"
-                            android:textAlignment="center"
-                            android:textColor="@color/gray"
-                            android:textSize="16sp"
-                            tools:ignore="HardcodedText" />
+                            <TextView
+                                android:id="@+id/longestStreakTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/longestStreakTextView_fragment_home"
+                                android:textSize="16sp" />
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Thu"
-                            android:textAlignment="center"
-                            android:textColor="@color/gray"
-                            android:textSize="16sp"
-                            tools:ignore="HardcodedText" />
+                        </LinearLayout>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Fri"
-                            android:textAlignment="center"
-                            android:textColor="@color/gray"
-                            android:textSize="16sp"
-                            tools:ignore="HardcodedText" />
+                    </androidx.cardview.widget.CardView>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Sat"
-                            android:textAlignment="center"
-                            android:textColor="@color/gray"
-                            android:textSize="16sp"
-                            tools:ignore="HardcodedText" />
-                    </LinearLayout>
+                </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/black" />
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp" >
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:orientation="vertical"
+                        android:padding="12dp">
 
-                        <ImageView
-                            android:id="@+id/indicatorSun"
-                            android:layout_width="0dp"
+                         <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:src="@drawable/ic_inactive_day"
-                            android:contentDescription="Inactive"
-                            android:visibility="visible"
-                            tools:ignore="ContentDescription" />
-                        <ImageView
-                            android:id="@+id/indicatorMon"
-                            android:layout_width="0dp"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="8dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/sun_fragment_home"
+                                android:textAlignment="center"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/mon_fragment_home"
+                                android:textAlignment="center"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/tue_fragment_home"
+                                android:textAlignment="center"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/wed_fragment_home"
+                                android:textAlignment="center"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/thu_fragment_home"
+                                android:textAlignment="center"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/fri_fragment_home"
+                                android:textAlignment="center"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/sat_fragment_home"
+                                android:textAlignment="center"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="0.5dp"
+                            android:background="@color/black" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:src="@drawable/ic_inactive_day"
-                            android:contentDescription="Inactive"
-                            android:visibility="visible"
-                            tools:ignore="ContentDescription" />
-                        <ImageView
-                            android:id="@+id/indicatorTue"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:src="@drawable/ic_inactive_day"
-                            android:contentDescription="Inactive"
-                            android:visibility="visible"
-                            tools:ignore="ContentDescription" />
-                        <ImageView
-                            android:id="@+id/indicatorWed"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:src="@drawable/ic_inactive_day"
-                            android:contentDescription="Inactive"
-                            android:visibility="visible"
-                            tools:ignore="ContentDescription" />
-                        <ImageView
-                            android:id="@+id/indicatorThu"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:src="@drawable/ic_inactive_day"
-                            android:contentDescription="Inactive"
-                            android:visibility="visible"
-                            tools:ignore="ContentDescription" />
-                        <ImageView
-                            android:id="@+id/indicatorFri"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:src="@drawable/ic_inactive_day"
-                            android:contentDescription="Inactive"
-                            android:visibility="visible"
-                            tools:ignore="ContentDescription" />
-                        <ImageView
-                            android:id="@+id/indicatorSat"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:src="@drawable/ic_inactive_day"
-                            android:contentDescription="Inactive"
-                            android:visibility="visible"
-                            tools:ignore="ContentDescription" />
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="8dp">
+
+                            <ImageView
+                                android:id="@+id/indicatorSun"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:src="@drawable/ic_inactive_day"
+                                android:contentDescription="@string/indicatorSun_fragment_home"
+                                android:visibility="visible"/>
+                            <ImageView
+                                android:id="@+id/indicatorMon"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:src="@drawable/ic_inactive_day"
+                                android:contentDescription="@string/indicatorMon_fragment_home"
+                                android:visibility="visible" />
+                            <ImageView
+                                android:id="@+id/indicatorTue"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:src="@drawable/ic_inactive_day"
+                                android:contentDescription="@string/indicatorTue_fragment_home"
+                                android:visibility="visible" />
+                            <ImageView
+                                android:id="@+id/indicatorWed"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:src="@drawable/ic_inactive_day"
+                                android:contentDescription="@string/indicatorWed_fragment_home"
+                                android:visibility="visible" />
+                            <ImageView
+                                android:id="@+id/indicatorThu"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:src="@drawable/ic_inactive_day"
+                                android:contentDescription="@string/indicatorThu_fragment_home"
+                                android:visibility="visible" />
+                            <ImageView
+                                android:id="@+id/indicatorFri"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:src="@drawable/ic_inactive_day"
+                                android:contentDescription="@string/indicatorFri_fragment_home"
+                                android:visibility="visible" />
+                            <ImageView
+                                android:id="@+id/indicatorSat"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:src="@drawable/ic_inactive_day"
+                                android:contentDescription="@string/indicatorSat_fragment_home"
+                                android:visibility="visible" />
+
+                        </LinearLayout>
+
                     </LinearLayout>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

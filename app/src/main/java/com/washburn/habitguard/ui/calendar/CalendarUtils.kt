@@ -17,8 +17,8 @@ object CalendarUtils {
         return try {
             val time = LocalTime.parse(timeStr)
             DateTimeFormatter.ofPattern("h:mm a").format(time)
-        } catch (e: Exception) {
-            timeStr // Fallback to raw string if parsing fails
+        } catch (_: Exception) {
+            timeStr
         }
     }
 
@@ -51,10 +51,10 @@ object CalendarUtils {
         val lastOfMonth = selectedDate.withDayOfMonth(daysInMonth)
 
         // Add leading days from previous month (only if part of the same week)
-        if (firstOfMonth.dayOfWeek != DayOfWeek.MONDAY) {  // Adjust based on your week start (e.g., SUNDAY)
+        if (firstOfMonth.dayOfWeek != DayOfWeek.SUNDAY) {  // Adjust based on your week start (e.g., SUNDAY)
             // Start from the last day of the previous month and go backward
             var day = firstOfMonth.minusDays(1)
-            while (day.dayOfWeek != DayOfWeek.SUNDAY) {  // Adjust to your week's start day
+            while (day.dayOfWeek != DayOfWeek.SATURDAY) {  // Adjust to your week's start day
                 daysInMonthArray.add(0, day)  // Insert at beginning
                 day = day.minusDays(1)
             }
@@ -66,9 +66,9 @@ object CalendarUtils {
         }
 
         // Add trailing days from next month (only if part of the same week)
-        if (lastOfMonth.dayOfWeek != DayOfWeek.SUNDAY) {  // Adjust to your week's end day
+        if (lastOfMonth.dayOfWeek != DayOfWeek.SATURDAY) {  // Adjust to your week's end day
             var day = lastOfMonth.plusDays(1)
-            while (day.dayOfWeek != DayOfWeek.MONDAY) {  // Stop at the start of the next week
+            while (day.dayOfWeek != DayOfWeek.SUNDAY) {  // Stop at the start of the next week
                 daysInMonthArray.add(day)
                 day = day.plusDays(1)
             }
