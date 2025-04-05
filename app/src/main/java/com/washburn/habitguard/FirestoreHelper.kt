@@ -24,6 +24,7 @@ class FirestoreHelper {
     companion object {
         private const val HABIT_GUARD_COLLECTION = "HabitGuard"
         private const val USER_HABIT_SUBCOLLECTION = "UserHabit"
+        private const val USER_TRANSACTIONS_SUBCOLLECTION = "UserTransactions"
     }
 
     fun getCurrentUserId(): String? = auth.currentUser?.uid
@@ -196,6 +197,106 @@ class FirestoreHelper {
                     doc.data?.let { Pair(doc.id, it) }
                 }
                 onSuccess(habits)
+            }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    fun addUserTransaction(
+        transactionData: Map<String, Any>,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
+            .add(transactionData)
+            .addOnSuccessListener { docRef ->
+                docRef.update("id", docRef.id)
+                onSuccess(docRef.id)
+            }
+            .addOnFailureListener(onFailure)
+    }
+
+    fun updateUserTransaction(
+        transactionId: String,
+        updatedData: Map<String, Any>,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_HABIT_SUBCOLLECTION)
+            .document(transactionId)
+            .update(updatedData)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    fun deleteUserTransaction(
+        transactionId: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_HABIT_SUBCOLLECTION)
+            .document(transactionId)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    fun getUserTransaction(
+        transactionId: String,
+        onSuccess: (Map<String, Any>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_HABIT_SUBCOLLECTION)
+            .document(transactionId)
+            .get()
+            .addOnSuccessListener { document ->
+                document.data?.let { data ->
+                    onSuccess(data)
+                } ?: onFailure(Exception("Transaction data is null"))
+            }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    fun getAllUserTransactions(
+        onSuccess: (List<Pair<String, Map<String, Any>>>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_HABIT_SUBCOLLECTION)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val transactions = querySnapshot.documents.mapNotNull { doc ->
+                    doc.data?.let { Pair(doc.id, it) }
+                }
+                onSuccess(transactions)
             }
             .addOnFailureListener { e -> onFailure(e) }
     }
