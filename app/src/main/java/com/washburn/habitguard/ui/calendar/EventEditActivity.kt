@@ -284,21 +284,37 @@ class EventEditActivity : AppCompatActivity() {
 
     // Prepare data for firestore
     private fun prepareHabitData(): Map<String, Any> {
-        return hashMapOf(
-            "name" to binding.eventNameET.text.toString().trim(),
-            "description" to binding.messageEditText.text.toString(),
-            "location" to binding.eventLocationET.text.toString(),
-            "date" to selectedDate.toString(),
-            "startTime" to formattedShortTime(startTime),
-            "endTime" to formattedShortTime(endTime),
-            "amount" to getCurrencyValue(),
-            "transactionType" to currentType.name,
-            "createdAt" to FieldValue.serverTimestamp(),
-            "isRecurring" to binding.recurringCheckBox.isChecked,
-            "isTransaction" to isTransactionMode
-        ).apply {
-            if (binding.recurringCheckBox.isChecked) {
-                putAll(prepareRecurrenceData())
+        if(isTransactionMode) {
+            return hashMapOf(
+                "name" to binding.eventNameET.text.toString().trim(),
+                "description" to binding.messageEditText.text.toString(),
+                "location" to binding.eventLocationET.text.toString(),
+                //TODO: Add time field (Time when transaction occurred, NOT WHEN CREATED)
+                "amount" to getCurrencyValue(),
+                "date" to selectedDate.toString(),
+                "transactionType" to currentType.name,
+                "createdAt" to FieldValue.serverTimestamp(),
+                "isRecurring" to binding.recurringCheckBox.isChecked
+            ).apply {
+                if (binding.recurringCheckBox.isChecked) {
+                    putAll(prepareRecurrenceData())
+                }
+            }
+        }
+        else {
+            return hashMapOf(
+                "name" to binding.eventNameET.text.toString().trim(),
+                "description" to binding.messageEditText.text.toString(),
+                "location" to binding.eventLocationET.text.toString(),
+                "date" to selectedDate.toString(),
+                "startTime" to formattedShortTime(startTime),
+                "endTime" to formattedShortTime(endTime),
+                "createdAt" to FieldValue.serverTimestamp(),
+                "isRecurring" to binding.recurringCheckBox.isChecked
+            ).apply {
+                if (binding.recurringCheckBox.isChecked) {
+                    putAll(prepareRecurrenceData())
+                }
             }
         }
     }
@@ -326,46 +342,88 @@ class EventEditActivity : AppCompatActivity() {
 
     // Create new habit in firestore
     private fun createNewHabit(habitData: Map<String, Any>) {
-        firestoreHelper.addUserHabit(
-            habitData = habitData,
-            onSuccess = { id ->
-                currentHabitId = id
-                showSuccess("Habit created successfully")
-            },
-            onFailure = { e ->
-                showError("Creation failed: ${e.message}")
-            }
-        )
-    }
-
-    // Update existing habit in firestore
-    private fun updateExistingHabit(habitData: Map<String, Any>) {
-        firestoreHelper.updateUserHabit(
-            habitId = currentHabitId!!,
-            updatedData = habitData,
-            onSuccess = { showSuccess("Habit updated successfully") },
-            onFailure = { e ->
-                showError("Update failed: ${e.message}")
-            }
-        )
-    }
-
-    // Load existing habit if editing
-    private fun loadExistingHabitIfEditing() {
-        currentHabitId?.let { habitId ->
-            firestoreHelper.getUserHabit(
-                habitId = habitId,
-                onSuccess = { habitData ->
-                    populateForm(habitData)
+        if(isTransactionMode) {
+            firestoreHelper.addUserTransaction(
+                transactionData = habitData,
+                onSuccess = { id ->
+                    currentHabitId = id
+                    showSuccess("Habit created successfully")
                 },
                 onFailure = { e ->
-                    showError("Error loading habit: ${e.message}")
+                    showError("Creation failed: ${e.message}")
+                }
+            )
+        }
+        else {
+            firestoreHelper.addUserHabit(
+                habitData = habitData,
+                onSuccess = { id ->
+                    currentHabitId = id
+                    showSuccess("Habit created successfully")
+                },
+                onFailure = { e ->
+                    showError("Creation failed: ${e.message}")
                 }
             )
         }
     }
 
+    // Update existing habit in firestore
+    private fun updateExistingHabit(habitData: Map<String, Any>) {
+        if(isTransactionMode) {
+            firestoreHelper.updateUserTransaction(
+                transactionId = currentHabitId!!,
+                updatedData = habitData,
+                onSuccess = { showSuccess("Habit updated successfully") },
+                onFailure = { e ->
+                    showError("Update failed: ${e.message}")
+                }
+            )
+        }
+        else {
+            firestoreHelper.updateUserHabit(
+                habitId = currentHabitId!!,
+                updatedData = habitData,
+                onSuccess = { showSuccess("Habit updated successfully") },
+                onFailure = { e ->
+                    showError("Update failed: ${e.message}")
+                }
+            )
+        }
+    }
+
+    // Load existing habit if editing
+    private fun loadExistingHabitIfEditing() {
+        if(isTransactionMode) {
+            currentHabitId?.let { transactionId ->
+                firestoreHelper.getUserTransaction(
+                    transactionId = transactionId,
+                    onSuccess = { transactionData ->
+                        populateForm(transactionData)
+                    },
+                    onFailure = { e ->
+                        showError("Error loading habit: ${e.message}")
+                    }
+                )
+            }
+        }
+        else {
+            currentHabitId?.let { habitId ->
+                firestoreHelper.getUserHabit(
+                    habitId = habitId,
+                    onSuccess = { habitData ->
+                        populateForm(habitData)
+                    },
+                    onFailure = { e ->
+                        showError("Error loading habit: ${e.message}")
+                    }
+                )
+            }
+        }
+    }
+
     // Populate form with habit data
+    //TODO: Rewrite with transaction mode in mind OR create another to populate transaction form
     private fun populateForm(habitData: Map<String, Any>) {
         binding.apply {
             eventNameET.setText(habitData["name"].toString())
