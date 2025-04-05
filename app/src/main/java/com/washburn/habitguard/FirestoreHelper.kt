@@ -201,6 +201,9 @@ class FirestoreHelper {
             .addOnFailureListener { e -> onFailure(e) }
     }
 
+    /**
+     * Function to add a user transaction to their HabitGuard UserTransaction document
+     */
     fun addUserTransaction(
         transactionData: Map<String, Any>,
         onSuccess: (String) -> Unit,
@@ -221,6 +224,9 @@ class FirestoreHelper {
             .addOnFailureListener(onFailure)
     }
 
+    /**
+     * Function to update an existing transaction within HabitGuard UserTransaction document
+     */
     fun updateUserTransaction(
         transactionId: String,
         updatedData: Map<String, Any>,
@@ -233,13 +239,16 @@ class FirestoreHelper {
         }
         db.collection(HABIT_GUARD_COLLECTION)
             .document(userId)
-            .collection(USER_HABIT_SUBCOLLECTION)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
             .document(transactionId)
             .update(updatedData)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e -> onFailure(e) }
     }
 
+    /**
+     * Function to delete an existing transaction within HabitGuard UserTransaction document
+     */
     fun deleteUserTransaction(
         transactionId: String,
         onSuccess: () -> Unit,
@@ -251,13 +260,16 @@ class FirestoreHelper {
         }
         db.collection(HABIT_GUARD_COLLECTION)
             .document(userId)
-            .collection(USER_HABIT_SUBCOLLECTION)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
             .document(transactionId)
             .delete()
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e -> onFailure(e) }
     }
 
+    /**
+     * Function to read a specific user transaction within HabitGuard UserTransaction document
+     */
     fun getUserTransaction(
         transactionId: String,
         onSuccess: (Map<String, Any>) -> Unit,
@@ -269,7 +281,7 @@ class FirestoreHelper {
         }
         db.collection(HABIT_GUARD_COLLECTION)
             .document(userId)
-            .collection(USER_HABIT_SUBCOLLECTION)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
             .document(transactionId)
             .get()
             .addOnSuccessListener { document ->
@@ -280,6 +292,9 @@ class FirestoreHelper {
             .addOnFailureListener { e -> onFailure(e) }
     }
 
+    /**
+     * Function to read ALL user transactions within HabitGuard UserTransaction document
+     */
     fun getAllUserTransactions(
         onSuccess: (List<Pair<String, Map<String, Any>>>) -> Unit,
         onFailure: (Exception) -> Unit
@@ -290,7 +305,7 @@ class FirestoreHelper {
         }
         db.collection(HABIT_GUARD_COLLECTION)
             .document(userId)
-            .collection(USER_HABIT_SUBCOLLECTION)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 val transactions = querySnapshot.documents.mapNotNull { doc ->
