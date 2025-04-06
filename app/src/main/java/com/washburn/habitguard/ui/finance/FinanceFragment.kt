@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import com.google.firebase.firestore.Transaction
+import com.washburn.habitguard.ui.finance.Transaction
 import com.washburn.habitguard.databinding.FragmentFinanceBinding
 
 class FinanceFragment : Fragment() {
