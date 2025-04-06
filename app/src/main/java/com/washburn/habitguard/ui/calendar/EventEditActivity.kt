@@ -21,6 +21,7 @@ import android.view.View
 import android.widget.Toast
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.NumberPicker
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +32,7 @@ import com.washburn.habitguard.databinding.ActivityEventEditBinding
 import com.washburn.habitguard.ui.calendar.CalendarUtils.formattedDate
 import com.washburn.habitguard.ui.calendar.CalendarUtils.formattedShortTime
 import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
+import com.washburn.habitguard.ui.finance.Transaction
 import java.util.*
 import java.time.LocalTime
 import java.text.NumberFormat
@@ -58,6 +60,10 @@ class EventEditActivity : AppCompatActivity() {
     private var isTransactionMode = false
     private var currentHabitId: String? = null
 
+    //Time handling for transactions
+    private lateinit var transactionHourPicker: NumberPicker
+    private lateinit var transactionMinutePicker: NumberPicker
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEventEditBinding.inflate(layoutInflater)
@@ -76,7 +82,11 @@ class EventEditActivity : AppCompatActivity() {
         binding.backButton.setOnClickListener { onBackPressedDispatcher.onBackPressed() } // Back button
         binding.eventDateTV.text = getString(R.string.date_format, formattedDate(selectedDate)) // Set date text
 
+        transactionHourPicker = binding.transactionHourPicker
+        transactionMinutePicker = binding.transactionMinutePicker
+
         setupTimePickers() // Time Initializing
+        setupTransactionTimePickers() // Transaction Time Initializing
         setupMoneyInput() // Transaction Initializing
         setupEventHandlers() // Event Handlers making sure Time and Transaction are in sync and valid
 
@@ -107,6 +117,17 @@ class EventEditActivity : AppCompatActivity() {
             endHourPicker.value = endTime.hour
             endMinutePicker.value = endTime.minute
         }
+    }
+
+    // Function to initialize transaction time pickers
+    private fun setupTransactionTimePickers() {
+        val locale = Locale.getDefault()
+        transactionHourPicker.minValue = 0
+        transactionHourPicker.maxValue = 23
+        transactionHourPicker.setFormatter { String.format(locale, "%02d", it) }
+        transactionMinutePicker.minValue = 0
+        transactionMinutePicker.maxValue = 59
+        transactionMinutePicker.setFormatter { String.format(locale, "%02d", it) }
     }
 
     // Transaction Initializing
@@ -163,7 +184,13 @@ class EventEditActivity : AppCompatActivity() {
         binding.apply {
             // Update visibility based on mode
             transactionType.visibility = if (isTransactionMode) View.VISIBLE else View.INVISIBLE
-            timeRecyclerView.visibility = if (isTransactionMode) View.INVISIBLE else View.VISIBLE
+            //timeRecyclerView.visibility = if (isTransactionMode) View.INVISIBLE else View.VISIBLE
+            timeRecyclerView.visibility = if (isTransactionMode) View.GONE else View.VISIBLE
+            transactionTimeLayout.visibility = if (isTransactionMode) View.VISIBLE else View.GONE
+
+            // Show/Hide tags/location based on mode
+            tagsLayout.visibility = if (isTransactionMode) View.VISIBLE else View.GONE
+            eventLocationET.hint = if (isTransactionMode) "Location (Optional)" else "Location"
 
             // Update button states
             btnToggleTransaction.setImageResource(
@@ -229,7 +256,7 @@ class EventEditActivity : AppCompatActivity() {
     }
     // Validate time input
     private fun validateTimes(): Boolean {
-        return if (startTime.isAfter(endTime)) {
+        return if (!isTransactionMode && startTime.isAfter(endTime)) {
             Toast.makeText(this, "End time must be after start time", Toast.LENGTH_SHORT).show()
             false
         } else {
@@ -288,8 +315,9 @@ class EventEditActivity : AppCompatActivity() {
             return hashMapOf(
                 "name" to binding.eventNameET.text.toString().trim(),
                 "description" to binding.messageEditText.text.toString(),
+                "tags" to binding.tagsEditText.text.toString().split(",").map { it.trim() },
                 "location" to binding.eventLocationET.text.toString(),
-                //TODO: Add time field (Time when transaction occurred, NOT WHEN CREATED)
+                "time" to formattedShortTime(LocalTime.of(transactionHourPicker.value, transactionMinutePicker.value)),
                 "amount" to getCurrencyValue(),
                 "date" to selectedDate.toString(),
                 "transactionType" to currentType.name,
@@ -423,30 +451,44 @@ class EventEditActivity : AppCompatActivity() {
     }
 
     // Populate form with habit data
-    //TODO: Rewrite with transaction mode in mind OR create another to populate transaction form
     private fun populateForm(habitData: Map<String, Any>) {
         binding.apply {
+            // Common fields
             eventNameET.setText(habitData["name"].toString())
             messageEditText.setText(habitData["description"].toString())
             eventLocationET.setText(habitData["location"].toString())
 
-            habitData["startTime"]?.toString()?.let {
-                startTime = LocalTime.parse(it)
-                startHourPicker.value = startTime.hour
-                startMinutePicker.value = startTime.minute
-            }
-            habitData["endTime"]?.toString()?.let {
-                endTime = LocalTime.parse(it)
-                endHourPicker.value = endTime.hour
-                endMinutePicker.value = endTime.minute
-            }
+            if (isTransactionMode) {
+                // Loading amount
+                val amount = habitData["amount"] as? Double ?: 0.0
+                setCurrencyValue(amount)
 
-            val amount = habitData["amount"] as? Double ?: 0.0
-            if (amount != 0.0) {
-                setCurrencyValue(abs(amount))
-                val type = habitData["transactionType"] as? String ?: "EXPENSE"
-                currentType = TransactionType.valueOf(type)
-                isTransactionMode = true
+                // Loading type
+                val typeString = habitData["transactionType"] as? String ?: "EXPENSE"
+                currentType = TransactionType.valueOf(typeString)
+
+                // Loading tags
+                val tags = habitData["tags"] as? List<*> ?: emptyList<String>()
+                tagsEditText.setText(tags.joinToString(", "))
+
+                //Loading transaction time pickers
+                habitData["time"]?.toString()?.let {
+                    val time = LocalTime.parse(it)
+                    transactionHourPicker.value = time.hour
+                    transactionMinutePicker.value = time.minute
+                }
+            }
+            else {
+                habitData["startTime"]?.toString()?.let {
+                    startTime = LocalTime.parse(it)
+                    startHourPicker.value = startTime.hour
+                    startMinutePicker.value = startTime.minute
+                }
+                habitData["endTime"]?.toString()?.let {
+                    endTime = LocalTime.parse(it)
+                    endHourPicker.value = endTime.hour
+                    endMinutePicker.value = endTime.minute
+                }
             }
 
             updateUI()

@@ -252,7 +252,31 @@
                             android:src="@drawable/ic_income"
                             app:tint="#757575" /> <!-- btnToggleIncome -->
 
-                    </LinearLayout> <!-- transactionType, currency, editTextMoney, btnToggleIncome -->
+                        <!-- Time for transaction selection -->
+                        <LinearLayout
+                            android:id="@+id/transactionTimeLayout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <NumberPicker
+                                android:id="@+id/transactionHourPicker"
+                                android:layout_width="48dp"
+                                android:layout_height="100dp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text=":"/>
+
+                            <NumberPicker
+                                android:id="@+id/transactionMinutePicker"
+                                android:layout_width="48dp"
+                                android:layout_height="100dp" />
+                        </LinearLayout>
+
+                    </LinearLayout> <!-- transactionType, currency, editTextMoney, btnToggleIncome, TransactionTimeLayout -->
 
                 </androidx.cardview.widget.CardView>
 
@@ -394,6 +418,30 @@
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
+
+                <!-- Tags Input (Visible only in Transaction Mode) -->
+                <LinearLayout
+                    android:id="@+id/tagsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tags (comma-separated)"
+                        android:textSize="16sp"/>
+
+                    <EditText
+                        android:id="@+id/tagsEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="e.g., Groceries, Transport"
+                        android:inputType="textCapWords"
+                        android:backgroundTint="@color/teal_200"/>
+                </LinearLayout>
 
                 <RelativeLayout
                     android:layout_width="match_parent"
