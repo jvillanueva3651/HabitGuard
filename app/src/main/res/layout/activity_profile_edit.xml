@@ -27,21 +27,19 @@
             android:id="@+id/changePhotoButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Change Photo"
+            android:text="@string/change_photo_activity_profile_edit"
             android:backgroundTint="@color/teal_700"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="24dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="24dp" />
 
         <!-- Email -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="E-mail"
+            android:text="@string/e_mail_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/emailEditText"
@@ -49,19 +47,17 @@
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
             android:inputType="textEmailAddress"
-            android:hint="New email"
-            android:layout_marginBottom="16dp"
-            tools:ignore="HardcodedText" />
+            android:hint="@string/emailEditText_activity_profile_edit"
+            android:layout_marginBottom="16dp" />
 
         <!-- Username -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Username"
+            android:text="@string/username_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/usernameEditText"
@@ -69,19 +65,17 @@
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
             android:inputType="text"
-            android:hint="New username"
-            android:layout_marginBottom="16dp"
-            tools:ignore="HardcodedText" />
+            android:hint="@string/usernameEditText_activity_profile_edit"
+            android:layout_marginBottom="16dp" />
 
         <!-- First Name -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="First Name"
+            android:text="@string/first_name_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/firstNameEditText"
@@ -89,19 +83,17 @@
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
             android:inputType="text"
-            android:hint="New first name"
-            android:layout_marginBottom="16dp"
-            tools:ignore="HardcodedText" />
+            android:hint="@string/firstNameEditText__activity_profile_edit"
+            android:layout_marginBottom="16dp" />
 
         <!-- Last Name -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Last Name"
+            android:text="@string/last_name_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/lastNameEditText"
@@ -109,35 +101,42 @@
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
             android:inputType="text"
-            android:hint="New Last Name"
-            android:layout_marginBottom="16dp"
-            tools:ignore="HardcodedText" />
+            android:hint="@string/lastNameEditText_activity_profile_edit"
+            android:layout_marginBottom="16dp" />
 
         <!-- Birthday -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Birthday"
+            android:text="@string/birthday_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
-        <CalendarView
-            android:id="@+id/birthdayCalendarView"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/birthdayEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/birthdayEditText_activity_profile_edit"
+                android:inputType="none"
+                android:focusable="true"
+                android:clickable="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Gender -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Gender"
+            android:text="@string/gender_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <RadioGroup
             android:id="@+id/genderRadioGroup"
@@ -150,34 +149,31 @@
                 android:id="@+id/maleRadioButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Male"
+                android:text="@string/maleRadioButton_activity_profile_edit"
                 android:drawableStart="@drawable/ic_male"
                 android:drawablePadding="8dp"
                 android:button="@android:color/transparent"
-                android:layout_weight="1"
-                tools:ignore="HardcodedText" />
+                android:layout_weight="1" />
 
             <RadioButton
                 android:id="@+id/femaleRadioButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Female"
+                android:text="@string/femaleRadioButton_activity_profile_edit"
                 android:drawableStart="@drawable/ic_female"
                 android:drawablePadding="8dp"
                 android:button="@android:color/transparent"
-                android:layout_weight="1"
-                tools:ignore="HardcodedText" />
+                android:layout_weight="1" />
         </RadioGroup>
 
         <!-- Address -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Address"
+            android:text="@string/address_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -192,29 +188,26 @@
                 android:layout_weight="1"
                 android:importantForAutofill="no"
                 android:inputType="textPostalAddress"
-                android:hint="Enter address"
-                tools:ignore="HardcodedText" />
+                android:hint="@string/addressEditText_activity_profile_edit" />
 
             <Button
                 android:id="@+id/mapButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:drawablePadding="8dp"
-                android:text="Map"
+                android:text="@string/mapButton_activity_profile_edit"
                 android:backgroundTint="@color/teal_700"
-                android:textColor="@android:color/white"
-                tools:ignore="HardcodedText" />
+                android:textColor="@android:color/white" />
         </LinearLayout>
 
         <!-- City -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="City"
+            android:text="@string/city_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/cityEditText"
@@ -222,19 +215,17 @@
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
             android:inputType="text"
-            android:hint="Enter city"
-            android:layout_marginBottom="16dp"
-            tools:ignore="HardcodedText" />
+            android:hint="@string/cityEditText_activity_profile_edit"
+            android:layout_marginBottom="16dp" />
 
         <!-- State -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="State"
+            android:text="@string/state_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/stateEditText"
@@ -242,19 +233,17 @@
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
             android:inputType="text"
-            android:hint="Enter state"
-            android:layout_marginBottom="16dp"
-            tools:ignore="HardcodedText" />
+            android:hint="@string/stateEditText_activity_profile_edit"
+            android:layout_marginBottom="16dp" />
 
         <!-- Zip Code -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Zip Code"
+            android:text="@string/zip_code_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <EditText
             android:id="@+id/zipCodeEditText"
@@ -263,27 +252,24 @@
             android:importantForAutofill="no"
             android:inputType="number"
             android:maxLength="5"
-            android:hint="Enter zip code"
-            android:layout_marginBottom="16dp"
-            tools:ignore="HardcodedText" />
+            android:hint="@string/zipCodeEditText__activity_profile_edit"
+            android:layout_marginBottom="16dp" />
 
         <!-- Phone Number -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Phone Number"
+            android:text="@string/phone_number_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter phone number"
+            android:hint="@string/enter_phone_number_activity_profile_edit"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_marginBottom="16dp"
-            tools:ignore="HardcodedText">
+            android:layout_marginBottom="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/phone1EditText"
@@ -296,19 +282,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Alternate Phone Number"
+            android:text="@string/alternate_phone_number_activity_profile_edit"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginBottom="8dp" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter alternate phone number"
+            android:hint="@string/enter_alternate_phone_number_activity_profile_edit"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_marginBottom="24dp"
-            tools:ignore="HardcodedText">
+            android:layout_marginBottom="24dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/phone2EditText"
@@ -322,9 +306,10 @@
             android:id="@+id/saveButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save"
+            android:text="@string/saveButton_activity_profile_edit"
             android:backgroundTint="@color/teal_700"
-            android:textColor="@android:color/white"
-            tools:ignore="HardcodedText" />
+            android:textColor="@android:color/white" />
+
     </LinearLayout>
+
 </ScrollView>

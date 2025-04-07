@@ -1,5 +1,7 @@
 package com.washburn.habitguard.settings
 
+import android.app.DatePickerDialog
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -13,190 +15,213 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
+import com.washburn.habitguard.CameraHelper
 import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.R
 import com.washburn.habitguard.databinding.ActivityProfileEditBinding
+import com.washburn.habitguard.firebase.AuthUtils.showToast
 import java.util.*
+import android.util.Patterns
 import androidx.core.net.toUri
+import java.text.SimpleDateFormat
 
-@Suppress("DEPRECATION")
 @RequiresApi(Build.VERSION_CODES.O)
 class ProfileEditActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileEditBinding
-    private lateinit var firestoreHelper: FirestoreHelper
-    private val currentUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
-    private var selectedImageUri: Uri? = null
-
-    private val pickImageLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            selectedImageUri = it
-            Glide.with(this)
-                .load(it)
-                .circleCrop()
-                .into(binding.profilePhoto)
-        }
+    private val firestoreHelper = FirestoreHelper()
+    private val auth = FirebaseAuth.getInstance()
+    private val currentUser get() = auth.currentUser
+    private val cameraHelper = CameraHelper(this)
+    private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { selectedImageUri = uri
+            loadImageIntoView(uri) }
     }
+
+    private var selectedImageUri: Uri? = null
+    private var originalEmail: String = ""
+    private var isEmailChanged = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityProfileEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        firestoreHelper = FirestoreHelper()
-
+        setupCameraHelper()
         setupViews()
         loadProfileData()
+    }
 
-        // Handle Birthday CalendarView
-        binding.birthdayCalendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val selectedDate = "$year-${month + 1}-$dayOfMonth"
-            // Store the selected date in a hidden EditText or directly use it
-            Toast.makeText(this, "Selected Date: $selectedDate", Toast.LENGTH_SHORT).show()
+    // Region: Setup Methods
+    private fun setupCameraHelper() {
+        cameraHelper.onPhotoTaken = { uri ->
+            selectedImageUri = uri
+            loadImageIntoView(uri)
         }
-
-        // Handle Gender RadioGroup
-        binding.genderRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.maleRadioButton -> Toast.makeText(this, "Male selected", Toast.LENGTH_SHORT).show()
-                R.id.femaleRadioButton -> Toast.makeText(this, "Female selected", Toast.LENGTH_SHORT).show()
-            }
+        cameraHelper.onPermissionDenied = {
+            showToast(this, "Camera permission denied")
         }
-
-        // Handle Map Button for Address
-        binding.mapButton.setOnClickListener {
-            // Launch Google Maps or another map activity to fetch the address
-            val intent = Intent(Intent.ACTION_VIEW, "geo:0,0?q=".toUri())
-            startActivity(intent)
-        }
-
     }
 
     private fun setupViews() {
-        binding.changePhotoButton.setOnClickListener {
-            pickImageLauncher.launch("image/*")
-        } // Handle Change Photo Button
-
-        binding.saveButton.setOnClickListener {
-            if (validateInputs()) {
-                saveProfileData()
+        binding.changePhotoButton.setOnClickListener { showPhotoSourceDialog() }
+        binding.mapButton.setOnClickListener { launchMaps() }
+        binding.saveButton.setOnClickListener { attemptSave() }
+        binding.birthdayEditText.setOnClickListener { showDatePickerDialog() }
+        binding.genderRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.maleRadioButton -> showToast(this, "Male selected")
+                R.id.femaleRadioButton -> showToast(this, "Female selected")
             }
-        } // Handle Save Button
+        }
+    }
 
-//        binding.backButton.setOnClickListener {
-//            onBackPressed()
-//        }
+    private fun showPhotoSourceDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Update Profile Picture")
+            .setItems(arrayOf("Take Photo", "Choose from Gallery", "Cancel")) { _, which ->
+                when (which) {
+                    0 -> cameraHelper.checkCameraPermissionAndLaunch()
+                    1 -> imagePicker.launch("image/*")
+                }
+            }
+            .show()
+    }
+
+    private fun loadImageIntoView(uri: Uri) {
+        Glide.with(this)
+            .load(uri)
+            .placeholder(R.drawable.ic_launcher_foreground)
+            .error(R.drawable.ic_launcher_foreground)
+            .circleCrop()
+            .into(binding.profilePhoto)
     }
 
     private fun loadProfileData() {
-        currentUser?.uid?.let { userId ->
-            firestoreHelper.getUserDocument(userId).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        populateFields(document)
-                    } else {
-//                        createNewProfileDocument()
-                    }
+        firestoreHelper.getUserInfoDocumentField(firestoreHelper.getCurrentUserId().toString()).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    populateFields(document)
+                    originalEmail = document.getString("email") ?: currentUser?.email ?: ""
+                } else {
+                    showToast(this, "No profile data found")
                 }
-                .addOnFailureListener { e ->
-                    showErrorToast("Failed to load profile: ${e.message}")
-                }
-        } ?: showErrorToast("User not authenticated")
+            }
+            .addOnFailureListener { e ->
+                showToast(this, "Failed to load profile: ${e.message}")
+            }
     }
 
     private fun populateFields(document: DocumentSnapshot) {
         with(binding) {
-            emailEditText.setText(document.getString("email") ?: currentUser?.email ?: "")
+            // Personal Info
+            emailEditText.setText(document.getString("email") ?: "")
             usernameEditText.setText(document.getString("username") ?: "")
             firstNameEditText.setText(document.getString("firstName") ?: "")
             lastNameEditText.setText(document.getString("lastName") ?: "")
 
-            document.getString("birthday")?.let { birthday ->
-                birthdayCalendarView.date = parseDateToMillis(birthday)
+            document.getString("birthday")?.let { dateStr ->
+                birthdayEditText.setText(dateStr)
             }
 
+            // Gender Selection
             when (document.getString("gender")) {
                 "Male" -> maleRadioButton.isChecked = true
                 "Female" -> femaleRadioButton.isChecked = true
             }
 
+            // Address Info
             addressEditText.setText(document.getString("address") ?: "")
             cityEditText.setText(document.getString("city") ?: "")
             stateEditText.setText(document.getString("state") ?: "")
             zipCodeEditText.setText(document.getString("zipCode") ?: "")
+
+            // Contact Info
             phone1EditText.setText(document.getString("phone1") ?: "")
             phone2EditText.setText(document.getString("phone2") ?: "")
 
-            document.getString("photoUri")?.takeIf { it.isNotEmpty() }?.let { uri ->
+            // Profile Photo
+            document.getString("photoUri")?.takeIf { it.isNotBlank() }?.let { uri ->
                 Glide.with(this@ProfileEditActivity)
                     .load(uri)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
                     .circleCrop()
                     .into(profilePhoto)
             }
         }
     }
+    // End Region
 
-//    private fun createNewProfileDocument() {
-//        currentUser?.uid?.let { userId ->
-//            firestoreHelper.saveUserInfo(
-//                userId,
-//                currentUser.email ?: "",
-//                currentUser.displayName ?: "John Doe",
-//                null, // photoUri
-//                { loadProfileData() },
-//                { e -> showErrorToast("Failed to create profile: ${e.message}") }
-//            )
-//        } ?: showErrorToast("User not authenticated")
-//    }
+    // Region: Data Saving
+    private fun attemptSave() {
+        if (!validateInputs()) return
 
-    private fun validateInputs(): Boolean {
-        with(binding) {
-            val email = emailEditText.text.toString()
-            if (!isValidEmail(email)) {
-                emailEditText.error = "Invalid email format"
-                return false
-            }
+        val updates = prepareProfileUpdates()
 
-            if (usernameEditText.text.isNullOrEmpty()) {
-                usernameEditText.error = "Username cannot be empty"
-                return false
-            }
-
-            return true
+        if (selectedImageUri != null) {
+            uploadImageAndSave(updates)
+        } else {
+            saveProfileToFirestore(updates)
         }
     }
 
-    private fun saveProfileData() {
-        currentUser?.uid?.let { userId ->
-            val updates = prepareProfileUpdates()
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance()
 
-            if (selectedImageUri != null) {
-                uploadImageAndSaveProfile(userId, updates)
-            } else {
-                saveProfileToFirestore(userId, updates)
+        try {
+            val currentDate = binding.birthdayEditText.text.toString()
+            if (currentDate.isNotEmpty()) {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                sdf.parse(currentDate)?.let { date ->
+                    calendar.time = date
+                }
             }
-        } ?: showErrorToast("User not authenticated")
+        } catch (_: Exception) {
+        }
+
+        val datePicker = DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                // Format the selected date
+                val selectedDate = Calendar.getInstance().apply {
+                    set(year, month, day)
+                }
+                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    .format(selectedDate.time)
+
+                // Update the EditText
+                binding.birthdayEditText.setText(formattedDate)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+
+        datePicker.datePicker.maxDate = System.currentTimeMillis()
+
+        val minDate = Calendar.getInstance()
+        minDate.add(Calendar.YEAR, -100)
+        datePicker.datePicker.minDate = minDate.timeInMillis
+
+        datePicker.show()
     }
 
     private fun prepareProfileUpdates(): HashMap<String, Any> {
+        val newEmail = binding.emailEditText.text.toString()
+        isEmailChanged = newEmail != originalEmail
+
         return hashMapOf(
-            "email" to binding.emailEditText.text.toString(),
+            "email" to newEmail,
             "username" to binding.usernameEditText.text.toString(),
             "firstName" to binding.firstNameEditText.text.toString(),
             "lastName" to binding.lastNameEditText.text.toString(),
-            "birthday" to formatDateFromMillis(binding.birthdayCalendarView.date),
-            "gender" to when (binding.genderRadioGroup.checkedRadioButtonId) {
-                R.id.maleRadioButton -> "Male"
-                R.id.femaleRadioButton -> "Female"
-                else -> "Not specified"
-            },
+            "birthday" to binding.birthdayEditText.text.toString(),
+            "gender" to getSelectedGender(),
             "address" to binding.addressEditText.text.toString(),
             "city" to binding.cityEditText.text.toString(),
             "state" to binding.stateEditText.text.toString(),
@@ -207,113 +232,136 @@ class ProfileEditActivity : AppCompatActivity() {
         )
     }
 
-    private fun uploadImageAndSaveProfile(userId: String, updates: HashMap<String, Any>) {
+    private fun uploadImageAndSave(updates: HashMap<String, Any>) {
         selectedImageUri?.let { uri ->
-            val storageRef = FirebaseStorage.getInstance().reference
-            val imageRef = storageRef.child("profile_images/${userId}.jpg")
+            try {
+                val inputStream = contentResolver.openInputStream(uri)
+                inputStream?.let { stream ->
+                    val storageRef = FirebaseStorage.getInstance().reference
+                    val imageRef = storageRef.child("profile_images/${firestoreHelper.getCurrentUserId()}.jpg")
 
-            imageRef.putFile(uri)
-                .addOnSuccessListener {
-                    imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                        updates["photoUri"] = downloadUri.toString()
-                        saveProfileToFirestore(userId, updates)
-                    }
+                    imageRef.putStream(stream)
+                        .addOnSuccessListener { taskSnapshot ->
+                            taskSnapshot.storage.downloadUrl.addOnSuccessListener { downloadUri ->
+                                updates["photoUri"] = downloadUri.toString()
+                                saveProfileToFirestore(updates)
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            showToast(this, "Image upload failed: ${e.message}")
+                            saveProfileToFirestore(updates)
+                        }
+                } ?: run {
+                    showToast(this, "Could not open image file")
+                    saveProfileToFirestore(updates)
                 }
-                .addOnFailureListener { e ->
-                    showErrorToast("Image upload failed: ${e.message}")
-                    saveProfileToFirestore(userId, updates) // Save without image update
-                }
-        }
-    }
-
-    private fun saveProfileToFirestore(userId: String, updates: HashMap<String, Any>) {
-        firestoreHelper.saveUserProfile(
-            userId,
-            updates,
-            {
-                checkEmailUpdateNeeded(updates["email"] as String)
-            },
-            { e ->
-                showErrorToast("Failed to save profile: ${e.message}")
+            } catch (e: Exception) {
+                showToast(this, "Error: ${e.message}")
+                saveProfileToFirestore(updates)
             }
-        )
-    }
-
-    private fun checkEmailUpdateNeeded(newEmail: String) {
-        if (currentUser?.email != newEmail) {
-            showPasswordDialogForEmailUpdate(newEmail)
-        } else {
-            showSuccessToast("Profile updated successfully")
+        } ?: run {
+            saveProfileToFirestore(updates)
         }
     }
 
-    private fun showPasswordDialogForEmailUpdate(newEmail: String) {
-        val passwordEditText = androidx.appcompat.widget.AppCompatEditText(this).apply {
+    private fun saveProfileToFirestore(updates: HashMap<String, Any>) {
+        firestoreHelper.getUserInfoDocumentField(firestoreHelper.getCurrentUserId().toString())
+            .set(updates, SetOptions.merge())
+            .addOnSuccessListener {
+                if (isEmailChanged) {
+                    verifyPasswordForEmailUpdate(updates["email"] as String)
+                } else {
+                    completeSave("Profile updated successfully")
+                }
+            }
+            .addOnFailureListener { e ->
+                showToast(this, "Failed to save: ${e.message}")
+            }
+    }
+
+    private fun verifyPasswordForEmailUpdate(newEmail: String) {
+        val passwordField = EditText(this).apply {
             inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
-            hint = "Enter your current password"
+            hint = "Current password"
         }
 
         AlertDialog.Builder(this)
             .setTitle("Verify Password")
-            .setMessage("To update your email, please verify your current password")
-            .setView(passwordEditText)
+            .setMessage("To update your email, please enter your current password")
+            .setView(passwordField)
             .setPositiveButton("Confirm") { _, _ ->
-                val password = passwordEditText.text?.toString() ?: ""
-                if (password.isNotEmpty()) {
+                val password = passwordField.text.toString()
+                if (password.isNotBlank()) {
                     reauthenticateAndUpdateEmail(newEmail, password)
                 } else {
-                    showErrorToast("Password cannot be empty")
+                    showToast(this, "Password cannot be empty")
                 }
             }
             .setNegativeButton("Cancel") { _, _ ->
-                showSuccessToast("Profile updated (email not changed)")
+                completeSave("Profile updated (email not changed)")
             }
             .show()
     }
 
     private fun reauthenticateAndUpdateEmail(newEmail: String, password: String) {
-        val credential = EmailAuthProvider.getCredential(currentUser?.email ?: "", password)
+        val credential = EmailAuthProvider.getCredential(originalEmail, password)
         currentUser?.reauthenticate(credential)
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    currentUser.updateEmail(newEmail)
-                        .addOnCompleteListener { updateTask ->
+                    currentUser?.updateEmail(newEmail)
+                        ?.addOnCompleteListener { updateTask ->
                             if (updateTask.isSuccessful) {
-                                showSuccessToast("Profile and email updated successfully")
+                                completeSave("Profile and email updated successfully")
                             } else {
-                                showErrorToast("Email update failed: ${updateTask.exception?.message}")
+                                showToast(this, "Failed to update email: ${updateTask.exception?.message}")
                             }
                         }
                 } else {
-                    showErrorToast("Authentication failed: ${task.exception?.message}")
+                    showToast(this, "Authentication failed: ${task.exception?.message}")
                 }
             }
     }
+    // End Region
 
-    // Helper functions
-    private fun isValidEmail(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    // Region: Helper Methods
+    private fun getSelectedGender(): String = when (binding.genderRadioGroup.checkedRadioButtonId) {
+        R.id.maleRadioButton -> "Male"
+        R.id.femaleRadioButton -> "Female"
+        else -> "Not specified"
     }
 
-    private fun parseDateToMillis(date: String): Long {
-        val parts = date.split("-").map { it.toInt() }
-        val calendar = Calendar.getInstance().apply {
-            set(parts[0], parts[1] - 1, parts[2])
+    private fun launchMaps() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, "geo:0,0?q=".toUri()))
+        } catch (_: ActivityNotFoundException) {
+            showToast(this, "No maps app found")
         }
-        return calendar.timeInMillis
     }
 
-    private fun formatDateFromMillis(millis: Long): String {
-        val calendar = Calendar.getInstance().apply { timeInMillis = millis }
-        return "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.MONTH) + 1}-${calendar.get(Calendar.DAY_OF_MONTH)}"
+    private fun validateInputs(): Boolean {
+        with(binding) {
+            return when {
+                !isValidEmail(emailEditText.text.toString()) -> {
+                    emailEditText.error = "Invalid email format"
+                    false
+                }
+                usernameEditText.text.isNullOrBlank() -> {
+                    usernameEditText.error = "Username required"
+                    false
+                }
+                else -> true
+            }
+        }
     }
 
-    private fun showSuccessToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun completeSave(message: String) {
+        showToast(this, message)
+        setResult(RESULT_OK)
         finish()
     }
 
-    private fun showErrorToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun isValidEmail(email: String): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
+    // End Region
 }

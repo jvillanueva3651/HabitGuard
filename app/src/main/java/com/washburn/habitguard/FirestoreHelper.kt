@@ -5,6 +5,7 @@ package com.washburn.habitguard
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -23,11 +24,16 @@ class FirestoreHelper {
 
     companion object {
         private const val HABIT_GUARD_COLLECTION = "HabitGuard"
+        private const val USER_INFO_SUBCOLLECTION = "UserInfo"
         private const val USER_HABIT_SUBCOLLECTION = "UserHabit"
+        private const val USER_TRANSACTIONS_SUBCOLLECTION = "UserTransactions"
     }
 
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
+    fun getUserInfoDocumentField(userId: String): DocumentReference {
+        return db.collection(HABIT_GUARD_COLLECTION).document(userId).collection(USER_INFO_SUBCOLLECTION).document(userId)
+    }
     fun getUserDocument(userId: String): DocumentReference {
         return db.collection(HABIT_GUARD_COLLECTION).document(userId)
     }
@@ -39,30 +45,30 @@ class FirestoreHelper {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        val userInfo = hashMapOf(
+        val userId = getCurrentUserId().toString()
+        val userRef = db.collection(HABIT_GUARD_COLLECTION).document(userId)
+
+        val userInfo = mapOf(
             "email" to email,
             "username" to username,
             "photoUri" to photoUri,
             "createdAt" to FieldValue.serverTimestamp()
         )
 
-        db.collection(HABIT_GUARD_COLLECTION)
-            .document(getCurrentUserId().toString())
-            .collection("UserInfo")
-            .add(userInfo)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onFailure(e) }
+        userRef.collection(USER_INFO_SUBCOLLECTION)
+            .document(userId)
+            .set(userInfo)
+            .addOnSuccessListener { _ ->
+                val userLogin = mapOf(
+                    "email" to email,
+                    "lastLogin" to FieldValue.serverTimestamp()
+                )
 
-        val userLogin = hashMapOf(
-            "email" to email,
-            "lastLogin" to FieldValue.serverTimestamp()
-        )
-
-        db.collection(HABIT_GUARD_COLLECTION)
-            .document(getCurrentUserId().toString())
-            .set(userLogin)
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onFailure(e) }
+                userRef.set(userLogin)
+                    .addOnSuccessListener{ _ -> onSuccess()}
+                    .addOnFailureListener(onFailure)
+            }
+            .addOnFailureListener(onFailure)
     }
 
     fun updateLastLogin(
@@ -199,6 +205,123 @@ class FirestoreHelper {
             }
             .addOnFailureListener { e -> onFailure(e) }
     }
+
+    // Joshua Update
+    /**
+     * Function to add a user transaction to their HabitGuard UserTransaction document
+     */
+    fun addUserTransaction(
+        transactionData: Map<String, Any>,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
+            .add(transactionData)
+            .addOnSuccessListener { docRef ->
+                docRef.update("id", docRef.id)
+                onSuccess(docRef.id)
+            }
+            .addOnFailureListener(onFailure)
+    }
+
+    /**
+     * Function to update an existing transaction within HabitGuard UserTransaction document
+     */
+    fun updateUserTransaction(
+        transactionId: String,
+        updatedData: Map<String, Any>,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
+            .document(transactionId)
+            .update(updatedData)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    /**
+     * Function to delete an existing transaction within HabitGuard UserTransaction document
+     */
+    fun deleteUserTransaction(
+        transactionId: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
+            .document(transactionId)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    /**
+     * Function to read a specific user transaction within HabitGuard UserTransaction document
+     */
+    fun getUserTransaction(
+        transactionId: String,
+        onSuccess: (Map<String, Any>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
+            .document(transactionId)
+            .get()
+            .addOnSuccessListener { document ->
+                document.data?.let { data ->
+                    onSuccess(data)
+                } ?: onFailure(Exception("Transaction data is null"))
+            }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    /**
+     * Function to read ALL user transactions within HabitGuard UserTransaction document
+     */
+    fun getAllUserTransactions(
+        onSuccess: (List<Pair<String, Map<String, Any>>>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val transactions = querySnapshot.documents.mapNotNull { doc ->
+                    doc.data?.let { Pair(doc.id, it) }
+                }
+                onSuccess(transactions)
+            }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+    //
 
     fun getHourlyEvents(
         date: LocalDate,

@@ -118,6 +118,36 @@
     <string name="monthDayText_activity_daily_calendar">Feb 2021</string>
     <string name="dayOfWeekTV_activity_daily_calendar">Monday</string>
     <string name="newEventButton_activity_daily_calendar">New Event</string>
+    <string name="maleRadioButton_activity_profile_edit">Male</string>
+    <string name="femaleRadioButton_activity_profile_edit">Female</string>
+    <string name="gender_activity_profile_edit">Gender</string>
+    <string name="birthday_activity_profile_edit">Birthday</string>
+    <string name="lastNameEditText_activity_profile_edit">New Last Name</string>
+    <string name="last_name_activity_profile_edit">Last Name</string>
+    <string name="firstNameEditText__activity_profile_edit">New first name</string>
+    <string name="first_name_activity_profile_edit">First Name</string>
+    <string name="usernameEditText_activity_profile_edit">New username</string>
+    <string name="username_activity_profile_edit">Username</string>
+    <string name="emailEditText_activity_profile_edit">New email</string>
+    <string name="e_mail_activity_profile_edit">E-mail</string>
+    <string name="change_photo_activity_profile_edit">Change Photo</string>
+    <string name="address_activity_profile_edit">Address</string>
+    <string name="addressEditText_activity_profile_edit">Enter address</string>
+    <string name="mapButton_activity_profile_edit">Map</string>
+    <string name="city_activity_profile_edit">City</string>
+    <string name="cityEditText_activity_profile_edit">Enter city</string>
+    <string name="state_activity_profile_edit">State</string>
+    <string name="stateEditText_activity_profile_edit">Enter state</string>
+    <string name="zip_code_activity_profile_edit">Zip Code</string>
+    <string name="zipCodeEditText__activity_profile_edit">Enter zip code</string>
+    <string name="phone_number_activity_profile_edit">Phone Number</string>
+    <string name="enter_phone_number_activity_profile_edit">Enter phone number</string>
+    <string name="alternate_phone_number_activity_profile_edit">Alternate Phone Number</string>
+    <string name="enter_alternate_phone_number_activity_profile_edit">Enter alternate phone number</string>
+    <string name="saveButton_activity_profile_edit">Save</string>
+    <string name="birthdayEditText_activity_profile_edit">Select birthday</string>
+    <string name="tags_comma_separated_activity_event_edit">Tags (comma-separated)</string>
+    <string name="tagsEditText_activity_event_edit">e.g., Groceries, Transport</string>
 
 
 </resources>

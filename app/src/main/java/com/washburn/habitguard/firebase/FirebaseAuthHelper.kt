@@ -15,6 +15,7 @@
 ============================================================================================*/
 package com.washburn.habitguard.firebase
 
+
 import android.content.Context
 import android.os.Build
 import android.util.Patterns
@@ -35,12 +36,11 @@ class FirebaseAuthHelper(private val context: Context) {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     private val firestoreHelper = FirestoreHelper()
+
     fun getFirestoreHelper(): FirestoreHelper = firestoreHelper
 
     // Sign Out
-    fun signOut() {
-        auth.signOut()
-    }
+    fun signOut() = auth.signOut()
 
     /**============================================================================================
     * Login Activity
@@ -60,11 +60,7 @@ class FirebaseAuthHelper(private val context: Context) {
                     if (user != null) {
                         firestoreHelper.getUserDocument(user.uid).get().addOnCompleteListener { firestoreTask ->
                             if (firestoreTask.isSuccessful && firestoreTask.result.exists()) {
-                                if (rememberMe) {
-                                    saveCredentials(email, password)
-                                } else {
-                                    clearCredentials()
-                                }
+                                if (rememberMe) saveCredentials(email, password) else clearCredentials()
                                 onSuccess(user)
                             } else {
                                 auth.signOut()
@@ -75,12 +71,11 @@ class FirebaseAuthHelper(private val context: Context) {
                         onFailure("Failed to retrieve user ID")
                     }
                 } else {
-                    val errorMessage = when (task.exception) {
+                    onFailure(when (task.exception) {
                         is FirebaseAuthInvalidUserException -> "User not found."
                         is FirebaseAuthInvalidCredentialsException -> "Invalid email or password."
                         else -> "Log In failed."
-                    }
-                    onFailure(errorMessage)
+                    })
                 }
             }
     }
@@ -105,21 +100,17 @@ class FirebaseAuthHelper(private val context: Context) {
         }
     }
 
+    // EncryptedSharedPreferences
+    private fun getEncryptedSharedPreferences() = EncryptedSharedPreferences.create(
+        context,
+        "SecureLoginPrefs",
+        MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
     // Save sharedPreferences
-    private fun saveCredentials(email: String, password: String) {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-
-        val sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "SecureLoginPrefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-
-        with(sharedPreferences.edit()) {
+    fun saveCredentials(email: String, password: String) {
+        getEncryptedSharedPreferences().edit().apply {
             putString("email", email)
             putString("password", password)
             putBoolean("rememberMe", true)
@@ -127,20 +118,8 @@ class FirebaseAuthHelper(private val context: Context) {
         }
     }
     // Clear sharedPreferences
-    private fun clearCredentials() {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-
-        val sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "SecureLoginPrefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-
-        with(sharedPreferences.edit()) {
+    fun clearCredentials() {
+        getEncryptedSharedPreferences().edit().apply {
             remove("email")
             remove("password")
             remove("rememberMe")
@@ -149,23 +128,12 @@ class FirebaseAuthHelper(private val context: Context) {
     }
     // Load sharedPreferences
     fun loadSavedCredentials(): Triple<String?, String?, Boolean> {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-
-        val sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "SecureLoginPrefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        val prefs = getEncryptedSharedPreferences()
+        return Triple(
+            prefs.getString("email", ""),
+            prefs.getString("password", ""),
+            prefs.getBoolean("rememberMe", false)
         )
-
-        val email = sharedPreferences.getString("email", "")
-        val password = sharedPreferences.getString("password", "")
-        val rememberMe = sharedPreferences.getBoolean("rememberMe", false)
-
-        return Triple(email, password, rememberMe)
     }
     // Offline Login
     fun checkOfflineLogin(email: String, password: String): Boolean {

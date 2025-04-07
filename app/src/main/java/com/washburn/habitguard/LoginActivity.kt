@@ -14,28 +14,26 @@
 package com.washburn.habitguard
 
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
-import android.content.Intent
-import android.content.Context
-import android.net.NetworkCapabilities
-import android.net.ConnectivityManager
-import android.text.method.PasswordTransformationMethod
-import android.text.method.HideReturnsTransformationMethod
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.lifecycleScope
+import androidx.appcompat.app.AppCompatActivity
 import androidx.credentials.Credential
-import androidx.credentials.CustomCredential
 import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
-import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-import com.washburn.habitguard.firebase.FirebaseAuthHelper
+import com.washburn.habitguard.NavigationHelper.navigateTo
 import com.washburn.habitguard.databinding.ActivityLoginBinding
+import com.washburn.habitguard.firebase.AuthUtils.isOnline
+import com.washburn.habitguard.firebase.AuthUtils.showToast
+import com.washburn.habitguard.firebase.AuthUtils.togglePasswordVisibility
+import com.washburn.habitguard.firebase.FirebaseAuthHelper
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -45,33 +43,30 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var authHelper: FirebaseAuthHelper
 
-    private lateinit var credentialManager: CredentialManager
+    private lateinit var credentialManager: CredentialManager // Google ID Token
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         authHelper = FirebaseAuthHelper(this)
 
-        credentialManager = CredentialManager.create(baseContext)
+        credentialManager = CredentialManager.create(baseContext) // Google ID Token
 
+        setupInit() // Initialized view
         loadSavedCredentials() // Remember Me
         updateNetworkStatusIndicator() // Online/Offline
+    }
 
-        binding.btnTogglePassword.setOnClickListener { togglePasswordVisibility() }
+    private fun setupInit() {
+        togglePasswordVisibility(binding.etPassword, binding.btnTogglePassword)
 
         binding.tvForgotPassword.setOnClickListener { forgotPassword() }
-
         binding.btnLogin.setOnClickListener { login() }
-
         binding.btnGoogle.setOnClickListener { googleSignIn() }
-
         binding.btnGithub.setOnClickListener { githubSignIn() }
-
         binding.btnLinkedIn.setOnClickListener { linkedInSignIn() }
-
         binding.tvRedirectSignUp.setOnClickListener { signup() }
     }
 
@@ -81,74 +76,50 @@ class LoginActivity : AppCompatActivity() {
         val pass = binding.etPassword.text.toString()
 
         if (email.isEmpty() || pass.isEmpty()) {
-            showToast("Please fill all fields")
+            showToast(this, "Please fill all fields")
             return
         }
 
-        if (isOnline(this)) {
-            authHelper.loginWithEmail(
-                email = email,
-                password = pass,
-                rememberMe = binding.cbRememberMe.isChecked,
-                onSuccess = {
-                    updateLastLoginAndProceed()
-                },
-                onFailure = { errorMessage ->
-                    showToast(errorMessage)
-                }
-            )
+        if (isOnline(this)) performOnlineLogin(email, pass) else performOfflineLogin(email, pass)
+    }
+
+    private fun performOnlineLogin(email: String, password: String) {
+        authHelper.loginWithEmail(
+            email = email,
+            password = password,
+            rememberMe = binding.cbRememberMe.isChecked,
+            onSuccess = { updateLastLoginAndProceed() },
+            onFailure = { errorMessage -> showToast(this, errorMessage) }
+        )
+    }
+
+    private fun performOfflineLogin(email: String, password: String) {
+        if (authHelper.checkOfflineLogin(email, password)) {
+            showToast(this, "Offline Log In Successful")
+            navigateTo(this, SideActivity::class.java, true)
         } else {
-            if (authHelper.checkOfflineLogin(email, pass)) {
-                showToast("Offline Log In Successful")
-                startActivity(Intent(this, SideActivity::class.java))
-                finish()
-            } else {
-                showToast("Invalid credentials for offline login")
-            }
+            showToast(this, "Invalid credentials for offline login")
         }
     }
+
     private fun updateLastLoginAndProceed() {
         authHelper.getFirestoreHelper().updateLastLogin(
             onSuccess = {
-                showToast("Log In Successful")
-                startActivity(Intent(this, SideActivity::class.java))
-                finish()
+                showToast(this, "Log In Successful")
+                navigateTo(this, SideActivity::class.java, true)
             },
             onFailure = {
-                showToast("Log In Successful (timestamp update failed)")
-                startActivity(Intent(this, SideActivity::class.java))
-                finish()
+                showToast(this, "Log In Successful (timestamp update failed)")
+                navigateTo(this, SideActivity::class.java, true)
             }
         )
     }
 
-    // Check network connectivity
-    private fun isOnline(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-    }
     // Update network status indicator
     private fun updateNetworkStatusIndicator() {
-        if (isOnline(this)) {
-            binding.ivStatusIndicator.setImageResource(R.drawable.ic_online)
-        } else {
-            binding.ivStatusIndicator.setImageResource(R.drawable.ic_offline)
-        }
-    }
-
-    // Toggle password visibility
-    private fun togglePasswordVisibility() {
-        if (binding.etPassword.transformationMethod == PasswordTransformationMethod.getInstance()) {
-            binding.etPassword.transformationMethod = HideReturnsTransformationMethod.getInstance()
-            binding.btnTogglePassword.setImageResource(R.drawable.ic_visibility)
-        } else {
-            binding.etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
-            binding.btnTogglePassword.setImageResource(R.drawable.ic_visibility_off)
-        }
-        binding.etPassword.setSelection(binding.etPassword.text.length)
+        binding.ivStatusIndicator.setImageResource(
+            if (isOnline(this)) R.drawable.ic_online else R.drawable.ic_offline
+        )
     }
 
     // Load saved credentials from SharedPreferences
@@ -166,12 +137,12 @@ class LoginActivity : AppCompatActivity() {
         val email = binding.etEmailAddress.text.toString()
         authHelper.sendPasswordResetEmail(
             email = email,
-            onSuccess = {
-                showToast("Password reset email sent.")
-            },
+            onSuccess = { showToast(this, "Password reset email sent.") },
             onFailure = {
-                if (email.isEmpty()) { showToast("Please enter your email. Then click Forgot Password.")
-                } else { showToast("Failed to send reset email.") }
+                showToast(this,
+                    if (email.isEmpty()) "Please enter your email. Then click Forgot Password."
+                    else "Failed to send reset email."
+                )
             }
         )
     }
@@ -179,7 +150,7 @@ class LoginActivity : AppCompatActivity() {
     // Handle Google sign-in
     private fun googleSignIn() {
         if (!isOnline(this)) {
-            showToast("Google Sign-In requires internet connection")
+            showToast(this, "Google Sign-In requires internet connection")
             return
         }
         val googleIdOption = GetGoogleIdOption.Builder()
@@ -199,7 +170,7 @@ class LoginActivity : AppCompatActivity() {
                 )
                 handleSignIn(result.credential)
             } catch (e: GetCredentialException) {
-                showToast("Couldn't retrieve user's credentials: ${e.localizedMessage}")
+//                showToast("Couldn't retrieve user's credentials: ${e.localizedMessage}")
             }
         }
     }
@@ -212,27 +183,26 @@ class LoginActivity : AppCompatActivity() {
             // Sign in to Firebase with using the token
             firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
         } else {
-            showToast("Credential is not of type Google ID!")
+//            showToast("Credential is not of type Google ID!")
         }
     }
     private fun firebaseAuthWithGoogle(idToken: String) {
         authHelper.signInWithGoogle(
             idToken = idToken,
             onSuccess = { user ->
-                showToast("Google Sign-In successful")
+//                showToast("Google Sign-In successful")
                 startActivity(Intent(this, SideActivity::class.java))
                 finish()
             },
             onFailure = { errorMessage ->
-                showToast("Google Sign-In failed: $errorMessage")
+//                showToast("Google Sign-In failed: $errorMessage")
             }
         )
     }
 
     // Handle GitHub sign-in
     private fun githubSignIn() {
-        startActivity(Intent(this, SideActivity::class.java))
-        finish()
+        // Implement GitHub sign-in logic here
     }
     // Handle LinkedIn sign-in
     private fun linkedInSignIn() {
@@ -241,11 +211,6 @@ class LoginActivity : AppCompatActivity() {
 
     // Handle signup
     private fun signup() {
-        startActivity(Intent(this, SignupActivity::class.java))
-        finish()
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        navigateTo(this, SignupActivity::class.java, false)
     }
 }

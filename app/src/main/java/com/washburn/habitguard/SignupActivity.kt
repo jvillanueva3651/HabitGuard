@@ -11,20 +11,20 @@
 ============================================================================================*/
 package com.washburn.habitguard
 
-import android.os.Build
-import android.os.Bundle
-import android.widget.Toast
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.text.method.PasswordTransformationMethod
-import android.text.method.HideReturnsTransformationMethod
-import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Build
+import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import com.washburn.habitguard.firebase.FirebaseAuthHelper
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.washburn.habitguard.NavigationHelper.navigateTo
 import com.washburn.habitguard.databinding.ActivitySignupBinding
+import com.washburn.habitguard.firebase.AuthUtils.showToast
+import com.washburn.habitguard.firebase.AuthUtils.togglePasswordVisibility
+import com.washburn.habitguard.firebase.FirebaseAuthHelper
 
 @RequiresApi(Build.VERSION_CODES.O)
 class SignupActivity : AppCompatActivity() {
@@ -51,13 +51,13 @@ class SignupActivity : AppCompatActivity() {
         if (isGranted) {
             launchCamera()
         } else {
-            showToast("Profile picture is set to default")
+            showToast(this, "Profile picture is set to default")
+            saveUserProfile()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -65,12 +65,15 @@ class SignupActivity : AppCompatActivity() {
 
         firestoreHelper = FirestoreHelper()
 
-        setupPasswordToggle(binding.etSPassword, binding.btnTogglePassword)
-        setupPasswordToggle(binding.etSConfPassword, binding.btnToggleConfPassword)
+        setupInit() // Initialized view
+    }
+
+    private fun setupInit() {
+        togglePasswordVisibility(binding.etSPassword, binding.btnTogglePassword)
+        togglePasswordVisibility(binding.etSConfPassword, binding.btnToggleConfPassword)
 
         binding.btnSSignUp.setOnClickListener { signUpUser() }
-
-        binding.tvRedirectLogin.setOnClickListener { login() }
+        binding.tvRedirectLogin.setOnClickListener { navigateTo(this, LoginActivity::class.java, true) }
     }
 
     // Validate and process user registration
@@ -80,14 +83,14 @@ class SignupActivity : AppCompatActivity() {
         val confirmPassword = binding.etSConfPassword.text.toString()
 
         when {
-            email.isBlank() -> showToast("Email cannot be blank")
-            pass.isBlank() -> showToast("Password cannot be blank")
-            pass != confirmPassword -> showToast("Password and Confirm Password do not match")
+            email.isBlank() -> showToast(this, "Email cannot be blank")
+            pass.isBlank() -> showToast(this, "Password cannot be blank")
+            pass != confirmPassword -> showToast(this, "Password and Confirm Password do not match")
             else -> authHelper.signupWithEmail(
                 email = email,
                 password = pass,
                 onSuccess = { checkCameraPermissionAndLaunch() },
-                onFailure = { errorMessage -> showToast(errorMessage) }
+                onFailure = { errorMessage -> showToast(this, errorMessage) }
             )
         }
     }
@@ -128,52 +131,17 @@ class SignupActivity : AppCompatActivity() {
 
     // Save user profile to Firestore
     private fun saveUserProfile(photoUri: String? = null) {
-
-        if (photoUri == null) {
-            showToast("Failed to capture photo, photo set to default")
-        }
-
-        val photoToSave = photoUri ?: "drawable://${R.drawable.ic_launcher_foreground}"
-
         firestoreHelper.saveUserInfo(
             email = binding.etSEmailAddress.text.toString(),
             username = binding.etSEmailAddress.text.toString().substringBefore("@"),
-            photoUri = photoToSave,
+            photoUri = photoUri ?: "drawable://${R.drawable.ic_launcher_foreground}",
             onSuccess = {
-                showToast("Successfully Signed Up")
-                login()
+                showToast(this, "Successfully Signed Up")
+                navigateTo(this, LoginActivity::class.java, true)
             },
             onFailure = { e ->
-                showToast("Failed to create user profile: ${e.message}")
+                showToast(this, "Failed to create user profile: ${e.message}")
             }
         )
-    }
-
-    // Toggle password visibility
-    private fun setupPasswordToggle(
-        editText: android.widget.EditText,
-        toggleButton: android.widget.ImageButton
-    ) {
-        toggleButton.setOnClickListener {
-            val isPasswordVisible = editText.transformationMethod == PasswordTransformationMethod.getInstance()
-            editText.transformationMethod = if (isPasswordVisible) {
-                toggleButton.setImageResource(R.drawable.ic_visibility)
-                HideReturnsTransformationMethod.getInstance()
-            } else {
-                toggleButton.setImageResource(R.drawable.ic_visibility_off)
-                PasswordTransformationMethod.getInstance()
-            }
-            editText.setSelection(editText.text.length)
-        }
-    }
-
-    // Direct to login
-    private fun login() {
-        startActivity(Intent(this, LoginActivity::class.java))
-        finish()
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 }

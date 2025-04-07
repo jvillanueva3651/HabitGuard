@@ -13,6 +13,8 @@
     <color name="red">#FF0000</color>
     <color name="green">#00FF00</color>
     <color name="yellow">#FFFF00</color>
+    <color name="male_color">#2196F3</color> <!-- Blue -->
+    <color name="female_color">#E91E63</color> <!-- Pink -->
 
     <!-- CMY Theme Colors -->
     <color name="income_green_soft">#4CAF50</color>    <!-- Material Green 500 -->
