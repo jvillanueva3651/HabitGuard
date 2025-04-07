@@ -52,6 +52,7 @@ class EventEditActivity : AppCompatActivity() {
     // Time handling with sensible defaults
     private var startTime: LocalTime = LocalTime.now().withMinute(0)
     private var endTime: LocalTime = startTime.plusHours(1)
+    private var transactionTime: LocalTime = LocalTime.now().withMinute(0)
 
     // Transaction handling
     private var currentType = TransactionType.INCOME
@@ -88,14 +89,14 @@ class EventEditActivity : AppCompatActivity() {
         val locale = Locale.getDefault()
         with(binding) {
             // Configure hour pickers (0-23)
-            listOf(startHourPicker, endHourPicker).forEach { picker ->
+            listOf(startHourPicker, endHourPicker, transactionHourPicker).forEach { picker ->
                 picker.minValue = 0
                 picker.maxValue = 23
                 picker.setFormatter { String.format(locale, "%02d", it) }
             }
 
             // Configure minute pickers (0-59 in 1-minute increments)
-            listOf(startMinutePicker, endMinutePicker).forEach { picker ->
+            listOf(startMinutePicker, endMinutePicker, transactionMinutePicker).forEach { picker ->
                 picker.minValue = 0
                 picker.maxValue = 59 // 0-59 in 1 minute steps
                 picker.setFormatter { String.format(locale, "%02d", it) }
@@ -106,6 +107,8 @@ class EventEditActivity : AppCompatActivity() {
             startMinutePicker.value = startTime.minute
             endHourPicker.value = endTime.hour
             endMinutePicker.value = endTime.minute
+            transactionHourPicker.value = transactionTime.hour
+            transactionMinutePicker.value = transactionTime.minute
         }
     }
 
@@ -163,7 +166,15 @@ class EventEditActivity : AppCompatActivity() {
         binding.apply {
             // Update visibility based on mode
             transactionType.visibility = if (isTransactionMode) View.VISIBLE else View.INVISIBLE
-            timeRecyclerView.visibility = if (isTransactionMode) View.INVISIBLE else View.VISIBLE
+//            timeRecyclerView.visibility = if (isTransactionMode) View.INVISIBLE else View.VISIBLE
+            // Update by Joshua
+            timeRecyclerView.visibility = if (isTransactionMode) View.GONE else View.VISIBLE
+            transactionTimeLayout.visibility = if (isTransactionMode) View.VISIBLE else View.GONE
+
+            // Show/Hide tags/location based on mode
+            tagsLayout.visibility = if (isTransactionMode) View.VISIBLE else View.GONE
+            eventLocationET.hint = if (isTransactionMode) "Location (Optional)" else "Location"
+            // ========================================
 
             // Update button states
             btnToggleTransaction.setImageResource(
@@ -210,6 +221,14 @@ class EventEditActivity : AppCompatActivity() {
                 endTime = LocalTime.of(endTime.hour, newVal)
                 validateTimes()
             }
+            transactionHourPicker.setOnValueChangedListener { _, _, newVal ->
+                transactionTime = LocalTime.of(newVal, transactionTime.minute)
+                validateTimes()
+            }
+            transactionMinutePicker.setOnValueChangedListener { _, _, newVal ->
+                transactionTime = LocalTime.of(transactionTime.hour, newVal)
+                validateTimes()
+            }
 
             // Mode toggle buttons
             btnToggleTransaction.setOnClickListener { toggleTransactionMode() }
@@ -229,7 +248,7 @@ class EventEditActivity : AppCompatActivity() {
     }
     // Validate time input
     private fun validateTimes(): Boolean {
-        return if (startTime.isAfter(endTime)) {
+        return if (!isTransactionMode && startTime.isAfter(endTime)) {
             Toast.makeText(this, "End time must be after start time", Toast.LENGTH_SHORT).show()
             false
         } else {
@@ -284,21 +303,38 @@ class EventEditActivity : AppCompatActivity() {
 
     // Prepare data for firestore
     private fun prepareHabitData(): Map<String, Any> {
-        return hashMapOf(
-            "name" to binding.eventNameET.text.toString().trim(),
-            "description" to binding.messageEditText.text.toString(),
-            "location" to binding.eventLocationET.text.toString(),
-            "date" to selectedDate.toString(),
-            "startTime" to formattedShortTime(startTime),
-            "endTime" to formattedShortTime(endTime),
-            "amount" to getCurrencyValue(),
-            "transactionType" to currentType.name,
-            "createdAt" to FieldValue.serverTimestamp(),
-            "isRecurring" to binding.recurringCheckBox.isChecked,
-            "isTransaction" to isTransactionMode
-        ).apply {
-            if (binding.recurringCheckBox.isChecked) {
-                putAll(prepareRecurrenceData())
+        if(isTransactionMode) {
+            return hashMapOf(
+                "name" to binding.eventNameET.text.toString().trim(),
+                "description" to binding.messageEditText.text.toString(),
+                "location" to binding.eventLocationET.text.toString(),
+                "tags" to binding.tagsEditText.text.toString().split(",").map { it.trim() },
+                "time" to formattedShortTime(transactionTime),
+                "amount" to getCurrencyValue(),
+                "date" to selectedDate.toString(),
+                "transactionType" to currentType.name,
+                "createdAt" to FieldValue.serverTimestamp(),
+                "isRecurring" to binding.recurringCheckBox.isChecked
+            ).apply {
+                if (binding.recurringCheckBox.isChecked) {
+                    putAll(prepareRecurrenceData())
+                }
+            }
+        }
+        else {
+            return hashMapOf(
+                "name" to binding.eventNameET.text.toString().trim(),
+                "description" to binding.messageEditText.text.toString(),
+                "location" to binding.eventLocationET.text.toString(),
+                "date" to selectedDate.toString(),
+                "startTime" to formattedShortTime(startTime),
+                "endTime" to formattedShortTime(endTime),
+                "createdAt" to FieldValue.serverTimestamp(),
+                "isRecurring" to binding.recurringCheckBox.isChecked
+            ).apply {
+                if (binding.recurringCheckBox.isChecked) {
+                    putAll(prepareRecurrenceData())
+                }
             }
         }
     }
@@ -326,69 +362,121 @@ class EventEditActivity : AppCompatActivity() {
 
     // Create new habit in firestore
     private fun createNewHabit(habitData: Map<String, Any>) {
-        firestoreHelper.addUserHabit(
-            habitData = habitData,
-            onSuccess = { id ->
-                currentHabitId = id
-                showSuccess("Habit created successfully")
-            },
-            onFailure = { e ->
-                showError("Creation failed: ${e.message}")
-            }
-        )
+        if(isTransactionMode) {
+            firestoreHelper.addUserTransaction(
+                transactionData = habitData,
+                onSuccess = { id ->
+                    currentHabitId = id
+                    showSuccess("Habit created successfully")
+                },
+                onFailure = { e ->
+                    showError("Creation failed: ${e.message}")
+                }
+            )
+        }
+        else {
+            firestoreHelper.addUserHabit(
+                habitData = habitData,
+                onSuccess = { id ->
+                    currentHabitId = id
+                    showSuccess("Habit created successfully")
+                },
+                onFailure = { e ->
+                    showError("Creation failed: ${e.message}")
+                }
+            )
+        }
     }
 
     // Update existing habit in firestore
     private fun updateExistingHabit(habitData: Map<String, Any>) {
-        firestoreHelper.updateUserHabit(
-            habitId = currentHabitId!!,
-            updatedData = habitData,
-            onSuccess = { showSuccess("Habit updated successfully") },
-            onFailure = { e ->
-                showError("Update failed: ${e.message}")
-            }
-        )
+        if(isTransactionMode) {
+            firestoreHelper.updateUserTransaction(
+                transactionId = currentHabitId!!,
+                updatedData = habitData,
+                onSuccess = { showSuccess("Habit updated successfully") },
+                onFailure = { e ->
+                    showError("Update failed: ${e.message}")
+                }
+            )
+        }
+        else {
+            firestoreHelper.updateUserHabit(
+                habitId = currentHabitId!!,
+                updatedData = habitData,
+                onSuccess = { showSuccess("Habit updated successfully") },
+                onFailure = { e ->
+                    showError("Update failed: ${e.message}")
+                }
+            )
+        }
     }
 
     // Load existing habit if editing
     private fun loadExistingHabitIfEditing() {
-        currentHabitId?.let { habitId ->
-            firestoreHelper.getUserHabit(
-                habitId = habitId,
-                onSuccess = { habitData ->
-                    populateForm(habitData)
-                },
-                onFailure = { e ->
-                    showError("Error loading habit: ${e.message}")
-                }
-            )
+        if(isTransactionMode) {
+            currentHabitId?.let { transactionId ->
+                firestoreHelper.getUserTransaction(
+                    transactionId = transactionId,
+                    onSuccess = { transactionData ->
+                        populateForm(transactionData)
+                    },
+                    onFailure = { e ->
+                        showError("Error loading habit: ${e.message}")
+                    }
+                )
+            }
+        }
+        else {
+            currentHabitId?.let { habitId ->
+                firestoreHelper.getUserHabit(
+                    habitId = habitId,
+                    onSuccess = { habitData ->
+                        populateForm(habitData)
+                    },
+                    onFailure = { e ->
+                        showError("Error loading habit: ${e.message}")
+                    }
+                )
+            }
         }
     }
 
     // Populate form with habit data
     private fun populateForm(habitData: Map<String, Any>) {
         binding.apply {
+            // Common fields
             eventNameET.setText(habitData["name"].toString())
             messageEditText.setText(habitData["description"].toString())
             eventLocationET.setText(habitData["location"].toString())
 
-            habitData["startTime"]?.toString()?.let {
-                startTime = LocalTime.parse(it)
-                startHourPicker.value = startTime.hour
-                startMinutePicker.value = startTime.minute
-            }
-            habitData["endTime"]?.toString()?.let {
-                endTime = LocalTime.parse(it)
-                endHourPicker.value = endTime.hour
-                endMinutePicker.value = endTime.minute
-            }
+            if (isTransactionMode) {
+                // Loading amount
+                val amount = habitData["amount"] as? Double ?: 0.0
+                setCurrencyValue(amount)
 
-            val amount = habitData["amount"] as? Double ?: 0.0
-            if (amount != 0.0) {
-                setCurrencyValue(abs(amount))
-                val type = habitData["transactionType"] as? String ?: "EXPENSE"
-                currentType = TransactionType.valueOf(type)
-                isTransactionMode = true
+                // Loading tags
+                val tags = habitData["tags"] as? List<*> ?: emptyList<String>()
+                tagsEditText.setText(tags.joinToString(", "))
+
+                //Loading transaction time pickers
+                habitData["time"]?.toString()?.let {
+                    val time = LocalTime.parse(it)
+                    transactionHourPicker.value = time.hour
+                    transactionMinutePicker.value = time.minute
+                }
+            }
+            else {
+                habitData["startTime"]?.toString()?.let {
+                    startTime = LocalTime.parse(it)
+                    startHourPicker.value = startTime.hour
+                    startMinutePicker.value = startTime.minute
+                }
+                habitData["endTime"]?.toString()?.let {
+                    endTime = LocalTime.parse(it)
+                    endHourPicker.value = endTime.hour
+                    endMinutePicker.value = endTime.minute
+                }
             }
 
             updateUI()

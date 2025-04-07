@@ -199,80 +199,95 @@
                         android:id="@+id/transactionType"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:layout_gravity="center"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:visibility="visible">
 
-                        <TextView
-                            android:id="@+id/currency"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/dollarSign_activity_event_edit"
-                            android:textSize="24sp"
-                            android:layout_gravity="center" /> <!-- currency -->
-
-                        <EditText
-                            android:id="@+id/editTextDollars"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:autofillHints="dollar Amount"
-                            android:hint="@string/autofillHints_editTextDollars_activity_event_edit"
-                            android:inputType="number"
-                            android:digits="0987654321,"
-                            android:maxLength="13"
-                            android:textSize="16sp"
-                            android:backgroundTint="@color/teal_700" />
-
-                        <TextView
-                            android:id="@+id/editTextDecimalSeparator"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/dotDecimal_activity_event_edit"
-                            android:textSize="16sp" />
-
-                        <EditText
-                            android:id="@+id/editTextCents"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/autofillHints_editTextCents_activity_event_edit"
-                            android:autofillHints="cent Amount"
-                            android:inputType="number"
-                            android:digits="0987654321"
-                            android:maxLength="2"
-                            android:textSize="16sp"
-                            android:backgroundTint="@color/teal_700" />
-
-                        <ImageButton
-                            android:id="@+id/btnToggleIncome"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
                             android:layout_gravity="center"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="@string/accessibility_btnToggleIncome_activity_event_edit"
-                            android:src="@drawable/ic_income"
-                            app:tint="#757575" /> <!-- btnToggleIncome -->
+                            android:orientation="horizontal"
+                            android:visibility="visible" >
+                            <TextView
+                                android:id="@+id/currency"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/dollarSign_activity_event_edit"
+                                android:textSize="24sp" /> <!-- currency -->
+
+                            <EditText
+                                android:id="@+id/editTextDollars"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:autofillHints="dollar Amount"
+                                android:hint="@string/autofillHints_editTextDollars_activity_event_edit"
+                                android:inputType="number"
+                                android:digits="0987654321,"
+                                android:maxLength="13"
+                                android:textSize="16sp"
+                                android:backgroundTint="@color/teal_700" />
+
+                            <TextView
+                                android:id="@+id/editTextDecimalSeparator"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="@string/dotDecimal_activity_event_edit"
+                                android:textSize="16sp" />
+
+                            <EditText
+                                android:id="@+id/editTextCents"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:hint="@string/autofillHints_editTextCents_activity_event_edit"
+                                android:autofillHints="cent Amount"
+                                android:inputType="number"
+                                android:digits="0987654321"
+                                android:maxLength="2"
+                                android:textSize="16sp"
+                                android:backgroundTint="@color/teal_700" />
+
+                            <ImageButton
+                                android:id="@+id/btnToggleIncome"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:contentDescription="@string/accessibility_btnToggleIncome_activity_event_edit"
+                                android:src="@drawable/ic_income"
+                                app:tint="#757575" /> <!-- btnToggleIncome -->
+                            </LinearLayout>
 
                         <LinearLayout
                             android:id="@+id/transactionTimeLayout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:orientation="horizontal"
-                            android:visibility="gone">
+                            android:visibility="visible">
 
                             <NumberPicker
                                 android:id="@+id/transactionHourPicker"
                                 android:layout_width="48dp"
-                                android:layout_height="100dp" />
+                                android:layout_height="100dp"
+                                android:layout_gravity="center" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center"
                                 android:text="@string/divider_activity_event_edit"/>
 
                             <NumberPicker
                                 android:id="@+id/transactionMinutePicker"
                                 android:layout_width="48dp"
-                                android:layout_height="100dp" />
+                                android:layout_height="100dp"
+                                android:layout_gravity="center"/>
                         </LinearLayout>
 
                     </LinearLayout> <!-- transactionType, currency, editTextMoney, btnToggleIncome -->
