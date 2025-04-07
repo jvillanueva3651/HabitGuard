@@ -27,6 +27,11 @@ import com.washburn.habitguard.databinding.EventCellBinding
 import com.washburn.habitguard.ui.calendar.CalendarUtils.formattedTimeFromString
 import kotlin.math.abs
 
+//TODO: Fix EventAdapter to work around event versus transaction logic
+// Currently, only events are displayed on the calendar views, NOT transactions
+// What kind of logic do we want with that anyways? Show each transaction one by one or
+// display a unified summation of transactions for that day??
+
 @RequiresApi(Build.VERSION_CODES.O)
 class EventAdapter(
     private val context: Context,
