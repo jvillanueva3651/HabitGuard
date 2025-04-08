@@ -6,6 +6,7 @@ comGoogleAndroidGmsPlayServicesAuthBase5 = "18.1.0"
 compiler = "4.16.0"
 coreKtxVersion = "1.15.0"
 firebaseAuthVersion = "23.2.0"
+generativeai = "0.9.0"
 glide = "4.16.0"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -48,6 +49,7 @@ com-google-android-gms-play-services-auth-api-phone3 = { module = "com.google.an
 com-google-android-gms-play-services-auth-base7 = { module = "com.google.android.gms:play-services-auth-base", version.ref = "comGoogleAndroidGmsPlayServicesAuthBase5" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
+generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gms-play-services-identity = { module = "com.google.android.gms:play-services-identity", version.ref = "playServicesIdentity" }
 google-firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuthVersion" }

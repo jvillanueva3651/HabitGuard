@@ -1,4 +1,13 @@
+/**===========================================================================================
+ * ProfileEditActivity for handling profile-related tasks
+ * REF    : USE_BY -> .SettingActivity
+ * Purpose: Edit and see user information
+ * Fun:  1. Handles camera permission requests to change icon,
+ *       2. Alter user info,
+ *       3. Validate user info.
+============================================================================================*/
 package com.washburn.habitguard.settings
+
 
 import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
@@ -29,20 +38,23 @@ import android.util.Patterns
 import androidx.core.net.toUri
 import java.text.SimpleDateFormat
 
+@Suppress("DEPRECATION")
 @RequiresApi(Build.VERSION_CODES.O)
 class ProfileEditActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileEditBinding
+
     private val firestoreHelper = FirestoreHelper()
-    private val auth = FirebaseAuth.getInstance()
-    private val currentUser get() = auth.currentUser
+
     private val cameraHelper = CameraHelper(this)
+
     private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { selectedImageUri = uri
             loadImageIntoView(uri) }
     }
 
     private var selectedImageUri: Uri? = null
+
     private var originalEmail: String = ""
     private var isEmailChanged = false
 
@@ -69,9 +81,13 @@ class ProfileEditActivity : AppCompatActivity() {
 
     private fun setupViews() {
         binding.changePhotoButton.setOnClickListener { showPhotoSourceDialog() }
+
         binding.mapButton.setOnClickListener { launchMaps() }
+
         binding.saveButton.setOnClickListener { attemptSave() }
+
         binding.birthdayEditText.setOnClickListener { showDatePickerDialog() }
+
         binding.genderRadioGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 R.id.maleRadioButton -> showToast(this, "Male selected")
@@ -106,7 +122,7 @@ class ProfileEditActivity : AppCompatActivity() {
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     populateFields(document)
-                    originalEmail = document.getString("email") ?: currentUser?.email ?: ""
+                    originalEmail = document.getString("email") ?: FirebaseAuth.getInstance().currentUser?.email ?: ""
                 } else {
                     showToast(this, "No profile data found")
                 }
@@ -305,10 +321,10 @@ class ProfileEditActivity : AppCompatActivity() {
 
     private fun reauthenticateAndUpdateEmail(newEmail: String, password: String) {
         val credential = EmailAuthProvider.getCredential(originalEmail, password)
-        currentUser?.reauthenticate(credential)
+        FirebaseAuth.getInstance().currentUser?.reauthenticate(credential)
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    currentUser?.updateEmail(newEmail)
+                    FirebaseAuth.getInstance().currentUser?.updateEmail(newEmail)
                         ?.addOnCompleteListener { updateTask ->
                             if (updateTask.isSuccessful) {
                                 completeSave("Profile and email updated successfully")

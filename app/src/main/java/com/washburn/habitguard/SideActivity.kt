@@ -17,9 +17,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.content.Intent
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.widget.Toast
 import android.widget.TextView
 import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.ui.navigateUp
@@ -28,13 +31,21 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.google.ai.client.generativeai.GenerativeModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 import com.washburn.habitguard.settings.SettingActivity
 import com.washburn.habitguard.databinding.ActivitySideBinding
+import com.washburn.habitguard.databinding.GeminiDialogBinding
+import kotlinx.coroutines.launch
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class SideActivity : AppCompatActivity() {
 
@@ -42,18 +53,23 @@ class SideActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
+    private var geminiDialog: AlertDialog? = null
+    private lateinit var generativeModel: GenerativeModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivitySideBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarSide.toolbar)
 
+        generativeModel = GenerativeModel(
+            modelName = "gemini-pro",
+            apiKey = getString(R.string.gemini_api_key),
+        )
+
         binding.appBarSide.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
+            showGeminiDialog()
         }
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
@@ -145,5 +161,63 @@ class SideActivity : AppCompatActivity() {
             // Set a default image if no photo URL is provided
             imageView.setImageResource(R.drawable.ic_launcher_foreground)
         }
+    }
+
+    private fun showGeminiDialog() {
+        geminiDialog?.dismiss()
+
+        val dialogBinding = GeminiDialogBinding.inflate(LayoutInflater.from(this))
+
+        geminiDialog = AlertDialog.Builder(this)
+            .setView(dialogBinding.root)
+            .setCancelable(true)
+            .create().apply {
+                window?.setBackgroundDrawableResource(android.R.color.transparent)
+                window?.setLayout(
+                    (resources.displayMetrics.widthPixels * 0.85).toInt(),
+                    (resources.displayMetrics.heightPixels * 0.7).toInt()
+                )
+                window?.setGravity(Gravity.BOTTOM or Gravity.END)
+                window?.attributes?.y = -100
+            }
+
+        dialogBinding.btnSubmit.setOnClickListener {
+            val query = dialogBinding.etUserQuery.text.toString()
+            if (query.isNotEmpty()) {
+                dialogBinding.progressBar.isVisible = true
+                dialogBinding.tvResponse.text = ""
+
+                lifecycleScope.launch {
+                    try {
+                        val response = generativeModel.generateContent(query)
+                        dialogBinding.tvResponse.text = response.text ?: "No response received"
+                    } catch (e: Exception) {
+                        val errorMsg = when (e) {
+                            is SocketTimeoutException -> "Request timed out"
+                            is UnknownHostException -> "No internet connection"
+                            is IOException -> "Network error"
+                            else -> "Error: ${e.localizedMessage}"
+                        }
+                        dialogBinding.tvResponse.text = errorMsg
+                        Toast.makeText(this@SideActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                    } finally {
+                        dialogBinding.progressBar.isVisible = false
+                    }
+                }
+            } else {
+                dialogBinding.etUserQuery.error = "Please enter a question"
+            }
+        }
+
+        dialogBinding.btnClose.setOnClickListener {
+            geminiDialog?.dismiss()
+        }
+
+        geminiDialog?.show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        geminiDialog?.dismiss()
     }
 }
