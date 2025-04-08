@@ -10,6 +10,8 @@
     <string name="date_format">Date: %s</string>
 
     <string name="default_web_client_id">1039653439392-ghjgk0v9hs69e4go99hv4rflsgehcgnk.apps.googleusercontent.com</string>
+    <string name="gemini_api_key">AIzaSyC3FwsSBaS_eDHHvXFy_Kh3d5F_sD7ECpc</string>
+
 
     <!-- Wierd to suppress the warning but it works -->
     <string name="event_with_time_format">%1$s (%2$s)</string>
@@ -60,7 +62,7 @@
     <string name="mon_activity_week_view">MON</string>
     <string name="tue_activity_week_view">TUE</string>
     <string name="wed_activity_week_view">WED</string>
-    <string name="thur_activity_week_view">THUR</string>
+    <string name="thu_activity_week_view">THU</string>
     <string name="fri_activity_week_view">FRI</string>
     <string name="sat_activity_week_view">SAT</string>
     <string name="newEventButton__activity_week_view">New Event</string>
@@ -148,6 +150,9 @@
     <string name="birthdayEditText_activity_profile_edit">Select birthday</string>
     <string name="tags_comma_separated_activity_event_edit">Tags (comma-separated)</string>
     <string name="tagsEditText_activity_event_edit">e.g., Groceries, Transport</string>
+    <string name="weeklyActionButton_fragment_calendar">Weekly</string>
+    <string name="addDotButton_fragment_calendar">Add Event</string>
+    <string name="description_fragment_calendar">Description</string>
 
 
 </resources>

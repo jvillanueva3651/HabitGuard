@@ -31,6 +31,7 @@ import com.washburn.habitguard.databinding.ActivityEventEditBinding
 import com.washburn.habitguard.ui.calendar.CalendarUtils.formattedDate
 import com.washburn.habitguard.ui.calendar.CalendarUtils.formattedShortTime
 import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
+import com.washburn.habitguard.ui.finance.Transaction
 import java.util.*
 import java.time.LocalTime
 import java.text.NumberFormat

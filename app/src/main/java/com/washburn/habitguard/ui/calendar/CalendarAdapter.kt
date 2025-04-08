@@ -1,5 +1,6 @@
 package com.washburn.habitguard.ui.calendar
 
+
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Build
@@ -33,7 +34,7 @@ class CalendarAdapter(
         val cellWidth = displayMetrics.widthPixels / 7
         val cellHeight = (cellWidth * 1.2).toInt()
 
-        // Set fixed height for each cell (1/6th of parent height)
+        // Set fixed height for each cell
         view.layoutParams = RecyclerView.LayoutParams(
             cellWidth,
             cellHeight

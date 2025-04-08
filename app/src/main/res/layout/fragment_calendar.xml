@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:background="@drawable/bg_calendar"
     tools:context=".ui.calendar.MonthlyViewActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -37,11 +38,10 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:backgroundTint="@color/teal_700"
-                    android:text="Weekly"
+                    android:text="@string/weeklyActionButton_fragment_calendar"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    tools:ignore="HardcodedText" />
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -64,11 +64,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
-                        android:text="Jun 2003"
+                        android:text="@string/monthYearTV_activity_week_view"
                         android:textAlignment="center"
                         android:textColor="@color/black"
-                        android:textSize="20sp"
-                        tools:ignore="HardcodedText" />
+                        android:textSize="20sp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/nextMonthButton"
@@ -91,93 +90,86 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="SUN"
+                        android:text="@string/sun_activity_week_view"
                         android:textAlignment="center"
                         android:textColor="@color/gray"
-                        android:textSize="16sp"
-                        tools:ignore="HardcodedText" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="MON"
+                        android:text="@string/mon_activity_week_view"
                         android:textAlignment="center"
                         android:textColor="@color/gray"
-                        android:textSize="16sp"
-                        tools:ignore="HardcodedText" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="TUE"
+                        android:text="@string/tue_activity_week_view"
                         android:textAlignment="center"
                         android:textColor="@color/gray"
-                        android:textSize="16sp"
-                        tools:ignore="HardcodedText" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="WED"
+                        android:text="@string/wed_activity_week_view"
                         android:textAlignment="center"
                         android:textColor="@color/gray"
-                        android:textSize="16sp"
-                        tools:ignore="HardcodedText" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="THUR"
+                        android:text="@string/thu_activity_week_view"
                         android:textAlignment="center"
                         android:textColor="@color/gray"
-                        android:textSize="16sp"
-                        tools:ignore="HardcodedText" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="FRI"
+                        android:text="@string/fri_activity_week_view"
                         android:textAlignment="center"
                         android:textColor="@color/gray"
-                        android:textSize="16sp"
-                        tools:ignore="HardcodedText" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="SAT"
+                        android:text="@string/sat_activity_week_view"
                         android:textAlignment="center"
                         android:textColor="@color/gray"
-                        android:textSize="16sp"
-                        tools:ignore="HardcodedText" />
+                        android:textSize="16sp" />
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/calendarRecyclerView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:padding="16dp"
-                    android:clipToPadding="false" />
+                    android:background="?attr/selectableItemBackground" />
+
                 <Button
                     android:id="@+id/addDotButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Add Event"
+                    android:text="@string/addDotButton_fragment_calendar"
                     android:layout_gravity="center"
                     android:backgroundTint="@color/teal_700"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    tools:ignore="HardcodedText" />
+                    android:textStyle="bold" />
+
             </LinearLayout>
+
         </androidx.cardview.widget.CardView>
 
         <!-- New Description CardView -->
@@ -206,18 +198,18 @@
                     android:id="@+id/descriptionTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Description"
+                    android:text="@string/description_fragment_calendar"
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="8dp"
-                    tools:ignore="HardcodedText" />
-
+                    android:layout_marginBottom="8dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/itemsRecyclerView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="300dp"
+                    android:layout_marginTop="8dp"
+                    android:nestedScrollingEnabled="true" />
 
             </LinearLayout>
 

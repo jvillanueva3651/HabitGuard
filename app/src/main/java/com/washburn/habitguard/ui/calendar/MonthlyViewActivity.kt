@@ -29,8 +29,6 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
 
     private lateinit var binding: FragmentCalendarBinding
 
-    private lateinit var calendarAdapter: CalendarAdapter // Updated Monthly date view
-
     private lateinit var eventAdapter: EventAdapter // Updated Event view
 
     private lateinit var firestoreHelper: FirestoreHelper // Access to Firestore
@@ -138,7 +136,7 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
             }
         )
 
-        calendarAdapter = CalendarAdapter(
+        binding.calendarRecyclerView.adapter = CalendarAdapter(
             daysInMonthArray(),
             this,
             allEvents.map { (_, eventData) ->
@@ -149,8 +147,6 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
                 )
             }
         )
-
-        binding.calendarRecyclerView.adapter = calendarAdapter
     }
 
     private fun setEventAdapter() {

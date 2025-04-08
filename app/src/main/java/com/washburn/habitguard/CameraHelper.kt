@@ -1,3 +1,11 @@
+/**===========================================================================================
+ * CameraHelper for handling camera-related tasks
+ * REF    : USE_BY -> .SignupActivity
+ * Purpose: Modularize camera-related functionality for better code organization.
+ * Fun:  1. Handles camera permission requests,
+ *       2. Camera initialization,
+ *       3. Photo capture functionality.
+============================================================================================*/
 package com.washburn.habitguard
 
 import android.app.Activity.RESULT_OK
