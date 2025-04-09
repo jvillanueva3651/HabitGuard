@@ -20,7 +20,6 @@ import androidx.core.net.toUri
 class CameraHelper(private val activity: AppCompatActivity) {
     var onPhotoTaken: ((Uri) -> Unit)? = null
     var onPermissionDenied: (() -> Unit)? = null
-    var onImagePicked: ((Uri) -> Unit)? = null
 
     private val cameraLauncher = activity.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()

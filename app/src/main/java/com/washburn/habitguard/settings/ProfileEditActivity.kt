@@ -15,7 +15,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -34,29 +36,25 @@ import com.washburn.habitguard.R
 import com.washburn.habitguard.databinding.ActivityProfileEditBinding
 import com.washburn.habitguard.firebase.AuthUtils.showToast
 import java.util.*
-import android.util.Patterns
 import androidx.core.net.toUri
-import java.text.SimpleDateFormat
+import com.washburn.habitguard.firebase.FirebaseAuthHelper
 
 @Suppress("DEPRECATION")
 @RequiresApi(Build.VERSION_CODES.O)
 class ProfileEditActivity : AppCompatActivity() {
 
+    // Region: Properties and Initialization
     private lateinit var binding: ActivityProfileEditBinding
-
     private val firestoreHelper = FirestoreHelper()
-
     private val cameraHelper = CameraHelper(this)
-
-    private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { selectedImageUri = uri
-            loadImageIntoView(uri) }
-    }
-
     private var selectedImageUri: Uri? = null
 
-    private var originalEmail: String = ""
-    private var isEmailChanged = false
+    private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            selectedImageUri = uri
+            loadImageIntoView(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,8 +65,70 @@ class ProfileEditActivity : AppCompatActivity() {
         setupViews()
         loadProfileData()
     }
+    // End Region
 
-    // Region: Setup Methods
+    // Region: View Setup and UI Configuration
+    private fun setupViews() {
+        setupPhotoButton()
+        setupMapButton()
+        setupSaveButton()
+        setupBirthdayField()
+        setupGenderSelection()
+    }
+
+    private fun setupPhotoButton() {
+        binding.changePhotoButton.setOnClickListener { showPhotoSourceDialog() }
+    }
+
+    private fun setupMapButton() {
+        binding.mapButton.setOnClickListener { launchMaps() }
+    }
+
+    private fun setupSaveButton() {
+        binding.saveButton.setOnClickListener { attemptSave() }
+    }
+
+    private fun setupBirthdayField() {
+        binding.birthdayEditText.inputType = InputType.TYPE_CLASS_NUMBER
+        binding.birthdayEditText.addDateSeparator()
+        binding.birthdayEditText.setOnClickListener { showDatePickerDialog() }
+    }
+
+    private fun setupGenderSelection() {
+        binding.genderRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.maleRadioButton -> showToast(this, "Male selected")
+                R.id.femaleRadioButton -> showToast(this, "Female selected")
+            }
+        }
+    }
+
+    private fun EditText.addDateSeparator() {
+        this.addTextChangedListener(object : TextWatcher {
+            private var current = ""
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                if (s.toString() != current) {
+                    val clean = s.toString().replace("[^\\d]".toRegex(), "")
+                    val formatted = when (clean.length) {
+                        in 1..2 -> clean
+                        in 3..4 -> "${clean.substring(0, 2)}/${clean.substring(2)}"
+                        in 5..8 -> "${clean.substring(0, 2)}/${clean.substring(2, 4)}/${clean.substring(4)}"
+                        else -> current
+                    }
+                    current = formatted
+                    this@addDateSeparator.setText(formatted)
+                    this@addDateSeparator.setSelection(formatted.length)
+                }
+            }
+        })
+    }
+    // End Region
+
+    // Region: Profile Photo Handling
     private fun setupCameraHelper() {
         cameraHelper.onPhotoTaken = { uri ->
             selectedImageUri = uri
@@ -76,23 +136,6 @@ class ProfileEditActivity : AppCompatActivity() {
         }
         cameraHelper.onPermissionDenied = {
             showToast(this, "Camera permission denied")
-        }
-    }
-
-    private fun setupViews() {
-        binding.changePhotoButton.setOnClickListener { showPhotoSourceDialog() }
-
-        binding.mapButton.setOnClickListener { launchMaps() }
-
-        binding.saveButton.setOnClickListener { attemptSave() }
-
-        binding.birthdayEditText.setOnClickListener { showDatePickerDialog() }
-
-        binding.genderRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.maleRadioButton -> showToast(this, "Male selected")
-                R.id.femaleRadioButton -> showToast(this, "Female selected")
-            }
         }
     }
 
@@ -116,13 +159,14 @@ class ProfileEditActivity : AppCompatActivity() {
             .circleCrop()
             .into(binding.profilePhoto)
     }
+    // End Region
 
+    // Region: Profile Data Loading
     private fun loadProfileData() {
         firestoreHelper.getUserInfoDocumentField(firestoreHelper.getCurrentUserId().toString()).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     populateFields(document)
-                    originalEmail = document.getString("email") ?: FirebaseAuth.getInstance().currentUser?.email ?: ""
                 } else {
                     showToast(this, "No profile data found")
                 }
@@ -135,14 +179,12 @@ class ProfileEditActivity : AppCompatActivity() {
     private fun populateFields(document: DocumentSnapshot) {
         with(binding) {
             // Personal Info
-            emailEditText.setText(document.getString("email") ?: "")
-            usernameEditText.setText(document.getString("username") ?: "")
-            firstNameEditText.setText(document.getString("firstName") ?: "")
-            lastNameEditText.setText(document.getString("lastName") ?: "")
-
-            document.getString("birthday")?.let { dateStr ->
-                birthdayEditText.setText(dateStr)
-            }
+            emailEditText.isEnabled = false
+            setTextSafely(emailEditText, document.getString("email"))
+            setTextSafely(usernameEditText, document.getString("username"), "She sells seashells by the seashore")
+            setTextSafely(firstNameEditText, document.getString("firstName"), "Chip")
+            setTextSafely(lastNameEditText, document.getString("lastName"), "Munk")
+            setBirthday(document.getString("birthday"))
 
             // Gender Selection
             when (document.getString("gender")) {
@@ -151,32 +193,101 @@ class ProfileEditActivity : AppCompatActivity() {
             }
 
             // Address Info
-            addressEditText.setText(document.getString("address") ?: "")
-            cityEditText.setText(document.getString("city") ?: "")
-            stateEditText.setText(document.getString("state") ?: "")
-            zipCodeEditText.setText(document.getString("zipCode") ?: "")
+            setTextSafely(addressEditText, document.getString("address"), "Sweet Home Alabama")
+            setTextSafely(cityEditText, document.getString("city"), "Crawfordville")
+            setTextSafely(stateEditText, document.getString("state"), "Georgia")
+            setTextSafely(zipCodeEditText, document.getString("zipCode"), "30631")
 
             // Contact Info
-            phone1EditText.setText(document.getString("phone1") ?: "")
-            phone2EditText.setText(document.getString("phone2") ?: "")
+            setTextSafely(phone1EditText, document.getString("phone1"))
+            setTextSafely(phone2EditText, document.getString("phone2"))
 
             // Profile Photo
             document.getString("photoUri")?.takeIf { it.isNotBlank() }?.let { uri ->
-                Glide.with(this@ProfileEditActivity)
-                    .load(uri)
-                    .placeholder(R.drawable.ic_launcher_foreground)
-                    .error(R.drawable.ic_launcher_foreground)
-                    .circleCrop()
-                    .into(profilePhoto)
+                loadProfilePhoto(uri)
             }
+        }
+    }
+
+    private fun setTextSafely(editText: EditText, text: String?, default: String = "") {
+        editText.setText(text ?: default)
+    }
+
+    private fun setBirthday(dateStr: String?) {
+        dateStr?.let {
+            if (it.isNotEmpty()) {
+                try {
+                    val parts = it.split("-")
+                    if (parts.size == 3) {
+                        val birthDate = "${parts[1]}/${parts[2]}/${parts[0]}"
+                        binding.birthdayEditText.setText(birthDate)
+                    }
+                } catch (_: Exception) {
+                    binding.birthdayEditText.setText(dateStr)
+                }
+            }
+        }
+    }
+
+    private fun loadProfilePhoto(uri: String) {
+        Glide.with(this@ProfileEditActivity)
+            .load(uri)
+            .placeholder(R.drawable.ic_launcher_foreground)
+            .error(R.drawable.ic_launcher_foreground)
+            .circleCrop()
+            .into(binding.profilePhoto)
+    }
+    // End Region
+
+    // Region: Date Picker
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance().apply {
+            tryParseCurrentDate(binding.birthdayEditText.text.toString())
+        }
+
+        DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                val birthD = "%02d/%02d/%04d"
+                binding.birthdayEditText.setText(birthD.format(month + 1, day, year))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).apply {
+            datePicker.maxDate = System.currentTimeMillis()
+            datePicker.minDate = Calendar.getInstance().apply { add(Calendar.YEAR, -100) }.timeInMillis
+            show()
+        }
+    }
+
+    private fun Calendar.tryParseCurrentDate(currentDate: String) {
+        if (currentDate.isEmpty()) return
+
+        try {
+            val cleanDate = currentDate.replace("/", "")
+            when {
+                cleanDate.length <= 2 -> set(Calendar.MONTH, cleanDate.toInt() - 1)
+                cleanDate.length <= 4 -> {
+                    set(Calendar.MONTH, cleanDate.substring(0, 2).toInt() - 1)
+                    set(Calendar.DAY_OF_MONTH, cleanDate.substring(2).toInt())
+                }
+                else -> {
+                    set(
+                        cleanDate.substring(4).toInt(),
+                        cleanDate.substring(0, 2).toInt() - 1,
+                        cleanDate.substring(2, 4).toInt()
+                    )
+                }
+            }
+        } catch (_: Exception) {
         }
     }
     // End Region
 
-    // Region: Data Saving
+    // Region: Data Saving and Validation
     private fun attemptSave() {
         if (!validateInputs()) return
-
         val updates = prepareProfileUpdates()
 
         if (selectedImageUri != null) {
@@ -186,57 +297,25 @@ class ProfileEditActivity : AppCompatActivity() {
         }
     }
 
-    private fun showDatePickerDialog() {
-        val calendar = Calendar.getInstance()
-
-        try {
-            val currentDate = binding.birthdayEditText.text.toString()
-            if (currentDate.isNotEmpty()) {
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                sdf.parse(currentDate)?.let { date ->
-                    calendar.time = date
+    private fun validateInputs(): Boolean {
+        with(binding) {
+            return when {
+                usernameEditText.text.isNullOrBlank() -> {
+                    usernameEditText.error = "Username required"
+                    false
                 }
+                else -> true
             }
-        } catch (_: Exception) {
         }
-
-        val datePicker = DatePickerDialog(
-            this,
-            { _, year, month, day ->
-                // Format the selected date
-                val selectedDate = Calendar.getInstance().apply {
-                    set(year, month, day)
-                }
-                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    .format(selectedDate.time)
-
-                // Update the EditText
-                binding.birthdayEditText.setText(formattedDate)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-
-        datePicker.datePicker.maxDate = System.currentTimeMillis()
-
-        val minDate = Calendar.getInstance()
-        minDate.add(Calendar.YEAR, -100)
-        datePicker.datePicker.minDate = minDate.timeInMillis
-
-        datePicker.show()
     }
 
     private fun prepareProfileUpdates(): HashMap<String, Any> {
-        val newEmail = binding.emailEditText.text.toString()
-        isEmailChanged = newEmail != originalEmail
-
         return hashMapOf(
-            "email" to newEmail,
+            "email" to binding.emailEditText.text.toString(),
             "username" to binding.usernameEditText.text.toString(),
             "firstName" to binding.firstNameEditText.text.toString(),
             "lastName" to binding.lastNameEditText.text.toString(),
-            "birthday" to binding.birthdayEditText.text.toString(),
+            "birthday" to formatBirthdayForStorage(binding.birthdayEditText.text.toString()),
             "gender" to getSelectedGender(),
             "address" to binding.addressEditText.text.toString(),
             "city" to binding.cityEditText.text.toString(),
@@ -248,15 +327,33 @@ class ProfileEditActivity : AppCompatActivity() {
         )
     }
 
+    private fun formatBirthdayForStorage(birthdayText: String): String {
+        if (birthdayText.isEmpty()) return ""
+
+        return try {
+            val cleanDate = birthdayText.replace("/", "")
+            when {
+                cleanDate.length <= 4 -> ""
+                else -> "%04d-%02d-%02d".format(
+                    cleanDate.substring(4).toInt(),
+                    cleanDate.substring(0, 2).toInt(),
+                    cleanDate.substring(2, 4).toInt()
+                )
+            }
+        } catch (_: Exception) {
+            ""
+        }
+    }
+    // End Region
+
+    // Region: Firebase Operations
     private fun uploadImageAndSave(updates: HashMap<String, Any>) {
         selectedImageUri?.let { uri ->
             try {
-                val inputStream = contentResolver.openInputStream(uri)
-                inputStream?.let { stream ->
-                    val storageRef = FirebaseStorage.getInstance().reference
-                    val imageRef = storageRef.child("profile_images/${firestoreHelper.getCurrentUserId()}.jpg")
-
-                    imageRef.putStream(stream)
+                contentResolver.openInputStream(uri)?.let { stream ->
+                    FirebaseStorage.getInstance().reference
+                        .child("profile_images/${firestoreHelper.getCurrentUserId()}.jpg")
+                        .putStream(stream)
                         .addOnSuccessListener { taskSnapshot ->
                             taskSnapshot.storage.downloadUrl.addOnSuccessListener { downloadUri ->
                                 updates["photoUri"] = downloadUri.toString()
@@ -284,57 +381,12 @@ class ProfileEditActivity : AppCompatActivity() {
         firestoreHelper.getUserInfoDocumentField(firestoreHelper.getCurrentUserId().toString())
             .set(updates, SetOptions.merge())
             .addOnSuccessListener {
-                if (isEmailChanged) {
-                    verifyPasswordForEmailUpdate(updates["email"] as String)
-                } else {
-                    completeSave("Profile updated successfully")
-                }
+                showToast(this, "Profile updated successfully")
+                setResult(RESULT_OK)
+                finish()
             }
             .addOnFailureListener { e ->
                 showToast(this, "Failed to save: ${e.message}")
-            }
-    }
-
-    private fun verifyPasswordForEmailUpdate(newEmail: String) {
-        val passwordField = EditText(this).apply {
-            inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
-            hint = "Current password"
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("Verify Password")
-            .setMessage("To update your email, please enter your current password")
-            .setView(passwordField)
-            .setPositiveButton("Confirm") { _, _ ->
-                val password = passwordField.text.toString()
-                if (password.isNotBlank()) {
-                    reauthenticateAndUpdateEmail(newEmail, password)
-                } else {
-                    showToast(this, "Password cannot be empty")
-                }
-            }
-            .setNegativeButton("Cancel") { _, _ ->
-                completeSave("Profile updated (email not changed)")
-            }
-            .show()
-    }
-
-    private fun reauthenticateAndUpdateEmail(newEmail: String, password: String) {
-        val credential = EmailAuthProvider.getCredential(originalEmail, password)
-        FirebaseAuth.getInstance().currentUser?.reauthenticate(credential)
-            ?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    FirebaseAuth.getInstance().currentUser?.updateEmail(newEmail)
-                        ?.addOnCompleteListener { updateTask ->
-                            if (updateTask.isSuccessful) {
-                                completeSave("Profile and email updated successfully")
-                            } else {
-                                showToast(this, "Failed to update email: ${updateTask.exception?.message}")
-                            }
-                        }
-                } else {
-                    showToast(this, "Authentication failed: ${task.exception?.message}")
-                }
             }
     }
     // End Region
@@ -353,31 +405,4 @@ class ProfileEditActivity : AppCompatActivity() {
             showToast(this, "No maps app found")
         }
     }
-
-    private fun validateInputs(): Boolean {
-        with(binding) {
-            return when {
-                !isValidEmail(emailEditText.text.toString()) -> {
-                    emailEditText.error = "Invalid email format"
-                    false
-                }
-                usernameEditText.text.isNullOrBlank() -> {
-                    usernameEditText.error = "Username required"
-                    false
-                }
-                else -> true
-            }
-        }
-    }
-
-    private fun completeSave(message: String) {
-        showToast(this, message)
-        setResult(RESULT_OK)
-        finish()
-    }
-
-    private fun isValidEmail(email: String): Boolean {
-        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
-    // End Region
 }

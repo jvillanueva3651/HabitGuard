@@ -44,6 +44,7 @@ class EventEditActivity : AppCompatActivity() {
     // For referring to the habit ID
     companion object {
         const val EXTRA_HABIT_ID = "HABIT_ID"
+        const val EXTRA_TRANSACTION_ID = "TRANSACTION_ID"
     }
 
     private lateinit var binding: ActivityEventEditBinding
@@ -59,6 +60,7 @@ class EventEditActivity : AppCompatActivity() {
     private var currentType = TransactionType.INCOME
     private var isTransactionMode = false
     private var currentHabitId: String? = null
+    private var currentTransactionId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,12 +68,15 @@ class EventEditActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         currentHabitId = intent.getStringExtra(EXTRA_HABIT_ID)
+        currentTransactionId = intent.getStringExtra(EXTRA_TRANSACTION_ID)
+
         firestoreHelper = FirestoreHelper()
 
         // Compose UI
         initializeComponents()
-        // Load existing habit if editing
+        // Load existing event if editing
         loadExistingHabitIfEditing()
+        loadExistingTransactionIfEditing()
     }
 
     private fun initializeComponents() {
@@ -243,7 +248,10 @@ class EventEditActivity : AppCompatActivity() {
 
             // Save button with validation
             saveEventAction.setOnClickListener {
-                if (validateForm()) saveOrUpdateHabit()
+                if (validateForm() && !isTransactionMode)
+                    saveOrUpdateHabit()
+                else if (validateForm() && isTransactionMode)
+                    saveOrUpdateTransaction()
             }
         }
     }
@@ -288,6 +296,13 @@ class EventEditActivity : AppCompatActivity() {
             isValid = false
         }
 
+        if (isTransactionMode) {
+            if (getCurrencyValue() == 0.0) {
+                binding.editTextDollars.error = "Please enter an amount"
+                isValid = false
+            }
+        }
+
         return isValid
     }
 
@@ -302,40 +317,49 @@ class EventEditActivity : AppCompatActivity() {
         }
     }
 
+    // Save or update transaction to firestore
+    private fun saveOrUpdateTransaction() {
+        val transactionData = prepareTransactionData()
+
+        if (currentTransactionId != null) {
+            updateExistingTransaction(transactionData)
+        } else {
+            createNewTransaction(transactionData)
+        }
+    }
+
     // Prepare data for firestore
     private fun prepareHabitData(): Map<String, Any> {
-        if(isTransactionMode) {
-            return hashMapOf(
-                "name" to binding.eventNameET.text.toString().trim(),
-                "description" to binding.messageEditText.text.toString(),
-                "location" to binding.eventLocationET.text.toString(),
-                "tags" to binding.tagsEditText.text.toString().split(",").map { it.trim() },
-                "time" to formattedShortTime(transactionTime),
-                "amount" to getCurrencyValue(),
-                "date" to selectedDate.toString(),
-                "transactionType" to currentType.name,
-                "createdAt" to FieldValue.serverTimestamp(),
-                "isRecurring" to binding.recurringCheckBox.isChecked
-            ).apply {
-                if (binding.recurringCheckBox.isChecked) {
-                    putAll(prepareRecurrenceData())
-                }
+        return hashMapOf(
+            "name" to binding.eventNameET.text.toString().trim(),
+            "description" to binding.messageEditText.text.toString(),
+            "location" to binding.eventLocationET.text.toString(),
+            "date" to selectedDate.toString(),
+            "startTime" to formattedShortTime(startTime),
+            "endTime" to formattedShortTime(endTime),
+            "createdAt" to FieldValue.serverTimestamp(),
+            "isRecurring" to binding.recurringCheckBox.isChecked
+        ).apply {
+            if (binding.recurringCheckBox.isChecked) {
+                putAll(prepareRecurrenceData())
             }
         }
-        else {
-            return hashMapOf(
-                "name" to binding.eventNameET.text.toString().trim(),
-                "description" to binding.messageEditText.text.toString(),
-                "location" to binding.eventLocationET.text.toString(),
-                "date" to selectedDate.toString(),
-                "startTime" to formattedShortTime(startTime),
-                "endTime" to formattedShortTime(endTime),
-                "createdAt" to FieldValue.serverTimestamp(),
-                "isRecurring" to binding.recurringCheckBox.isChecked
-            ).apply {
-                if (binding.recurringCheckBox.isChecked) {
-                    putAll(prepareRecurrenceData())
-                }
+    }
+    private fun prepareTransactionData(): Map<String, Any> {
+        return hashMapOf(
+            "name" to binding.eventNameET.text.toString().trim(),
+            "description" to binding.messageEditText.text.toString(),
+            "location" to binding.eventLocationET.text.toString(),
+            "tags" to binding.tagsEditText.text.toString().split(",").map { it.trim() },
+            "transactionTime" to formattedShortTime(transactionTime),
+            "amount" to getCurrencyValue(),
+            "date" to selectedDate.toString(),
+            "transactionType" to currentType.name,
+            "createdAt" to FieldValue.serverTimestamp(),
+            "isRecurring" to binding.recurringCheckBox.isChecked
+        ).apply {
+            if (binding.recurringCheckBox.isChecked) {
+                putAll(prepareRecurrenceData())
             }
         }
     }
@@ -361,123 +385,125 @@ class EventEditActivity : AppCompatActivity() {
         )
     } // TODO still looking how to implement
 
-    // Create new habit in firestore
+    // Create new event in firestore
     private fun createNewHabit(habitData: Map<String, Any>) {
-        if(isTransactionMode) {
-            firestoreHelper.addUserTransaction(
-                transactionData = habitData,
-                onSuccess = { id ->
-                    currentHabitId = id
-                    showSuccess("Habit created successfully")
-                },
-                onFailure = { e ->
-                    showError("Creation failed: ${e.message}")
-                }
-            )
-        }
-        else {
-            firestoreHelper.addUserHabit(
-                habitData = habitData,
-                onSuccess = { id ->
-                    currentHabitId = id
-                    showSuccess("Habit created successfully")
-                },
-                onFailure = { e ->
-                    showError("Creation failed: ${e.message}")
-                }
-            )
-        }
+        firestoreHelper.addUserHabit(
+            habitData = habitData,
+            onSuccess = { id ->
+                currentHabitId = id
+                showSuccess("Habit created successfully")
+            },
+            onFailure = { e ->
+                showError("Creation failed: ${e.message}")
+            }
+        )
+    }
+    private fun createNewTransaction(transactionData: Map<String, Any>) {
+        firestoreHelper.addUserTransaction(
+            transactionData = transactionData,
+            onSuccess = { id ->
+                currentTransactionId = id
+                showSuccess("Transaction created successfully")
+            },
+            onFailure = { e ->
+                showError("Creation failed: ${e.message}")
+            }
+        )
     }
 
-    // Update existing habit in firestore
+    // Update existing event in firestore
     private fun updateExistingHabit(habitData: Map<String, Any>) {
-        if(isTransactionMode) {
-            firestoreHelper.updateUserTransaction(
-                transactionId = currentHabitId!!,
-                updatedData = habitData,
-                onSuccess = { showSuccess("Habit updated successfully") },
+        firestoreHelper.updateUserHabit(
+            habitId = currentHabitId!!,
+            updatedData = habitData,
+            onSuccess = { showSuccess("Habit updated successfully") },
+            onFailure = { e ->
+                showError("Update failed: ${e.message}")
+            }
+        )
+    }
+    private fun updateExistingTransaction(transactionData: Map<String, Any>) {
+        firestoreHelper.updateUserTransaction(
+            transactionId = currentTransactionId!!,
+            updatedData = transactionData,
+            onSuccess = { showSuccess("Habit updated successfully") },
+            onFailure = { e ->
+                showError("Update failed: ${e.message}")
+            }
+        )
+    }
+
+    // Load existing event if editing
+    private fun loadExistingHabitIfEditing() {
+        currentHabitId?.let { habitId ->
+            firestoreHelper.getUserHabit(
+                habitId = habitId,
+                onSuccess = { habitData ->
+                    populateFormHabit(habitData)
+                },
                 onFailure = { e ->
-                    showError("Update failed: ${e.message}")
-                }
-            )
-        }
-        else {
-            firestoreHelper.updateUserHabit(
-                habitId = currentHabitId!!,
-                updatedData = habitData,
-                onSuccess = { showSuccess("Habit updated successfully") },
-                onFailure = { e ->
-                    showError("Update failed: ${e.message}")
+                    showError("Error loading habit: ${e.message}")
                 }
             )
         }
     }
-
-    // Load existing habit if editing
-    private fun loadExistingHabitIfEditing() {
-        if(isTransactionMode) {
-            currentHabitId?.let { transactionId ->
-                firestoreHelper.getUserTransaction(
-                    transactionId = transactionId,
-                    onSuccess = { transactionData ->
-                        populateForm(transactionData)
-                    },
-                    onFailure = { e ->
-                        showError("Error loading habit: ${e.message}")
-                    }
-                )
-            }
-        }
-        else {
-            currentHabitId?.let { habitId ->
-                firestoreHelper.getUserHabit(
-                    habitId = habitId,
-                    onSuccess = { habitData ->
-                        populateForm(habitData)
-                    },
-                    onFailure = { e ->
-                        showError("Error loading habit: ${e.message}")
-                    }
-                )
-            }
+    private fun loadExistingTransactionIfEditing() {
+        currentTransactionId?.let { transactionId ->
+            firestoreHelper.getUserTransaction(
+                transactionId = transactionId,
+                onSuccess = { transactionData ->
+                    populateFormTransaction(transactionData)
+                },
+                onFailure = { e ->
+                    showError("Error loading habit: ${e.message}")
+                }
+            )
         }
     }
 
     // Populate form with habit data
-    private fun populateForm(habitData: Map<String, Any>) {
+    private fun populateFormHabit(habitData: Map<String, Any>) {
         binding.apply {
             // Common fields
             eventNameET.setText(habitData["name"].toString())
             messageEditText.setText(habitData["description"].toString())
             eventLocationET.setText(habitData["location"].toString())
 
-            if (isTransactionMode) {
-                // Loading amount
-                val amount = habitData["amount"] as? Double ?: 0.0
-                setCurrencyValue(amount)
-
-                // Loading tags
-                val tags = habitData["tags"] as? List<*> ?: emptyList<String>()
-                tagsEditText.setText(tags.joinToString(", "))
-
-                //Loading transaction time pickers
-                habitData["time"]?.toString()?.let {
-                    val time = LocalTime.parse(it)
-                    transactionHourPicker.value = time.hour
-                    transactionMinutePicker.value = time.minute
-                }
+            habitData["startTime"]?.toString()?.let {
+                startTime = LocalTime.parse(it)
+                startHourPicker.value = startTime.hour
+                startMinutePicker.value = startTime.minute
             }
-            else {
-                habitData["startTime"]?.toString()?.let {
-                    startTime = LocalTime.parse(it)
-                    startHourPicker.value = startTime.hour
-                    startMinutePicker.value = startTime.minute
-                }
-                habitData["endTime"]?.toString()?.let {
-                    endTime = LocalTime.parse(it)
-                    endHourPicker.value = endTime.hour
-                    endMinutePicker.value = endTime.minute
-                }
+            habitData["endTime"]?.toString()?.let {
+                endTime = LocalTime.parse(it)
+                endHourPicker.value = endTime.hour
+                endMinutePicker.value = endTime.minute
+            }
+
+            updateUI()
+        }
+    }
+
+    private fun populateFormTransaction(transactionData: Map<String, Any>) {
+        binding.apply {
+            // Common fields
+            eventNameET.setText(transactionData["name"].toString())
+            messageEditText.setText(transactionData["description"].toString())
+            eventLocationET.setText(transactionData["location"].toString())
+
+            // Loading amount
+            val amount = transactionData["amount"] as? Double ?: 0.0
+            setCurrencyValue(amount)
+
+            // Loading tags
+            val tags = transactionData["tags"] as? List<*> ?: emptyList<String>()
+            tagsEditText.setText(tags.joinToString(", "))
+
+            //Loading transaction time pickers
+            transactionData["transactionTime"]?.toString()?.let {
+                val time = LocalTime.parse(it)
+                transactionHourPicker.value = time.hour
+                transactionMinutePicker.value = time.minute
             }
 
             updateUI()

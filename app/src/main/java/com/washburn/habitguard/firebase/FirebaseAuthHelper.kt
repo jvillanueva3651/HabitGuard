@@ -176,7 +176,7 @@ class FirebaseAuthHelper(private val context: Context) {
             }
     }
 
-    private fun isEmailValid(email: String): Boolean {
+    fun isEmailValid(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 

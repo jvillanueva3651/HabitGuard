@@ -38,6 +38,9 @@ class FirestoreHelper {
         return db.collection(HABIT_GUARD_COLLECTION).document(userId)
     }
 
+    /** ===========================================================================================
+     * UserInfo Collection Functions
+    =============================================================================================*/
     fun saveUserInfo(
         email: String,
         username: String,
@@ -82,23 +85,9 @@ class FirestoreHelper {
             .addOnFailureListener { error -> onFailure(error) }
     }
 
-    fun saveUserProfile(
-        userId: String,
-        profileData: Map<String, Any>,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        val dataWithTimestamp = profileData.toMutableMap().apply {
-            put("updatedAt", FieldValue.serverTimestamp())
-        }
-
-        db.collection(HABIT_GUARD_COLLECTION)
-            .document(userId)
-            .set(dataWithTimestamp, SetOptions.merge())
-            .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onFailure(e) }
-    }
-
+    /** ===========================================================================================
+     * UserHabit Collection Functions
+    =============================================================================================*/
     fun addUserHabit(
         habitData: Map<String, Any>,
         onSuccess: (String) -> Unit,
@@ -206,10 +195,9 @@ class FirestoreHelper {
             .addOnFailureListener { e -> onFailure(e) }
     }
 
-    // Joshua Update
-    /**
-     * Function to add a user transaction to their HabitGuard UserTransaction document
-     */
+    /** ===========================================================================================
+     * UserTransaction Collection Functions
+    =============================================================================================*/
     fun addUserTransaction(
         transactionData: Map<String, Any>,
         onSuccess: (String) -> Unit,
@@ -230,9 +218,6 @@ class FirestoreHelper {
             .addOnFailureListener(onFailure)
     }
 
-    /**
-     * Function to update an existing transaction within HabitGuard UserTransaction document
-     */
     fun updateUserTransaction(
         transactionId: String,
         updatedData: Map<String, Any>,
@@ -252,9 +237,6 @@ class FirestoreHelper {
             .addOnFailureListener { e -> onFailure(e) }
     }
 
-    /**
-     * Function to delete an existing transaction within HabitGuard UserTransaction document
-     */
     fun deleteUserTransaction(
         transactionId: String,
         onSuccess: () -> Unit,
@@ -273,9 +255,6 @@ class FirestoreHelper {
             .addOnFailureListener { e -> onFailure(e) }
     }
 
-    /**
-     * Function to read a specific user transaction within HabitGuard UserTransaction document
-     */
     fun getUserTransaction(
         transactionId: String,
         onSuccess: (Map<String, Any>) -> Unit,
@@ -298,9 +277,6 @@ class FirestoreHelper {
             .addOnFailureListener { e -> onFailure(e) }
     }
 
-    /**
-     * Function to read ALL user transactions within HabitGuard UserTransaction document
-     */
     fun getAllUserTransactions(
         onSuccess: (List<Pair<String, Map<String, Any>>>) -> Unit,
         onFailure: (Exception) -> Unit
@@ -323,6 +299,9 @@ class FirestoreHelper {
     }
     //
 
+    /** ===========================================================================================
+     * HourlyEvent Functions
+    =============================================================================================*/
     fun getHourlyEvents(
         date: LocalDate,
         onSuccess: (List<HourlyEventData>) -> Unit,
