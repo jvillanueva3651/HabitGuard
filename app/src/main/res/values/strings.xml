@@ -10,7 +10,7 @@
     <string name="date_format">Date: %s</string>
 
     <string name="default_web_client_id">1039653439392-ghjgk0v9hs69e4go99hv4rflsgehcgnk.apps.googleusercontent.com</string>
-    <string name="gemini_api_key">AIzaSyC3FwsSBaS_eDHHvXFy_Kh3d5F_sD7ECpc</string>
+    <string name="gemini_api_key">placeholder</string>
 
 
     <!-- Wierd to suppress the warning but it works -->
