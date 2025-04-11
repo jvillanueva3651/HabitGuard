@@ -151,18 +151,26 @@
                             android:layout_marginBottom="8dp" />
 
                         <TextView
-                            android:id="@+id/balanceTextView"
+                            android:id="@+id/incomeTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/balanceTextView_fragment_home"
+                            android:text="@string/income_label"
                             android:textSize="16sp"
                             android:layout_marginBottom="4dp" />
 
                         <TextView
-                            android:id="@+id/spendingTextView"
+                            android:id="@+id/expenseTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/spendingTextView_fragment_home"
+                            android:text="@string/expense_label"
+                            android:textSize="16sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/creditTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/credit_label"
                             android:textSize="16sp" />
 
                     </LinearLayout>

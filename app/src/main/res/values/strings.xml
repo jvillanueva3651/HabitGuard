@@ -93,7 +93,10 @@
     <string name="habit_analysis_fragment_home">Habit Analysis</string>
     <string name="habitProgressTextView_fragment_home">Progress: 75%</string>
     <string name="habitStreakTextView_fragment_home">Current Habit: Buying Groceries</string>
-    <string name="finance_analysis_fragment_home">Finance Analysis</string>
+    <string name="finance_analysis_fragment_home">Weekly Finance Analysis</string>
+    <string name="income_label">Income: $%1$.2f</string>
+    <string name="expense_label">Expenses: $%1$.2f</string>
+    <string name="credit_label">Upcoming Credits: $%1$.2f</string>
     <string name="balanceTextView_fragment_home">Balance: $500.00</string>
     <string name="spendingTextView_fragment_home">Monthly Spending: $200.00</string>
     <string name="daily_streak_fragment_home">Daily Streak</string>
