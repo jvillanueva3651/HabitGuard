@@ -10,11 +10,12 @@ Backend:
 
 
 Features:
-Create an account using another platforms existing account
-Create an account using email
-Schedule a habit
-Schedule a credit transaction
-Schedule a debit transaction
+•	Create an account using another platforms existing account
+•	Create an account using email
+•	Schedule a habit
+•	Schedule a credit transaction
+•	Schedule a debit transaction
+
 
 
 
