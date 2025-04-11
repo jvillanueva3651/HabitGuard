@@ -14,11 +14,14 @@ Features:
 
 
 App Walkthrough of Features:
-When the app is installed a user will see 
-
-The user will click the create new 
+When the app is installed a user will see the login options for returning users, users can also other established accounts to create a profile such as Google, or users can click the Don't have an account? Register now prompt at the bottom of the screen. 
 
 ![image](https://github.com/user-attachments/assets/aba0483d-2e6f-46c8-a4f0-ddc5bb0dc3ee)
+
+The register now button will direct users to a new screen that will prompt them to enter a email address, password, and to confirm password. Password requirements include upper case letter, lower case letter, a number, a symbol, and twelve characters long.
+
+![image](https://github.com/user-attachments/assets/f977c045-00bc-4d9f-8952-7a94248e501f)
+
 
 
 
