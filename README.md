@@ -20,9 +20,9 @@ The tools used in the development of this app were Android Studio, Github, and G
 We utilized a number of things to aid in development; Trello, YouTube, Gemini, CoPilot, and Stack
 Overflow.
 
-##### Requirements
+#### Requirements
     Current version of Android.
-##### Installation
+#### Installation
 
 
 #### Features
