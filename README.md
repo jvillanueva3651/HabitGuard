@@ -29,3 +29,9 @@ Once the app is installed a user will need to navigate to the bottom of the page
 Don't have an account? Register now prompt.
 
 ![initial_screen.png](app/src/main/res/drawable/initial_screen.png)
+
+The registration screen will ask users to enter an email address, password, and confirm password.
+Password requirements include upper case letter, lower case letter, a number, a symbol and 
+must be twelve characters long.
+
+![create_new_account_screen.png](app/src/main/res/drawable/create_new_account_screen.png)
