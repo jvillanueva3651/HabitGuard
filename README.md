@@ -19,5 +19,5 @@ Studio, Google Firebase, and GitHub.
 
 
 #### Features
-* -Add, edit, and delete habits
-* -Add, edit, and delete financial transactions
+* Add, edit, and delete habits
+* Add, edit, and delete financial transactions
