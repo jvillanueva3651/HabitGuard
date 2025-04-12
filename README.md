@@ -1,4 +1,4 @@
-**HabitGuard**
+**#HabitGuard**
 
 HabitGuard is a mobile application designed to help users manage their social and financial events
 through an intuitive calendar interface. Users can create personalized profiles with custom
