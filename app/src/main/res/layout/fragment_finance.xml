@@ -173,20 +173,19 @@
             tools:ignore="HardcodedText" />
 
         <!-- Income and Expense Summary -->
-        <TextView
-            android:id="@+id/incomeTextView"
+        <Spinner
+            android:id="@+id/periodSpinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Total Income: $0.00"
-            android:layout_marginTop="8dp"
-            tools:ignore="HardcodedText" />
+            android:entries="@array/period_options"
+            android:layout_marginBottom="8dp"/>
 
-        <TextView
-            android:id="@+id/expenseTextView"
+        <Button
+            android:id="@+id/viewAllButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Total Expenses: $0.00"
-            android:layout_marginTop="8dp"
-            tools:ignore="HardcodedText" />
+            android:text="View All Transactions"
+            android:layout_marginBottom="16dp"
+            android:onClick="onViewAllClicked"/>
     </LinearLayout>
 </ScrollView>

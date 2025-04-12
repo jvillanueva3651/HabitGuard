@@ -97,6 +97,10 @@
     <string name="income_label">Income: $%1$.2f</string>
     <string name="expense_label">Expenses: $%1$.2f</string>
     <string name="credit_label">Upcoming Credits: $%1$.2f</string>
+    <string name="balance_format">Balance: $%1$.2f</string>
+    <string name="income_format">Income: $%1$.2f</string>
+    <string name="expense_format">Expenses: $%1$.2f</string>
+    <string name="credit_format">Credits: $%1$.2f</string>
     <string name="balanceTextView_fragment_home">Balance: $500.00</string>
     <string name="spendingTextView_fragment_home">Monthly Spending: $200.00</string>
     <string name="daily_streak_fragment_home">Daily Streak</string>
