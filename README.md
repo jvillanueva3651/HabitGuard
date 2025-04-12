@@ -41,6 +41,15 @@ The screen will then return to the original login screen where the user will ent
 newly created login and password. Users can click the Remember me option which will populate 
 the saved login and password to make future logins easier.
 
+![new_user_login.png](app/src/main/res/drawable/new_user_login.png)
 
+After hitting the Login button users will see the Home Screen.
+
+![home_screen.png](app/src/main/res/drawable/home_screen.png)
+
+In order to complete their profile information users will need to click the three dots in the 
+upper left hand corner to display the settings button.
+
+![settings.png](app/src/main/res/drawable/settings.png)
 
 
