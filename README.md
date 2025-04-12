@@ -28,4 +28,4 @@ Studio, Google Firebase, and GitHub.
 Once the app is installed a user will need to navigate to the bottom of the page to click on the 
 Don't have an account? Register now prompt.
 
-![Initial screen.png](app/src/main/res/drawable/Initial%20screen.png)
+![initial_screen.png](app/src/main/res/drawable/initial_screen.png)
