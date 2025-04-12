@@ -13,7 +13,12 @@ schedules. The app also supports data synchronization across multiple devices, a
 access their information seamlessly. HabitGuard was developed collaboratively using Android 
 Studio, Google Firebase, and GitHub.
 
-### Getting Started
+#### Development Tools
+The tools used in the development of this app were Android Studio, Github, and Google Firebase.
+
+#### Supporting Tools
+We utilized a number of things to aid in development; Trello, YouTube, Gemini, CoPilot, and Stack
+Overflow.
 
 ##### Requirements
     Current version of Android.
@@ -65,5 +70,7 @@ The user can add name information, birthdate, gender, address, and telephone num
 The user will receive a pop up notification when entering their gender.
 
 ![profile_gender_toast.png](app/src/main/res/drawable/profile_gender_toast.png)
+
+
 
 
