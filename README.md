@@ -52,4 +52,13 @@ upper left hand corner to display the settings button.
 
 ![settings.png](app/src/main/res/drawable/settings.png)
 
+Once the user clicks settings they will navigate to the Accounting Settings screen. This screen
+contains the Edit Profile button.
+
+![settings_home_screen.png](app/src/main/res/drawable/settings_home_screen.png)
+
+The user will be sent to a new screen once the Edit Profile button is clicked.
+
+![profile_screen.png](app/src/main/res/drawable/profile_screen.png)
+
 
