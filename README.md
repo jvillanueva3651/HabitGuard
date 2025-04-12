@@ -10,4 +10,5 @@ schedules. The app also supports data synchronization across multiple devices, a
 access their information seamlessly. HabitGuard was developed collaboratively using Android 
 Studio, Google Firebase, and GitHub.
 
-#### Requirements
+#### Requirements:
+![img_5.png](img_5.png)
