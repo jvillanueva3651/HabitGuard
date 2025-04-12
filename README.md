@@ -61,4 +61,9 @@ The user will be sent to a new screen once the Edit Profile button is clicked.
 
 ![profile_screen.png](app/src/main/res/drawable/profile_screen.png)
 
+The user can add name information, birthdate, gender, address, and telephone numbers. 
+The user will receive a pop up notification when entering their gender.
+
+![profile_updated_toast.png](app/src/main/res/drawable/profile_updated_toast.png)
+
 
