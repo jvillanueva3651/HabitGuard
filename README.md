@@ -1,6 +1,8 @@
 # **HabitGuard**
 ![logo_habit_launcher.png](app/src/main/res/drawable/logo_habit_launcher.png)
-Introduction
+
+## Introduction
+
 HabitGuard is a mobile application designed to help users manage their social and financial events
 through an intuitive calendar interface. Users can create personalized profiles with custom
 authentication, track their daily routines and financial transactions, and receive alerts based on
@@ -21,3 +23,8 @@ Studio, Google Firebase, and GitHub.
 #### Features
 * Add, edit, and delete habits
 * Add, edit, and delete financial transactions
+
+#### Application Walkthrough
+Once the app is installed a user will need to navigate to the bottom of the page to click on the 
+Don't have an account? Register now prompt.
+![img_6.png](img_6.png)
