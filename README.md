@@ -32,6 +32,15 @@ Don't have an account? Register now prompt.
 
 The registration screen will ask users to enter an email address, password, and confirm password.
 Password requirements include upper case letter, lower case letter, a number, a symbol and 
-must be twelve characters long.
+must be twelve characters long. Once users have email and password entered they will click the
+sign up button.
 
 ![create_new_account_screen.png](app/src/main/res/drawable/create_new_account_screen.png)
+
+The screen will then return to the original login screen where the user will enter their 
+newly created login and password. Users can click the Remember me option which will populate 
+the saved login and password to make future logins easier.
+
+
+
+
