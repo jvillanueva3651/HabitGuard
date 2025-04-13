@@ -44,8 +44,8 @@ Don't have an account? Register now prompt.
 
 The registration screen will ask users to enter an email address, password, and confirm password.
 Password requirements include upper case letter, lower case letter, a number, a symbol and 
-must be twelve characters long. Once users have email and password entered they will click the
-sign up button.
+must be twelve characters long. Once users have email and password entered, they will click the
+sign-up button.
 
 ![create_new_account_screen.png](app/src/main/res/drawable/create_new_account_screen.png)
 
@@ -59,8 +59,8 @@ After hitting the Login button users will see the Home Screen.
 
 ![home_screen.png](app/src/main/res/drawable/home_screen.png)
 
-In order to complete their profile information users will need to click the three dots in the 
-upper left hand corner to display the settings button.
+To complete their profile information users will need to click the three dots in the 
+upper left-hand corner to display the settings button.
 
 ![settings.png](app/src/main/res/drawable/settings.png)
 
@@ -74,7 +74,7 @@ The user will be sent to a new screen once the Edit Profile button is clicked.
 ![profile_screen.png](app/src/main/res/drawable/profile_screen.png)
 
 The user can add name information, birthdate, gender, address, and telephone numbers. 
-The user will receive a pop up notification when entering their gender.
+The user will receive a pop-up notification when entering their gender.
 
 ![profile_gender_toast.png](app/src/main/res/drawable/profile_gender_toast.png)
 
