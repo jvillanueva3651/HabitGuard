@@ -94,6 +94,12 @@ expand the menu for the Home, Calendar, and Finance menu.
 
 ![hamburger_screen.png](app/src/main/res/drawable/hamburger_screen.png)
 
+The user can click Calendar which opens the calendar home screen. This screen will 
+show the user ........ 
+
+![calendar_home_screen.png](app/src/main/res/drawable/calendar_home_screen.png)
+
+
 
 
 
