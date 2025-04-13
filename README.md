@@ -32,7 +32,7 @@ authentication tokens from Google Firebase.
 * Habit Management: Add, edit, and delete habits effortlessly.
 * Transaction Management: Add, edit, and delete transactions with ease.
 * Comprehensive Summary Page: View a detailed summary of habits and transactions.
-* Activity Streaks Summary: Track and summarize streaks of activities.
+* Streaks Summary: Track and summarize streaks of activities.
 * Insightful Suggestions: Receive personalized suggestions through analysis of habits
 and transactions.
 
