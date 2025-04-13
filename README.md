@@ -14,10 +14,8 @@ access their information seamlessly. HabitGuard was developed collaboratively us
 Studio, Google Firebase, and GitHub.
 
 #### Development Tools
-The tools used in the development of this app were Android Studio, Github, and Google Firebase.
-
-#### Supporting Tools
-We utilized several things to aid in development; Trello, YouTube, Gemini, CoPilot, and Stack
+The tools used in the development of this app were Android Studio, Github, and Google Firebase. 
+We utilized several supportive tools in development; Trello, YouTube, Gemini, CoPilot, and Stack
 Overflow.
 
 #### Requirements
