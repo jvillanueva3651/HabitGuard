@@ -26,6 +26,7 @@ Overflow.
 #### Features
 * Account Creation with Authentication Tokens: Securely create accounts using
 authentication tokens from Google Firebase.
+* Password Management: Recover your account with our secure password recovery process.
 * User Profile Management: Create and manage personalized user profiles.
 * Credential Storage: Remember and securely store user credentials for easy access.
 * Habit Management: Add, edit, and delete habits effortlessly.
