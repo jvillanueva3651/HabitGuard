@@ -78,7 +78,20 @@ The user will receive a pop-up notification when entering their gender.
 
 ![profile_gender_toast.png](app/src/main/res/drawable/profile_gender_toast.png)
 
+The user will hit the save button at the bottom of the screen once they are done
+modify their profile information.
 
+![profile_address_save.png](app/src/main/res/drawable/profile_address_save.png)
+
+The screen will return to the home summary screen where a toast notification will appear
+stating the profile has been updated.
+
+![profile_updated_toast.png](app/src/main/res/drawable/profile_updated_toast.png)
+
+The next step is for the user to click the hamburger in the upper left corner to start
+scheduling habits and transactions.
+
+![hamburger_screen.png](app/src/main/res/drawable/hamburger_screen.png)
 
 
 
