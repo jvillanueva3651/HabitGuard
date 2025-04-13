@@ -19,7 +19,7 @@ We utilized several supportive tools in development; Trello, YouTube, Gemini, Co
 Overflow.
 
 #### Requirements
-    Current version of Android.
+   Latest version of Android OS.
 #### Installation
 
 
