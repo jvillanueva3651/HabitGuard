@@ -88,8 +88,8 @@ stating the profile has been updated.
 
 ![profile_updated_toast.png](app/src/main/res/drawable/profile_updated_toast.png)
 
-The next step is for the user to click the hamburger in the upper left corner to start
-scheduling habits and transactions.
+The next step is for the user to click the hamburger in the upper left corner to 
+expand the menu for the Home, Calendar, and Finance menu.
 
 ![hamburger_screen.png](app/src/main/res/drawable/hamburger_screen.png)
 
