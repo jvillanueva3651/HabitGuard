@@ -17,7 +17,7 @@ Studio, Google Firebase, and GitHub.
 The tools used in the development of this app were Android Studio, Github, and Google Firebase.
 
 #### Supporting Tools
-We utilized a number of things to aid in development; Trello, YouTube, Gemini, CoPilot, and Stack
+We utilized several things to aid in development; Trello, YouTube, Gemini, CoPilot, and Stack
 Overflow.
 
 #### Requirements
@@ -26,9 +26,18 @@ Overflow.
 
 
 #### Features
-* Add, edit, and delete habits
-* Add, edit, and delete financial transactions
+* Account Creation with Authentication Tokens: Securely create accounts using
+authentication tokens from Google Firebase.
+* User Profile Management: Create and manage personalized user profiles.
+* Credential Storage: Remember and securely store user credentials for easy access.
+* Habit Management: Add, edit, and delete habits effortlessly.
+* Transaction Management: Add, edit, and delete transactions with ease.
+* Comprehensive Summary Page: View a detailed summary of habits and transactions.
+* Activity Streaks Summary: Track and summarize streaks of activities.
+* Insightful Suggestions: Receive personalized suggestions through analysis of habits
+and transactions.
 
+  
 #### Application Walkthrough
 Once the app is installed a user will need to navigate to the bottom of the page to click on the 
 Don't have an account? Register now prompt.
@@ -70,6 +79,8 @@ The user can add name information, birthdate, gender, address, and telephone num
 The user will receive a pop up notification when entering their gender.
 
 ![profile_gender_toast.png](app/src/main/res/drawable/profile_gender_toast.png)
+
+
 
 
 
