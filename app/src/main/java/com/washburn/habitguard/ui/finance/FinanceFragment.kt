@@ -1,5 +1,6 @@
 package com.washburn.habitguard.ui.finance
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,9 +16,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.washburn.habitguard.R
 import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.databinding.FragmentFinanceBinding
+import com.washburn.habitguard.ui.calendar.EventEditActivity
+import com.washburn.habitguard.ui.calendar.MonthlyViewActivity
 import com.washburn.habitguard.ui.finance.Transaction
 import com.washburn.habitguard.ui.calendar.TransactionType
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class FinanceFragment : Fragment() {
     private lateinit var binding: FragmentFinanceBinding
@@ -53,12 +57,16 @@ class FinanceFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setupButtonHandlers() {
         binding.addTransactionButton.setOnClickListener {
-            // Navigate to CalendarFragment
-            //findNavController().navigate(
-                // TODO Update with actual nav graph ID
-            //)
+            // Create intent with current date
+            val intent = Intent(requireContext(), EventEditActivity::class.java).apply {
+
+                putExtra("date", LocalDate.now().toString())
+                putExtra("isTransaction", true)
+            }
+            startActivity(intent)
         }
 
         binding.scanReceiptButton.setOnClickListener {
