@@ -7,6 +7,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.washburn.habitguard.ui.calendar.TransactionType
 import java.time.LocalDate
+import java.time.DayOfWeek
+import java.time.temporal.TemporalAdjusters
 
 class FinanceViewModel : ViewModel() {
     private val _balance = MutableLiveData(0.00)
@@ -60,14 +62,25 @@ class FinanceViewModel : ViewModel() {
         return LocalDate.parse(date) == LocalDate.now()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun isThisWeek(date: String): Boolean {
-        // TODO Implement week check logic
-        return false
+        val inputDate = LocalDate.parse(date)
+        val today = LocalDate.now()
+
+        // Get the start and end of the current week (Sunday-based)
+        val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+        val endOfWeek = startOfWeek.plusDays(6)
+
+        return !inputDate.isBefore(startOfWeek) && !inputDate.isAfter(endOfWeek)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun isThisMonth(date: String): Boolean {
-        // TODO Implement month check logic
-        return false
+        val inputDate = LocalDate.parse(date)
+        val today = LocalDate.now()
+
+        return inputDate.year == today.year &&
+                inputDate.month == today.month
     }
 
     enum class Period { DAILY, WEEKLY, MONTHLY }
