@@ -183,7 +183,14 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
         setMonthView()
     }
 
-    private fun newEventAction() { startActivity(Intent(requireContext(), EventEditActivity::class.java)) }
+    private fun newEventAction() {
+        val intent = Intent(requireContext(), EventEditActivity::class.java).apply {
+
+            putExtra("date", selectedDate.toString())
+            putExtra("isTransaction", false)
+        }
+        startActivity(intent)
+    }
     private fun weeklyAction() { startActivity(Intent(requireContext(), WeeklyViewActivity::class.java)) }
 
     override fun onItemClick(position: Int, date: LocalDate) {
