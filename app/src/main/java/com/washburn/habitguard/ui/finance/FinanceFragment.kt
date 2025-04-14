@@ -117,11 +117,36 @@ class FinanceFragment : Fragment() {
     // TODO: Add period selection logic
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setupBudgetSection() {
-        // TODO: Implement budget setup navigation
-        binding.creditLimitTextView.setOnClickListener {
-            // startActivity(Intent(requireContext(), BudgetSetupActivity::class.java))
+        binding.setBudgetButton.setOnClickListener {
+            startActivity(Intent(requireContext(), BudgetSetupActivity::class.java))
         }
+
+        loadBudgetData()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun loadBudgetData() {
+        FirestoreHelper().getUserBudget(
+            onSuccess = { budget ->
+                budget?.let { (amount, period) ->
+                    binding.budgetStatusText.text = "Budget: $${"%.2f".format(amount)} ($period)"
+                    // Update progress bar and other UI elements
+                } ?: run {
+                    binding.budgetStatusText.text = getString(R.string.no_budget_message)
+                }
+            },
+            onFailure = { e ->
+                Toast.makeText(context, "Error loading budget", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onResume() {
+        super.onResume()
+        loadBudgetData()
     }
 
     // TODO: Implement receipt scanning
