@@ -103,6 +103,13 @@
     <string name="credit_format">Credits: $%1$.2f</string>
     <string name="balanceTextView_fragment_home">Balance: $500.00</string>
     <string name="spendingTextView_fragment_home">Monthly Spending: $200.00</string>
+    <string-array name="budget_period_options">
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+    </string-array>
+    <string name="no_budget_message">No budget set up</string>
+    <string name="set_budget_button">Set Budget</string>
     <string name="daily_streak_fragment_home">Daily Streak</string>
     <string name="current_streak_fragment_home">Current Streak</string>
     <string name="currentStreakTextView_fragment_home">10 days</string>
