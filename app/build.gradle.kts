@@ -65,6 +65,12 @@ dependencies {
     // Security
     implementation(libs.androidx.security.crypto)
 
+    // Gemini
+    implementation (libs.generativeai)
+
+    // Notification
+    implementation (libs.firebase.messaging.ktx)
+
     // Camera
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
@@ -107,7 +113,4 @@ dependencies {
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    // Gemini
-    implementation (libs.generativeai)
 }

@@ -1,20 +1,20 @@
 /**============================================================================================
- * FirebaseAuthHelper.kt - Firebase authentication helper for login and signup
- * REF    : USE_BY -> .LoginActivity (login) & .SignupActivity (signup)
- *          USING  -> Firebase Authentication SDK & .FirestoreHelper (for user data)
- * Purpose: Handles all Firebase authentication operations including:
- *          - Email/password authentication
- *          - Credential management (remember me)
- *          - Password reset
- *          - TODO: Third-party authentication (Google)
- * Fun    :  1. Secure credential storage using EncryptedSharedPreferences
- *           2. Email validation
- *           3. Password strength validation
- *           4. Offline login capability
- *           5. Google Sign-In integration
+ * FirebaseAuthHelper - Centralized authentication helper for Firebase operations.
+ *
+ * Responsibilities:
+ * 1. Email/password authentication (login/signup)
+ * 2. Secure credential storage using EncryptedSharedPreferences
+ * 3. Password reset functionality
+ * 4. User input validation (email/password)
+ * 5. TODO Future Idea: Third-party authentication (Google)
+ * 6. Offline login capability
+ *
+ * Dependencies:
+ * - Firebase Authentication SDK
+ * - FirestoreHelper (for user data operations)
+ * - Android Security Crypto (for encrypted preferences)
 ============================================================================================*/
 package com.washburn.habitguard.firebase
-
 
 import android.content.Context
 import android.os.Build
@@ -33,12 +33,10 @@ import com.google.firebase.auth.GoogleAuthProvider
 @RequiresApi(Build.VERSION_CODES.O)
 class FirebaseAuthHelper(private val context: Context) {
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-
     private val firestoreHelper = FirestoreHelper()
-
     fun getFirestoreHelper(): FirestoreHelper = firestoreHelper
 
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     // Sign Out
     fun signOut() = auth.signOut()
 
@@ -109,7 +107,10 @@ class FirebaseAuthHelper(private val context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
     // Save sharedPreferences
-    fun saveCredentials(email: String, password: String) {
+    fun saveCredentials(
+        email: String,
+        password: String
+    ) {
         getEncryptedSharedPreferences().edit().apply {
             putString("email", email)
             putString("password", password)
@@ -136,16 +137,18 @@ class FirebaseAuthHelper(private val context: Context) {
         )
     }
     // Offline Login
-    fun checkOfflineLogin(email: String, password: String): Boolean {
+    fun checkOfflineLogin(
+        email: String,
+        password: String
+    ): Boolean {
         val (savedEmail, savedPassword, _) = loadSavedCredentials()
         return email == savedEmail && password == savedPassword
     }
-    //=============================================================================================
-    //=============================================================================================
 
     /**============================================================================================
     * Signup Activity
     *============================================================================================*/
+    // signUpWithEmailAndPassword Signup
     fun signupWithEmail(
         email: String,
         password: String,
@@ -176,19 +179,19 @@ class FirebaseAuthHelper(private val context: Context) {
             }
     }
 
+    // Email Validation
     fun isEmailValid(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
-
+    // Password Validation
     private fun isPasswordStrong(password: String): Boolean {
         val passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$"
         return password.matches(passwordRegex.toRegex())
     }
-    // ============================================================================================
 
-    /**
+    /**============================================================================================
      * Third Party Login
-    */
+     *============================================================================================*/
     // Google Sign In =============================================================================
     // TODO: See LoginActivity for Google Sign In
     fun signInWithGoogle(

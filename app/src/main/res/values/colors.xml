@@ -20,4 +20,6 @@
     <color name="income_green_soft">#4CAF50</color>    <!-- Material Green 500 -->
     <color name="expense_red_soft">#F44336</color>    <!-- Material Red 500 -->
     <color name="credit_yellow_soft">#FFD54F</color>  <!-- Material Yellow 500 -->
+
+    <color name="warning_color">#FFCDD2</color>
 </resources>

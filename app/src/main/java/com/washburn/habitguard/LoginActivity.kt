@@ -1,25 +1,24 @@
-/**===========================================================================================
- * LoginActivity for login in user
- * REF    : USE_BY -> .SignupActivity (other half) & .SideActivity (main)
- *          USING  -> .firebase/FirebaseAuthHelper (authentication)
- *          LAYOUT -> layout/activity_login.xml
- * Purpose: Handles user authentication with email and password.
- * Fun    :  1. Email & password login (online/offline)
- *           2. TODO: Third-party provider logins (Google, GitHub, LinkedIn)
- *           3. Password reset functionality
- *           4. Network status awareness
- *           5. Remember me
- *           6. Authentication functionality through .firebase/FirebaseAuthHelper
+ /**===========================================================================================
+ * LoginActivity - Handles user authentication for the HabitGuard application.
+ *
+ * Key Features:
+ * 1. Email/password authentication (both online and offline modes)
+ * 2. Password reset functionality
+ * 3. "Remember me" credential persistence
+ * 4. Network status awareness
+ * 5. TODO: Future Idea: Google/GitHub/LinkedIn integration
+ *
+ * Dependencies:
+ * - Layout: activity_login.xml
+ * - Helper: FirebaseAuthHelper (handles Firebase authentication logic)
+ * - Navigation: Used by SignupActivity and SideActivity
 ============================================================================================*/
 package com.washburn.habitguard
 
-
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.credentials.Credential
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -28,8 +27,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-import com.washburn.habitguard.NavigationHelper.navigateTo
 import com.washburn.habitguard.databinding.ActivityLoginBinding
+import com.washburn.habitguard.NavigationHelper.navigateTo
 import com.washburn.habitguard.firebase.AuthUtils.isOnline
 import com.washburn.habitguard.firebase.AuthUtils.showToast
 import com.washburn.habitguard.firebase.AuthUtils.togglePasswordVisibility
@@ -40,10 +39,8 @@ import kotlinx.coroutines.launch
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-
     private lateinit var authHelper: FirebaseAuthHelper
-
-    private lateinit var credentialManager: CredentialManager // Google ID Token
+    private lateinit var credentialManager: CredentialManager // For Google Sign-In
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,23 +48,32 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         authHelper = FirebaseAuthHelper(this)
+        credentialManager = CredentialManager.create(baseContext)
 
-        credentialManager = CredentialManager.create(baseContext) // Google ID Token
-
-        setupInit() // Initialized view
-        loadSavedCredentials() // Remember Me
-        updateNetworkStatusIndicator() // Online/Offline
+        setupInit()
     }
 
     private fun setupInit() {
-        togglePasswordVisibility(binding.etPassword, binding.btnTogglePassword)
+        binding.apply {
+            ivStatusIndicator.setImageResource(
+                if (isOnline(this@LoginActivity)) R.drawable.ic_online else R.drawable.ic_offline // Online/Offline
+            )
 
-        binding.tvForgotPassword.setOnClickListener { forgotPassword() }
-        binding.btnLogin.setOnClickListener { login() }
-        binding.btnGoogle.setOnClickListener { googleSignIn() }
-        binding.btnGithub.setOnClickListener { githubSignIn() }
-        binding.btnLinkedIn.setOnClickListener { linkedInSignIn() }
-        binding.tvRedirectSignUp.setOnClickListener { signup() }
+            val (email, password, rememberMe) = authHelper.loadSavedCredentials() // Remember me
+            if (rememberMe) {
+                cbRememberMe.isChecked = true
+                etEmailAddress.setText(email)
+                etPassword.setText(password)
+            }
+
+            togglePasswordVisibility(etPassword, btnTogglePassword) // Password Visibility
+            tvForgotPassword.setOnClickListener { forgotPassword() }
+            btnLogin.setOnClickListener { login() }
+            btnGoogle.setOnClickListener { googleSignIn() }
+            btnGithub.setOnClickListener { githubSignIn() }
+            btnLinkedIn.setOnClickListener { linkedInSignIn() }
+            tvRedirectSignUp.setOnClickListener { navigateTo(this@LoginActivity, SignupActivity::class.java, false) }
+        }
     }
 
     // Handle user login
@@ -80,55 +86,32 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        if (isOnline(this)) performOnlineLogin(email, pass) else performOfflineLogin(email, pass)
-    }
-
-    private fun performOnlineLogin(email: String, password: String) {
-        authHelper.loginWithEmail(
-            email = email,
-            password = password,
-            rememberMe = binding.cbRememberMe.isChecked,
-            onSuccess = { updateLastLoginAndProceed() },
-            onFailure = { errorMessage -> showToast(this, errorMessage) }
-        )
-    }
-
-    private fun performOfflineLogin(email: String, password: String) {
-        if (authHelper.checkOfflineLogin(email, password)) {
-            showToast(this, "Offline Log In Successful")
-            navigateTo(this, SideActivity::class.java, true)
+        if (isOnline(this)){
+            authHelper.loginWithEmail(
+                email = email,
+                password = pass,
+                rememberMe = binding.cbRememberMe.isChecked,
+                onSuccess = {
+                    authHelper.getFirestoreHelper().updateLastLogin(
+                        onSuccess = {
+                            showToast(this, "Log In Successful")
+                            navigateTo(this, SideActivity::class.java, true)
+                        },
+                        onFailure = {
+                            showToast(this, "Log In Successful (timestamp update failed)")
+                            navigateTo(this, SideActivity::class.java, true)
+                        }
+                    )
+                },
+                onFailure = { errorMessage -> showToast(this, errorMessage) }
+            )
         } else {
-            showToast(this, "Invalid credentials for offline login")
-        }
-    }
-
-    private fun updateLastLoginAndProceed() {
-        authHelper.getFirestoreHelper().updateLastLogin(
-            onSuccess = {
-                showToast(this, "Log In Successful")
+            if (authHelper.checkOfflineLogin(email, pass)) {
+                showToast(this, "Offline Log In Successful")
                 navigateTo(this, SideActivity::class.java, true)
-            },
-            onFailure = {
-                showToast(this, "Log In Successful (timestamp update failed)")
-                navigateTo(this, SideActivity::class.java, true)
+            } else {
+                showToast(this, "Invalid credentials for offline login")
             }
-        )
-    }
-
-    // Update network status indicator
-    private fun updateNetworkStatusIndicator() {
-        binding.ivStatusIndicator.setImageResource(
-            if (isOnline(this)) R.drawable.ic_online else R.drawable.ic_offline
-        )
-    }
-
-    // Load saved credentials from SharedPreferences
-    private fun loadSavedCredentials() {
-        val (email, password, rememberMe) = authHelper.loadSavedCredentials()
-        if (rememberMe) {
-            binding.cbRememberMe.isChecked = true
-            binding.etEmailAddress.setText(email)
-            binding.etPassword.setText(password)
         }
     }
 
@@ -161,43 +144,36 @@ class LoginActivity : AppCompatActivity() {
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
             .build()
-        // TODO: Figure out why the val result is having issue
-        lifecycleScope.launch {
+
+        lifecycleScope.launch { // TODO: Figure out why the val result is having issue
             try {
                 val result = credentialManager.getCredential(
                     context = baseContext,
                     request = request,
-                )
-                handleSignIn(result.credential)
-            } catch (e: GetCredentialException) {
-//                showToast("Couldn't retrieve user's credentials: ${e.localizedMessage}")
-            }
-        }
-    }
-    private fun handleSignIn(credential: Credential) {
-        // Check if credential is of type Google ID
-        if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-            // Create Google ID Token
-            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                ) // TODO: from this point
+                if (result.credential is CustomCredential && result.credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    // Create Google ID Token
+                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
 
-            // Sign in to Firebase with using the token
-            firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
-        } else {
-//            showToast("Credential is not of type Google ID!")
-        }
-    }
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        authHelper.signInWithGoogle(
-            idToken = idToken,
-            onSuccess = { user ->
-//                showToast("Google Sign-In successful")
-                startActivity(Intent(this, SideActivity::class.java))
-                finish()
-            },
-            onFailure = { errorMessage ->
-//                showToast("Google Sign-In failed: $errorMessage")
+                    // Sign in to Firebase with using the token
+                    authHelper.signInWithGoogle(
+                        idToken = googleIdTokenCredential.idToken,
+                        onSuccess = { user ->
+                            showToast(this@LoginActivity, "Google Sign-In successful")
+                            navigateTo(this@LoginActivity, SideActivity::class.java, true)
+                            finish()
+                        },
+                        onFailure = { errorMessage ->
+                            showToast(this@LoginActivity, "Google Sign-In failed: $errorMessage")
+                        }
+                    )
+                } else {
+                    showToast(this@LoginActivity, "Credential is not of type Google ID!")
+                }
+            } catch (e: GetCredentialException) {
+                showToast(this@LoginActivity, "Couldn't retrieve user's credentials: ${e.localizedMessage}")
             }
-        )
+        }
     }
 
     // Handle GitHub sign-in
@@ -207,10 +183,5 @@ class LoginActivity : AppCompatActivity() {
     // Handle LinkedIn sign-in
     private fun linkedInSignIn() {
         // Implement LinkedIn sign-in logic here
-    }
-
-    // Handle signup
-    private fun signup() {
-        navigateTo(this, SignupActivity::class.java, false)
     }
 }

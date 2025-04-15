@@ -1,25 +1,24 @@
 /**===========================================================================================
- * SignupActivity for signing up user
- * REF    : USE_BY -> .LoginActivity (other half)
- *          USING  -> .firebase/FirebaseAuthHelper (authentication) & .FirestoreHelper (database)
- *          LAYOUT -> layout/activity_signup.xml
- * Purpose: Handles user authentication with email and password.
- * Fun:  1. Email, password, and confirm password signing up
- *       2. Camera permission request for profile picture
- *       3. TODO: Third-party provider signup (Google, GitHub, LinkedIn)
- *       4. Authentication functionality through .firebase/FirebaseAuthHelper
+ * SignupActivity - Handles user registration for the HabitGuard application.
+ *
+ * Key Features:
+ * 1. Email/password registration with confirmation
+ * 2. Profile picture capture (with camera permission handling)
+ * 3. User profile creation in Firestore
+ * 4. Navigation to login after successful registration
+ *
+ * Dependencies:
+ * - Layout: activity_signup.xml
+ * - Helpers: FirebaseAuthHelper (authentication), FirestoreHelper (database)
+ * - Navigation: Used by LoginActivity
 ============================================================================================*/
 package com.washburn.habitguard
 
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.washburn.habitguard.NavigationHelper.navigateTo
 import com.washburn.habitguard.databinding.ActivitySignupBinding
 import com.washburn.habitguard.firebase.AuthUtils.showToast
@@ -35,26 +34,7 @@ class SignupActivity : AppCompatActivity() {
 
     private lateinit var firestoreHelper: FirestoreHelper
 
-    // Camera launcher
-    private val cameraLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            handleCameraResult(result.data)
-        }
-    }
-
-    // Camera permission launcher
-    private val cameraPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            launchCamera()
-        } else {
-            showToast(this, "Profile picture is set to default")
-            saveUserProfile()
-        }
-    }
+    private lateinit var cameraHelper: CameraHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,18 +42,26 @@ class SignupActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         authHelper = FirebaseAuthHelper(this)
-
         firestoreHelper = FirestoreHelper()
+        cameraHelper = CameraHelper(this).apply {
+            onPhotoTaken = { uri -> saveUserProfile(uri.toString()) }
+            onPermissionDenied = {
+                showToast(this@SignupActivity, "Profile picture is set to default")
+                saveUserProfile()
+            }
+        }
 
         setupInit() // Initialized view
     }
 
     private fun setupInit() {
-        togglePasswordVisibility(binding.etSPassword, binding.btnTogglePassword)
-        togglePasswordVisibility(binding.etSConfPassword, binding.btnToggleConfPassword)
+        binding.apply {
+        togglePasswordVisibility(etSPassword, btnTogglePassword)
+        togglePasswordVisibility(etSConfPassword, btnToggleConfPassword)
 
-        binding.btnSSignUp.setOnClickListener { signUpUser() }
-        binding.tvRedirectLogin.setOnClickListener { navigateTo(this, LoginActivity::class.java, true) }
+        btnSSignUp.setOnClickListener { signUpUser() }
+        tvRedirectLogin.setOnClickListener { navigateTo(this@SignupActivity, LoginActivity::class.java, true) }
+        }
     }
 
     // Validate and process user registration
@@ -89,44 +77,21 @@ class SignupActivity : AppCompatActivity() {
             else -> authHelper.signupWithEmail(
                 email = email,
                 password = pass,
-                onSuccess = { checkCameraPermissionAndLaunch() },
+                onSuccess = {
+                    AlertDialog.Builder(this)
+                        .setTitle("Profile Picture")
+                        .setMessage("Would you like to add a profile picture?")
+                        .setPositiveButton("Take Photo") { _, _ ->
+                            cameraHelper.checkCameraPermissionAndLaunch()
+                        }
+                        .setNegativeButton("Use Default") { _, _ ->
+                            saveUserProfile()
+                        }
+                        .show()
+                },
                 onFailure = { errorMessage -> showToast(this, errorMessage) }
             )
         }
-    }
-
-    // Check and request camera permission
-    private fun checkCameraPermissionAndLaunch() {
-        AlertDialog.Builder(this)
-            .setTitle("Profile Picture")
-            .setMessage("Would you like to add a profile picture?")
-            .setPositiveButton("Take Photo") { _, _ ->
-                when {
-                    ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.CAMERA
-                    ) == PackageManager.PERMISSION_GRANTED -> {
-                        launchCamera()
-                    }
-                    else -> {
-                        cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-                    }
-                }
-            }
-            .setNegativeButton("Use Default") { _, _ ->
-                saveUserProfile()
-            }
-            .show()
-    }
-    // Launch camera
-    private fun launchCamera() {
-        val cameraIntent = Intent(this, CameraActivity::class.java)
-        cameraLauncher.launch(cameraIntent)
-    }
-    // Handle camera result
-    private fun handleCameraResult(data: Intent?) {
-        val photoUri = data?.getStringExtra("photoUri")
-        saveUserProfile(photoUri)
     }
 
     // Save user profile to Firestore

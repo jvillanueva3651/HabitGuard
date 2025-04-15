@@ -29,6 +29,18 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
+        android:importantForAccessibility="no"
         app:srcCompat="@drawable/ic_gemini" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnTestNotifications"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="@dimen/fab_margin"
+        android:layout_marginBottom="16dp"
+        android:importantForAccessibility="no"
+        app:srcCompat="@drawable/ic_alert"
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
