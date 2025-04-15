@@ -35,6 +35,7 @@ import com.washburn.habitguard.ui.finance.Transaction
 import java.util.*
 import java.time.LocalTime
 import java.text.NumberFormat
+import java.time.LocalDate
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -45,6 +46,8 @@ class EventEditActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_HABIT_ID = "HABIT_ID"
         const val EXTRA_TRANSACTION_ID = "TRANSACTION_ID"
+        const val EXTRA_DATE = "date"
+        const val EXTRA_IS_TRANSACTION = "isTransaction"
     }
 
     private lateinit var binding: ActivityEventEditBinding
@@ -64,6 +67,16 @@ class EventEditActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Get date from intent or use current date
+        selectedDate = intent.getStringExtra(EXTRA_DATE)?.let {
+            LocalDate.parse(it)
+        } ?: LocalDate.now()
+
+        if (intent.getBooleanExtra(EXTRA_IS_TRANSACTION, false)) {
+            isTransactionMode = true
+        }
+
         binding = ActivityEventEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -71,6 +84,8 @@ class EventEditActivity : AppCompatActivity() {
         currentTransactionId = intent.getStringExtra(EXTRA_TRANSACTION_ID)
 
         firestoreHelper = FirestoreHelper()
+
+        binding.eventDateTV.text = getString(R.string.date_format, formattedDate(selectedDate))
 
         // Compose UI
         initializeComponents()

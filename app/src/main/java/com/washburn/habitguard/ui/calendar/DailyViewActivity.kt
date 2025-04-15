@@ -8,6 +8,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.databinding.ActivityDailyCalendarBinding
+import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
+import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -42,7 +44,12 @@ class DailyViewActivity : AppCompatActivity() {
             }
 
             newEventButton.setOnClickListener {
-                startActivity(Intent(this@DailyViewActivity, EventEditActivity::class.java))
+                val intent = Intent(this@DailyViewActivity, EventEditActivity::class.java).apply {
+
+                    putExtra("date", selectedDate.toString())
+                    putExtra("isTransaction", false)
+                }
+                startActivity(intent)
             }
         }
     }

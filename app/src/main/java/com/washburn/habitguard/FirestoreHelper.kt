@@ -27,6 +27,7 @@ class FirestoreHelper {
         private const val USER_INFO_SUBCOLLECTION = "UserInfo"
         private const val USER_HABIT_SUBCOLLECTION = "UserHabit"
         private const val USER_TRANSACTIONS_SUBCOLLECTION = "UserTransactions"
+        private const val USER_BUDGET_SUBCOLLECTION = "UserBudget"
     }
 
     fun getCurrentUserId(): String? = auth.currentUser?.uid
@@ -297,7 +298,63 @@ class FirestoreHelper {
             }
             .addOnFailureListener { e -> onFailure(e) }
     }
-    //
+
+
+    /** ===========================================================================================
+     * UserBudget Collection Functions
+    =============================================================================================*/
+    fun addUserBudget(
+        amount: Double,
+        period: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+
+        val budgetData = hashMapOf(
+            "amount" to amount,
+            "period" to period,
+            "createdAt" to FieldValue.serverTimestamp()
+        )
+
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_BUDGET_SUBCOLLECTION)
+            .document()
+            .set(budgetData)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    fun getUserBudget(
+        onSuccess: (Pair<Double, String>?) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_BUDGET_SUBCOLLECTION)
+            .document()
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val amount = document.getDouble("amount") ?: 0.0
+                    val period = document.getString("period") ?: "MONTHLY"
+                    onSuccess(Pair(amount, period))
+                } else {
+                    onSuccess(null)
+                }
+            }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
 
     /** ===========================================================================================
      * HourlyEvent Functions

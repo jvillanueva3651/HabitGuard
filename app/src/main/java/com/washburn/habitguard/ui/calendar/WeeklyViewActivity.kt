@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.databinding.ActivityWeekViewBinding
+import com.washburn.habitguard.ui.calendar.CalendarUtils.selectedDate
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -142,7 +143,12 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
     }
 
     private fun newEventAction() {
-        startActivity(Intent(this, EventEditActivity::class.java))
+        val intent = Intent(this@WeeklyViewActivity, EventEditActivity::class.java).apply {
+
+            putExtra("date", selectedDate.toString())
+            putExtra("isTransaction", false)
+        }
+        startActivity(intent)
     }
 
     private fun dailyActionAction() {
