@@ -113,4 +113,7 @@ dependencies {
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // PhilJay MPAndroidChart
+    implementation(libs.mpandroidchart)
 }
