@@ -21,5 +21,9 @@
     <color name="expense_red_soft">#F44336</color>    <!-- Material Red 500 -->
     <color name="credit_yellow_soft">#FFD54F</color>  <!-- Material Yellow 500 -->
 
+    <color name="gray_200">#EEEEEE</color>
+    <color name="red_600">#E53935</color>
+    <color name="green_600">#43A047</color>
+
     <color name="warning_color">#FFCDD2</color>
 </resources>
