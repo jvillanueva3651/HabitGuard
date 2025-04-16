@@ -323,8 +323,34 @@ class FirestoreHelper {
         db.collection(HABIT_GUARD_COLLECTION)
             .document(userId)
             .collection(USER_BUDGET_SUBCOLLECTION)
-            .document()
-            .set(budgetData)
+            .add(budgetData)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    fun updateUserBudget(
+        budgetId: String,
+        amount: Double,
+        period: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userId = getCurrentUserId() ?: run {
+            onFailure(Exception("User not authenticated"))
+            return
+        }
+
+        val updatedBudgetData = hashMapOf(
+            "amount" to amount,
+            "period" to period,
+            "createdAt" to FieldValue.serverTimestamp()
+        )
+
+        db.collection(HABIT_GUARD_COLLECTION)
+            .document(userId)
+            .collection(USER_BUDGET_SUBCOLLECTION)
+            .document(budgetId)
+            .update(updatedBudgetData)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e -> onFailure(e) }
     }
