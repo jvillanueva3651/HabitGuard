@@ -13,152 +13,164 @@
 ============================================================================================*/
 package com.washburn.habitguard
 
-import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.content.Intent
+import android.os.Build
+import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.widget.Toast
-import android.widget.TextView
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.ImageView
+import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.navigation.NavigationView
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
-import com.washburn.habitguard.settings.SettingActivity
 import com.washburn.habitguard.databinding.ActivitySideBinding
 import com.washburn.habitguard.databinding.GeminiDialogBinding
+import com.washburn.habitguard.firebase.AuthUtils.showToast
+import com.washburn.habitguard.notification.NotificationHelper
+import com.washburn.habitguard.settings.SettingActivity
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
+@RequiresApi(Build.VERSION_CODES.O)
 class SideActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySideBinding
-
     private lateinit var appBarConfiguration: AppBarConfiguration
-
-    private var geminiDialog: AlertDialog? = null
+    private lateinit var notificationHelper: NotificationHelper
     private lateinit var generativeModel: GenerativeModel
+    private var geminiDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySideBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Initialize notification system
+        notificationHelper = NotificationHelper(this)
+        notificationHelper.checkNotificationPermission()
+
         setSupportActionBar(binding.appBarSide.toolbar)
+        setupNavigation()
+        initializeGemini()
+        setupTestButtonBehavior()
 
-        generativeModel = GenerativeModel(
-            modelName = "gemini-pro",
-            apiKey = getString(R.string.gemini_api_key),
-        )
+        // Hide test button by default (visible on long-press)
+        binding.appBarSide.btnTestNotifications.isVisible = false
+    }
 
-        binding.appBarSide.fab.setOnClickListener { view ->
-            showGeminiDialog()
-        }
+    private fun setupNavigation() {
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_side)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+
         appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_home, R.id.nav_calendar, R.id.nav_finance
-            ), drawerLayout
+            setOf(R.id.nav_home, R.id.nav_calendar, R.id.nav_finance),
+            drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-        if (userId != null) {
+        FirebaseAuth.getInstance().currentUser?.uid?.let { userId ->
             fetchUserData(userId)
-        } else {
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.side, menu)
-        return true
+    private fun initializeGemini() {
+        generativeModel = GenerativeModel(
+            modelName = "gemini-pro",
+            apiKey = getString(R.string.gemini_api_key)
+        )
+        binding.appBarSide.fab.setOnClickListener { showGeminiDialog() }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here.
-        return when (item.itemId) {
-            R.id.action_settings -> {
-                // Navigate to SettingActivity
-                val intent = Intent(this, SettingActivity::class.java)
-                startActivity(intent)
-                true
+    private fun setupTestButtonBehavior() {
+        // Single click - show test notifications
+        binding.appBarSide.btnTestNotifications.setOnClickListener {
+            try {
+                if (notificationHelper.canShowNotifications()) {
+                    notificationHelper.showFinanceAlert(
+                        "Test Budget Alert",
+                        "This is a test financial notification"
+                    )
+                    notificationHelper.showImportantDateAlert(
+                        "Test Reminder",
+                        "This is a test event reminder"
+                    )
+                    showToast(this, "Test notifications sent")
+                } else {
+                    showToast(this, "Please enable notifications first")
+                    notificationHelper.checkNotificationPermission()
+                }
+            } catch (_: SecurityException) {
+                showToast(this, "Notification permission required")
+                notificationHelper.checkNotificationPermission()
             }
-            else -> super.onOptionsItemSelected(item)
         }
-    }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_side)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+        // Long-press toolbar to toggle test button visibility
+        binding.appBarSide.toolbar.setOnLongClickListener {
+            binding.appBarSide.btnTestNotifications.isVisible =
+                !binding.appBarSide.btnTestNotifications.isVisible
+            showToast(this,
+                if (binding.appBarSide.btnTestNotifications.isVisible)
+                    "Dev mode enabled" else "Dev mode disabled")
+            true
+        }
     }
 
     private fun fetchUserData(userId: String) {
         val db = Firebase.firestore
         db.collection("HabitGuard")
             .document(userId)
+            .collection("UserInfo")
+            .document(userId)
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    // Extract data from the document
                     val email = document.getString("email") ?: "No Email"
                     val username = document.getString("username") ?: "Unknown User"
                     val photoUrl = document.getString("photoUri")
-
-                    // Update the NavigationView header
                     updateNavigationHeader(username, email, photoUrl)
-                } else {
-                    Toast.makeText(this, "User data not found", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Failed to fetch user data: ${e.message}", Toast.LENGTH_SHORT).show()
+                showToast(this, "Failed to fetch user data: ${e.message}")
             }
     }
 
     private fun updateNavigationHeader(username: String, email: String, photoUrl: String?) {
-        val navView: NavigationView = binding.navView
-        val headerView = navView.getHeaderView(0)
-
+        val headerView = binding.navView.getHeaderView(0)
         val imageView = headerView.findViewById<ImageView>(R.id.imageView)
         val titleTextView = headerView.findViewById<TextView>(R.id.userNameTextView)
         val subtitleTextView = headerView.findViewById<TextView>(R.id.userEmailTextView)
 
-        // Update the text views
         titleTextView.text = username
         subtitleTextView.text = email
 
-        // Load the profile image (if available)
         if (!photoUrl.isNullOrEmpty()) {
-            Glide.with(this) // Use Glide to load the image
+            Glide.with(this)
                 .load(photoUrl)
-                .circleCrop() // Optional: Crop the image to a circle
+                .circleCrop()
                 .into(imageView)
         } else {
-            // Set a default image if no photo URL is provided
             imageView.setImageResource(R.drawable.ic_launcher_foreground)
         }
     }
@@ -199,7 +211,7 @@ class SideActivity : AppCompatActivity() {
                             else -> "Error: ${e.localizedMessage}"
                         }
                         dialogBinding.tvResponse.text = errorMsg
-                        Toast.makeText(this@SideActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                        showToast(this@SideActivity, errorMsg)
                     } finally {
                         dialogBinding.progressBar.isVisible = false
                     }
@@ -214,6 +226,26 @@ class SideActivity : AppCompatActivity() {
         }
 
         geminiDialog?.show()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.side, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                startActivity(Intent(this, SettingActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_content_side)
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
     override fun onDestroy() {

@@ -161,6 +161,9 @@
     <string name="finance_channel_description">Budget and spending notifications</string>
     <string name="important_dates_channel_name">Important Dates</string>
     <string name="important_dates_channel_description">Reminders for important events</string>
+    <string name="no_budget_message">No budget set up</string>
+    <string name="set_budget_button">Set Budget</string>
+    <string name="balance_format">Balance: $%1$.2f</string>
 
 
 </resources>
