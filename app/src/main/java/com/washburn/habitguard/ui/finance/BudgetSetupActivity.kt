@@ -27,6 +27,7 @@ class BudgetSetupActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun saveBudget() {
         val amountInput = binding.amountInput.text.toString()
         val period = binding.periodSpinner.selectedItemPosition
