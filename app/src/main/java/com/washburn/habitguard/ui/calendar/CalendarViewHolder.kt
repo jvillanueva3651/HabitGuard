@@ -7,6 +7,7 @@ import com.washburn.habitguard.R
 
 class CalendarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val dayOfMonth: TextView = itemView.findViewById(R.id.cellDayText)
-    val eventIndicator: View = itemView.findViewById(R.id.eventIndicator)
+    val habitIndicator: View = itemView.findViewById(R.id.habitIndicator)
+    val transactionIndicator: View = itemView.findViewById(R.id.transactionIndicator)
     val parentView: View = itemView.findViewById(R.id.parentView)
 }

@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.R
 import com.washburn.habitguard.databinding.FragmentCalendarBinding
+import com.washburn.habitguard.firebase.AuthUtils.showToast
 import com.washburn.habitguard.ui.calendar.CalendarUtils.daysInMonthArray
 import com.washburn.habitguard.ui.calendar.CalendarUtils.monthYearFromDate
 import com.washburn.habitguard.ui.calendar.CalendarAdapter.OnItemListener
@@ -34,6 +35,7 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
     private lateinit var firestoreHelper: FirestoreHelper // Access to Firestore
 
     private var allEvents: List<Pair<String, Map<String, Any>>> = emptyList() // Store all events
+    private var allTransaction: List<Pair<String, Map<String, Any>>> = emptyList() // Store all transaction
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -50,6 +52,7 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
 
         setupViews()
         loadEvents()
+        loadTransactionsForDate()
     }
 
     private fun setupViews() {
@@ -81,6 +84,47 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
             },
             onFailure = { e ->
                 Toast.makeText(requireContext(), "Error loading events: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    private fun loadTransactionsForDate() {
+        firestoreHelper.getAllUserTransactions(
+            onSuccess = { transactions ->
+                allTransaction = transactions.sortedWith(compareBy(
+                    { it.second["date"] as? String ?: "" },
+                    { it.second["time"] as? String ?: "00:00" }
+                ))
+
+                // Filter transactions for the specific date
+                val dailyTransactions = allTransaction
+                    .filter { (_, transaction) ->
+                        transaction["date"] == selectedDate.toString()
+                    }
+
+                var totalIncome = 0.0
+                var totalExpense = 0.0
+                var totalCredit = 0.0
+
+                dailyTransactions.forEach { (_, data) ->
+                    val type = data["transactionType"] as? String ?: ""
+                    val amount = data["amount"] as? Double ?: 0.0
+                    when (type) {
+                        "INCOME" -> totalIncome += amount
+                        "EXPENSE" -> totalExpense += amount
+                        "CREDIT" -> totalCredit += amount
+                    }
+                }
+
+                // Update UI
+                activity?.runOnUiThread {
+                    binding.incomeValue.text = getString(R.string.income_label, totalIncome)
+                    binding.expenseValue.text = getString(R.string.expense_label, totalExpense)
+                    binding.creditValue.text = getString(R.string.credit_label, totalCredit)
+                }
+            },
+            onFailure = { e ->
+                showToast(requireContext(), "Error loading transactions: $e")
             }
         )
     }
@@ -145,6 +189,13 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
                     "date" to (eventData["date"] as? String ?: ""),
                     "time" to (eventData["startTime"] as? String ?: "00:00")
                 )
+            },
+            allTransaction.map { (_, transactionData) ->
+                mapOf(
+                    "name" to (transactionData["name"] as? String ?: ""),
+                    "date" to (transactionData["date"] as? String ?: ""),
+                    "time" to (transactionData["time"] as? String ?: "00:00")
+                )
             }
         )
     }
@@ -202,5 +253,6 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
     override fun onResume() {
         super.onResume()
         loadEvents() // Refresh data when returning from other screens
+        loadTransactionsForDate()
     }
 }

@@ -164,6 +164,13 @@
     <string name="no_budget_message">No budget set up</string>
     <string name="set_budget_button">Set Budget</string>
     <string name="balance_format">Balance: $%1$.2f</string>
+    <string name="description_finance_fragment_calendar">Finance Summary</string>
+    <string name="description_income_fragment_calendar">Income</string>
+    <string name="description_expense_fragment_calendar">Expense</string>
+    <string name="description_credit_fragment_calendar">Credit</string>
+    <string name="_80">80</string>
+    <string name="_70">-70</string>
+    <string name="_10">10</string>
 
 
 </resources>

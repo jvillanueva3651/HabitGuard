@@ -14,6 +14,8 @@
  * - FirestoreHelper (for user data operations)
  * - Android Security Crypto (for encrypted preferences)
 ============================================================================================*/
+@file:Suppress("DEPRECATION")
+
 package com.washburn.habitguard.firebase
 
 import android.content.Context

@@ -32,6 +32,7 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
     private lateinit var binding: ActivityWeekViewBinding
     private lateinit var firestoreHelper: FirestoreHelper
     private var allEvents: List<Pair<String, Map<String, Any>>> = emptyList()
+    private var allTransaction: List<Pair<String, Map<String, Any>>> = emptyList() // Store all transaction
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,8 +80,8 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
     }
 
     private fun setWeekView() {
-        binding.monthYearTV.text = CalendarUtils.monthYearFromDate(CalendarUtils.selectedDate)
-        val days = CalendarUtils.daysInWeekArray(CalendarUtils.selectedDate)
+        binding.monthYearTV.text = CalendarUtils.monthYearFromDate(selectedDate)
+        val days = CalendarUtils.daysInWeekArray(selectedDate)
 
         val calendarEvents = allEvents.map { (_, eventData) ->
             mapOf(
@@ -93,8 +94,14 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
         binding.calendarRecyclerView.adapter = CalendarAdapter(
             ArrayList(days),
             this,
-            calendarEvents
-            // Explicitly set for weekly view
+            calendarEvents,
+            allTransaction.map { (_, transactionData) ->
+                mapOf(
+                    "name" to (transactionData["name"] as? String ?: ""),
+                    "date" to (transactionData["date"] as? String ?: ""),
+                    "time" to (transactionData["time"] as? String ?: "00:00")
+                )
+            }
         )
 
         setEventAdapter()
@@ -103,7 +110,7 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
     private fun setEventAdapter() {
         val dailyEvents = allEvents
             .filter { (_, eventData) ->
-                eventData["date"] == CalendarUtils.selectedDate.toString()
+                eventData["date"] == selectedDate.toString()
             }
             .sortedBy { (_, eventData) ->
                 eventData["startTime"] as? String ?: "00:00"
@@ -123,7 +130,7 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
     }
 
     override fun onItemClick(position: Int, date: LocalDate) {
-        CalendarUtils.selectedDate = date
+        selectedDate = date
         setWeekView() // This will refresh both calendar and events list
     }
 
@@ -133,12 +140,12 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
     }
 
     private fun previousWeekAction() {
-        CalendarUtils.selectedDate = CalendarUtils.selectedDate.minusWeeks(1)
+        selectedDate = selectedDate.minusWeeks(1)
         setWeekView()
     }
 
     private fun nextWeekAction() {
-        CalendarUtils.selectedDate = CalendarUtils.selectedDate.plusWeeks(1)
+        selectedDate = selectedDate.plusWeeks(1)
         setWeekView()
     }
 

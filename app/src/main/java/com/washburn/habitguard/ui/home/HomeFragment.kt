@@ -48,6 +48,7 @@ class HomeFragment : Fragment() {
         updateFinanceAnalysis() // Update finance analysis data
     }
 
+    // Update profile
     private fun updateProfile(userId: String) {
         firestoreHelper.getUserDocument(userId)
             .collection("UserInfo")
@@ -58,7 +59,6 @@ class HomeFragment : Fragment() {
                     binding.userNameTextView.text = document.getString("username") ?: "No username"
                     binding.userEmailTextView.text = document.getString("email") ?: "No email"
 
-                    // Load profile image
                     document.getString("photoUri")?.let { uri ->
                         Glide.with(this)
                             .load(uri)
@@ -77,6 +77,7 @@ class HomeFragment : Fragment() {
             }
     }
 
+    // Credit Notification
     private fun checkUpcomingCredits() {
         binding.dismissCreditButton.setOnClickListener {
             binding.upcomingCreditsCard.visibility = View.GONE
@@ -114,14 +115,13 @@ class HomeFragment : Fragment() {
                         // 3. Format the display text
                         val upcomingCreditsText = buildString {
                             append("⚠️ Next Payment: $${"%.2f".format(nearestAmount)}\n")
-                            append("For: $nearestDesc\n")
-                            append("Due: ${formatDueDate(nearestDate, today)}\n──────────────\n")
+                            append("Due: ${formatDueDate(nearestDate, today)}\n")
+                            append("For: $nearestDesc")
 
                             if (sortedCredits.size > 1) {
+                                append("\n──────────────\n")
                                 append("\uD83E\uDDFE Upcoming Total: $${"%.2f".format(totalUpcoming)}\n")
                                 append("(${sortedCredits.size - 1} more payments)")
-                            } else {
-                                append("(No other upcoming payments)")
                             }
                         }
 
@@ -137,7 +137,6 @@ class HomeFragment : Fragment() {
             }
         )
     }
-
     // Helper function to extract credit details
     private fun getCreditDetails(credit: Pair<String, Map<String, Any>>): Triple<LocalDate, Double, String> {
         val data = credit.second
@@ -146,7 +145,6 @@ class HomeFragment : Fragment() {
         val description = data["description"] as? String ?: "Upcoming credit"
         return Triple(date, amount, description)
     }
-
     // Helper function to format due date
     private fun formatDueDate(date: LocalDate, today: LocalDate): String {
         val daysUntil = date.toEpochDay() - today.toEpochDay()
@@ -158,21 +156,21 @@ class HomeFragment : Fragment() {
         }
     }
 
+    // Habit Analysis
     private fun updateHabitAnalysis() {
         firestoreHelper.getAllUserHabits(
             onSuccess = { habits ->
                 if (habits.isNotEmpty()) {
                     val currentDateTime = LocalDateTime.now()
                     val currentDate = currentDateTime.toLocalDate()
+                    val currentMonth = currentDate.month
+                    val currentYear = currentDate.year
 
-                    // Initialize tracking variables
+                    val allMonthlyHabitDates = mutableSetOf<LocalDate>()
+                    val completedDates = mutableSetOf<LocalDate>()
                     val weeklyCompletion = MutableList(7) { false }
-                    val monthlyHabits = mutableMapOf<LocalDate, Boolean>()
                     val importantHabits = mutableListOf<String>()
                     val recurringHabits = mutableListOf<String>()
-                    var currentStreak = 0
-                    var longestStreak = 0
-                    var tempStreak = 0
 
                     // Process each habit
                     habits.forEach { (_, data) ->
@@ -180,60 +178,67 @@ class HomeFragment : Fragment() {
                         val dateStr = data["date"] as? String
                         val timeStr = data["time"] as? String ?: "23:59"
                         val isRecurring = data["isRecurring"] as? Boolean == true
+                        val tags = when (val tagsField = data["tags"]) {
+                            is List<*> -> tagsField.filterIsInstance<String>()
+                            else -> emptyList()
+                        }
 
-                        if (importantTitles.any { importantTitles ->
-                                name.contains(importantTitles, ignoreCase = true)
-                            }) {
+                        // Track important/recurring habits
+                        // Method 1: Check tags array for "important"
+                        if (tags.any { it.equals("important", ignoreCase = true) }) {
                             importantHabits.add(name)
                         }
-                        if (isRecurring) recurringHabits.add(name)
+                        // Method 2: Check name for important keywords
+                        else if (importantTitles.any { name.contains(it, ignoreCase = true) }) {
+                            importantHabits.add(name)
+                        }
+                        if (isRecurring) {
+                            recurringHabits.add(name)
+                        }
 
                         dateStr?.let { dateString ->
                             try {
                                 val habitDate = LocalDate.parse(dateString)
                                 val habitTime = LocalTime.parse(timeStr)
                                 val habitDateTime = LocalDateTime.of(habitDate, habitTime)
-                                val isCompleted = habitDateTime.isBefore(currentDateTime)
 
-                                // Monthly tracking
-                                if (habitDate.month == currentDate.month && habitDate.year == currentDate.year) {
-                                    monthlyHabits[habitDate] = isCompleted
-                                }
+                                // Count as scheduled if in current month
+                                if (habitDate.month == currentMonth && habitDate.year == currentYear) {
+                                    allMonthlyHabitDates.add(habitDate)
 
-                                // Weekly tracking
-                                if (habitDate.isAfter(currentDate.minusDays(7))) {
-                                    val dayOfWeek = habitDate.dayOfWeek.value % 7
-                                    weeklyCompletion[dayOfWeek] = weeklyCompletion[dayOfWeek] || isCompleted
-                                }
+                                    // Check if completed (past current time)
+                                    if (habitDateTime.isBefore(currentDateTime)) {
+                                        completedDates.add(habitDate)
 
-                                // Streak calculation
-                                if (isCompleted) {
-                                    tempStreak++
-                                    longestStreak = maxOf(longestStreak, tempStreak)
-                                } else {
-                                    tempStreak = 0
+                                        // Weekly tracking (last 7 days)
+                                        if (habitDate.isAfter(currentDate.minusDays(7))) {
+                                            val dayOfWeek = habitDate.dayOfWeek.value % 7
+                                            weeklyCompletion[dayOfWeek] = true
+                                        }
+                                    }
                                 }
                             } catch (_: Exception) {
-                                showToast(requireContext(), "Error parsing date/time: $dateStr $timeStr")
+                                showToast(requireContext(),"Error parsing date/time: $dateString $timeStr")
                             }
                         }
                     }
 
-                    // Calculate current streak
-                    var streak = 0
-                    for (i in currentDate.dayOfWeek.value % 7 downTo 0) {
-                        if (weeklyCompletion[i]) streak++ else break
-                    }
-                    currentStreak = streak
+                    // Calculate streaks properly
+                    val (currentStreak, longestStreak) = calculateStreaks(
+                        completedDates = completedDates,
+                        currentDate = currentDate
+                    )
 
                     // Update UI
                     updateHabitProgressUI(
-                        monthlyHabits = monthlyHabits,
+                        monthlyCompleted = completedDates.size,
+                        monthlyScheduled = allMonthlyHabitDates.size,
                         weeklyCompletion = weeklyCompletion,
                         currentStreak = currentStreak,
                         longestStreak = longestStreak,
                         importantHabits = importantHabits,
-                        recurringHabits = recurringHabits
+                        recurringHabits = recurringHabits,
+                        completedDates = completedDates
                     )
                 } else {
                     // No habits found
@@ -245,6 +250,38 @@ class HomeFragment : Fragment() {
                     binding.habitStreakTextView.text = defStreak
                     binding.currentStreakTextView.text = defCurStreak
                     binding.longestStreakTextView.text = defLonStreak
+
+                    binding.incomeTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.income_green_soft))
+                    binding.expenseTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.expense_red_soft))
+                    binding.creditTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.credit_yellow_soft))
+
+                    val indicators = listOf(
+                        binding.indicatorSun, binding.indicatorMon,
+                        binding.indicatorTue, binding.indicatorWed,
+                        binding.indicatorThu, binding.indicatorFri,
+                        binding.indicatorSat
+                    )
+
+                    val currentDayOfWeek = LocalDate.now().dayOfWeek.value % 7
+                    val tealColor = ContextCompat.getColor(requireContext(), R.color.teal_200)
+
+                    indicators.forEachIndexed { index, imageView ->
+                        imageView.clearColorFilter()
+
+                        when {
+                            index == currentDayOfWeek -> {
+                                imageView.setImageResource(R.drawable.ic_current_date)
+                                imageView.setColorFilter(tealColor)
+                            }
+                            index < currentDayOfWeek -> {
+                                imageView.setImageResource(R.drawable.ic_past_inactive_day)
+                            }
+                            else -> {
+                                imageView.setImageResource(R.drawable.ic_inactive_day)
+                            }
+                        }
+                    }
+
                 }
             },
             onFailure = { e ->
@@ -253,41 +290,104 @@ class HomeFragment : Fragment() {
         )
     }
 
+    private fun calculateStreaks(
+        completedDates: Set<LocalDate>,
+        currentDate: LocalDate
+    ): Pair<Int, Int> {
+        if (completedDates.isEmpty()) return Pair(0, 0)
+
+        val sortedDates = completedDates.sorted()
+        var currentStreak = 0
+        var longestStreak = 0
+        var tempStreak = 0
+        var previousDate: LocalDate? = null
+
+        for (date in sortedDates) {
+            when {
+                previousDate == null -> {
+                    tempStreak = 1
+                    if (date == currentDate || date == currentDate.minusDays(1)) {
+                        currentStreak = tempStreak
+                    }
+                }
+                previousDate.plusDays(1) == date -> {
+                    tempStreak++
+                    if (date >= currentDate.minusDays(tempStreak.toLong())) {
+                        currentStreak = tempStreak
+                    }
+                }
+                else -> tempStreak = 1
+            }
+            longestStreak = maxOf(longestStreak, tempStreak)
+            previousDate = date
+        }
+
+        return Pair(currentStreak, longestStreak)
+    }
+
     private fun updateHabitProgressUI(
-        monthlyHabits: Map<LocalDate, Boolean>,
+        monthlyCompleted: Int,
+        monthlyScheduled: Int,
         weeklyCompletion: List<Boolean>,
         currentStreak: Int,
         longestStreak: Int,
         importantHabits: List<String>,
-        recurringHabits: List<String>
+        recurringHabits: List<String>,
+        completedDates: Set<LocalDate>
     ) {
-        // Monthly progress
-        val monthlyCompleted = monthlyHabits.count { it.value }
-        val monthlyTotal = monthlyHabits.size
-        val monthlyProgress = if (monthlyTotal > 0) (monthlyCompleted * 100 / monthlyTotal) else 0
+        // 1. Calculate Progress Percentages
+        val monthlyProgress = if (monthlyScheduled > 0) {
+            (monthlyCompleted * 100 / monthlyScheduled)
+        } else {
+            0
+        }
+
+        val currentDate = LocalDate.now()
+        val last30DaysCompleted = completedDates.count {
+            it.isAfter(currentDate.minusDays(30))
+        }
+        val thirtyDayRate = (last30DaysCompleted / 30f * 100).toInt()
+
+        // 2. Update Progress TextView
         val habitProgressTextViewText = """
-            📅 Monthly Progress: $monthlyProgress%
-            ✅ Completed: $monthlyCompleted/$monthlyTotal
+        📅 Monthly Progress: $monthlyProgress%
+        ✅ Completed: $monthlyCompleted/$monthlyScheduled habits
+        📊 30-Day Rate: $thirtyDayRate%
         """.trimIndent()
         binding.habitProgressTextView.text = habitProgressTextViewText
 
-        // Streak info
+        // 3. Update Streak Information
         val habitStreakTextViewText = """
-            🔥 Current Streak: $currentStreak days
-            🏆 Longest Streak: $longestStreak days
+        🔥 Current Streak: $currentStreak ${if (currentStreak == 1) "day" else "days"}
+        🏆 Longest Streak: $longestStreak ${if (longestStreak == 1) "day" else "days"}
         """.trimIndent()
         binding.habitStreakTextView.text = habitStreakTextViewText
 
-        // Tags info
-        binding.habitTagsTextView.text = when {
-            importantHabits.isNotEmpty() || recurringHabits.isNotEmpty() -> """
-                ⭐ Important: ${importantHabits.take(3).joinToString()}${if (importantHabits.size > 3) "..." else ""}
-                🔄 Recurring: ${recurringHabits.take(3).joinToString()}${if (recurringHabits.size > 3) "..." else ""}
-            """.trimIndent()
-            else -> "No tagged habits this month"
-        }
+        // 4. Update Tags Display
+        binding.habitTagsTextView.text = buildString {
+            if (importantHabits.isNotEmpty()) {
+                append("⭐ Important Habits:\n")
+                importantHabits.take(3).forEach { append("• $it\n") }
+                if (importantHabits.size > 3) append("+ ${importantHabits.size - 3} more\n")
+            }
 
-        // Update weekly indicators
+            if (recurringHabits.isNotEmpty()) {
+                if (isNotEmpty()) append("\n")
+                append("🔄 Recurring Habits:\n")
+                recurringHabits.take(3).forEach { append("• $it\n") }
+                if (recurringHabits.size > 3) append("+ ${recurringHabits.size - 3} more")
+            }
+
+            if (isEmpty()) {
+                append("No tagged habits this month")
+            }
+        }.trim()
+
+        // 5. Update Weekly Indicators
+        updateWeeklyIndicators(weeklyCompletion)
+    }
+
+    private fun updateWeeklyIndicators(weeklyCompletion: List<Boolean>) {
         val indicators = listOf(
             binding.indicatorSun, binding.indicatorMon,
             binding.indicatorTue, binding.indicatorWed,
@@ -300,6 +400,8 @@ class HomeFragment : Fragment() {
         val tealDarkColor = ContextCompat.getColor(requireContext(), R.color.teal_700)
 
         indicators.forEachIndexed { index, imageView ->
+            imageView.clearColorFilter()
+
             when {
                 index == currentDayOfWeek -> {
                     imageView.setImageResource(R.drawable.ic_current_date)

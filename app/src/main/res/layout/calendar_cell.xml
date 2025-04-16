@@ -15,21 +15,38 @@
         android:textColor="@color/black"
         android:includeFontPadding="false"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/eventIndicator"
+        app:layout_constraintBottom_toTopOf="@id/indicatorsLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <View
-        android:id="@+id/eventIndicator"
-        android:layout_width="8dp"
-        android:layout_height="8dp"
-        android:background="@drawable/ic_indicator"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/cellDayText"
+    <LinearLayout
+        android:id="@+id/indicatorsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.3" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cellDayText">
+
+        <View
+            android:id="@+id/habitIndicator"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginEnd="2dp"
+            android:visibility="invisible"
+            android:background="@drawable/ic_indicator" />
+
+        <View
+            android:id="@+id/transactionIndicator"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginEnd="2dp"
+            android:visibility="invisible"
+            android:background="@drawable/ic_indicator" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
