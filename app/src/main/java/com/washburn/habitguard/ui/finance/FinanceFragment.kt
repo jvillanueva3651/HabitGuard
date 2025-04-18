@@ -3,6 +3,7 @@ package com.washburn.habitguard.ui.finance
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +18,13 @@ import com.washburn.habitguard.R
 import com.washburn.habitguard.FirestoreHelper
 import com.washburn.habitguard.databinding.FragmentFinanceBinding
 import com.washburn.habitguard.ui.calendar.EventEditActivity
+import com.washburn.habitguard.ui.finance.BudgetSetupActivity
 import com.washburn.habitguard.ui.calendar.MonthlyViewActivity
 import com.washburn.habitguard.ui.finance.Transaction
 import com.washburn.habitguard.ui.calendar.TransactionType
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.math.abs
 
 class FinanceFragment : Fragment() {
     private lateinit var binding: FragmentFinanceBinding
@@ -42,6 +45,7 @@ class FinanceFragment : Fragment() {
 
         setupTransactionList()
         setupButtonHandlers()
+        setupBudgetSection()
         setupObservers()
         loadInitialData()
     }
@@ -75,35 +79,41 @@ class FinanceFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun setupObservers() {
         viewModel.transactions.observe(viewLifecycleOwner) { transactions ->
             transactionAdapter.updateTransactions(transactions)
+            loadBudgetData()
         }
 
         viewModel.balance.observe(viewLifecycleOwner) { balance ->
             binding.balanceTextView.text = getString(R.string.balance_format, balance)
         }
-
-        // TODO: Add observers for period summary
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun loadInitialData() {
         lifecycleScope.launch {
-            // Load transactions from Firestore
             FirestoreHelper().getAllUserTransactions(
                 onSuccess = { transactions ->
-                    val converted = transactions.map { (id, data) ->
-                        Transaction(
-                            id = id,
-                            amount = data["amount"] as Double,
-                            type = TransactionType.valueOf(data["transactionType"] as String),
-                            date = data["date"] as String,
-                            time = data["transactionTime"] as String,
-                            tags = data["tags"] as? List<String> ?: emptyList(),
-                            location = data["location"] as? String ?: "",
-                            notes = data["description"] as? String ?: ""
-                        )
+                    val converted = transactions.mapNotNull { (id, data) ->
+                        try {
+                            Transaction(
+                                id = id,
+                                amount = (data["amount"] as? Double) ?: 0.0,
+                                type = TransactionType.valueOf(
+                                    data["transactionType"] as? String ?: TransactionType.EXPENSE.name
+                                ),
+                                date = data["date"] as? String ?: LocalDate.now().toString(),
+                                time = data["transactionTime"] as? String ?: "00:00",
+                                tags = data["tags"] as? List<String> ?: emptyList(),
+                                location = data["location"] as? String ?: "",
+                                notes = data["description"] as? String ?: ""
+                            )
+                        } catch (e: Exception) {
+                            Log.e("FinanceFragment", "Error converting transaction $id", e)
+                            null // Skip invalid transactions
+                        }
                     }
                     viewModel.updateTransactions(converted)
                 },
@@ -123,6 +133,10 @@ class FinanceFragment : Fragment() {
             startActivity(Intent(requireContext(), BudgetSetupActivity::class.java))
         }
 
+        binding.editBudgetButton.setOnClickListener {
+            startActivity(Intent(requireContext(), BudgetSetupActivity::class.java))
+        }
+
         loadBudgetData()
     }
 
@@ -131,10 +145,21 @@ class FinanceFragment : Fragment() {
         FirestoreHelper().getUserBudget(
             onSuccess = { budget ->
                 budget?.let { (amount, period) ->
-                    binding.budgetStatusText.text = "Budget: $${"%.2f".format(amount)} ($period)"
-                    // Update progress bar and other UI elements
+                    binding.budgetSetupLayout.visibility = View.GONE
+                    binding.budgetProgressLayout.visibility = View.VISIBLE
+
+                    val transactions = viewModel.transactions.value ?: emptyList()
+                    val filteredTransactions = filterTransactionsByPeriod(transactions, period)
+                        .filter { it.type == TransactionType.EXPENSE } // Only expenses
+
+                    val totalSpent = filteredTransactions.sumOf { abs(it.amount) } // Force positive
+
+                    val progress = calculateProgress(totalSpent, amount)
+                    updateProgressUI(totalSpent, amount, progress)
+
                 } ?: run {
-                    binding.budgetStatusText.text = getString(R.string.no_budget_message)
+                    binding.budgetSetupLayout.visibility = View.VISIBLE
+                    binding.budgetProgressLayout.visibility = View.GONE
                 }
             },
             onFailure = { e ->
@@ -144,9 +169,40 @@ class FinanceFragment : Fragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
+    private fun filterTransactionsByPeriod(transactions: List<Transaction>, period: String): List<Transaction> {
+        val now = LocalDate.now()
+        return when (period.uppercase()) { // Handle case insensitivity
+            "DAILY" -> transactions.filter {
+                LocalDate.parse(it.date).isEqual(now)
+            }
+            "WEEKLY" -> transactions.filter {
+                val date = LocalDate.parse(it.date)
+                date.isAfter(now.minusWeeks(1)) || date.isEqual(now)
+            }
+            "MONTHLY" -> transactions.filter {
+                val date = LocalDate.parse(it.date)
+                date.month == now.month && date.year == now.year
+            }
+            else -> transactions
+        }
+    }
+
+    private fun calculateProgress(spent: Double, budget: Double): Int {
+        return if (budget > 0) (spent / budget * 100).toInt() else 0
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
         super.onResume()
         loadBudgetData()
+    }
+
+    private fun updateProgressUI(spent: Double, budget: Double, progress: Int) {
+        binding.budgetProgressBar.progress = progress
+        binding.spentAmountText.text = getString(R.string.spent_format, spent)
+        binding.remainingAmountText.text = getString(R.string.remaining_format, budget - spent)
+        binding.budgetTotalText.text = getString(R.string.budget_total_format, budget, progress)
+        binding.budgetProgressBar.animate().setDuration(800).start()
     }
 
     // TODO: Implement receipt scanning

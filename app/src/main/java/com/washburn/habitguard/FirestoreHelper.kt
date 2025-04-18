@@ -323,13 +323,13 @@ class FirestoreHelper {
         db.collection(HABIT_GUARD_COLLECTION)
             .document(userId)
             .collection(USER_BUDGET_SUBCOLLECTION)
-            .add(budgetData)
+            .document("Budget")
+            .set(budgetData)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e -> onFailure(e) }
     }
-
+    /* Don't think there's a reason for this now since addBudget needs to just overwrite the existing budget
     fun updateUserBudget(
-        budgetId: String,
         amount: Double,
         period: String,
         onSuccess: () -> Unit,
@@ -348,12 +348,13 @@ class FirestoreHelper {
 
         db.collection(HABIT_GUARD_COLLECTION)
             .document(userId)
-            .collection(USER_BUDGET_SUBCOLLECTION)
-            .document(budgetId)
+            .collection(USER_TRANSACTIONS_SUBCOLLECTION)
+            .document("Budget")
             .update(updatedBudgetData)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e -> onFailure(e) }
     }
+     */
 
     fun getUserBudget(
         onSuccess: (Pair<Double, String>?) -> Unit,
@@ -367,7 +368,7 @@ class FirestoreHelper {
         db.collection(HABIT_GUARD_COLLECTION)
             .document(userId)
             .collection(USER_BUDGET_SUBCOLLECTION)
-            .document()
+            .document("Budget")
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
