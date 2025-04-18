@@ -84,9 +84,10 @@ class FinanceFragment : Fragment() {
         viewModel.transactions.observe(viewLifecycleOwner) { transactions ->
             transactionAdapter.updateTransactions(transactions)
             loadBudgetData()
-        }
 
-        viewModel.balance.observe(viewLifecycleOwner) { balance ->
+            // Calculate current month's balance
+            val currentMonthTransactions = filterTransactionsByCurrentMonth(transactions)
+            val balance = calculateNetBalance(currentMonthTransactions)
             binding.balanceTextView.text = getString(R.string.balance_format, balance)
         }
     }
@@ -184,6 +185,25 @@ class FinanceFragment : Fragment() {
                 date.month == now.month && date.year == now.year
             }
             else -> transactions
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun filterTransactionsByCurrentMonth(transactions: List<Transaction>): List<Transaction> {
+        val now = LocalDate.now()
+        return transactions.filter {
+            val date = LocalDate.parse(it.date)
+            date.month == now.month && date.year == now.year
+        }
+    }
+
+    private fun calculateNetBalance(transactions: List<Transaction>): Double {
+        return transactions.sumOf { transaction ->
+            when (transaction.type) {
+                TransactionType.INCOME -> transaction.amount
+                TransactionType.EXPENSE -> -transaction.amount
+                else -> 0.0 // Handle other types if needed
+            }
         }
     }
 
