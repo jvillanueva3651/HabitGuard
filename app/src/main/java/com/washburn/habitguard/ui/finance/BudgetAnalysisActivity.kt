@@ -5,6 +5,8 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.data.*
@@ -76,18 +78,37 @@ class BudgetAnalysisActivity : AppCompatActivity() {
     private fun setupChartConfigs() {
         // Common style config
         listOf(binding.lineChart, binding.barChart, binding.pieChart).forEach {
-            it.description.isEnabled = false
-            it.legend.isEnabled = true
-            it.setTouchEnabled(true)
-            it.setDrawMarkers(false)
+            // Add this line to all charts
+            it.data?.setValueFormatter(dollarFormatter)
+
+            // For line chart specifically
+            if (it is LineChart) {
+                it.axisLeft.valueFormatter = dollarFormatter
+            }
         }
 
         // Line chart specific
         with(binding.lineChart) {
-            xAxis.position = XAxis.XAxisPosition.BOTTOM
+            axisLeft.valueFormatter = dollarFormatter
+
+            // Enable background grid
+            xAxis.setDrawGridLines(true)
+            axisLeft.setDrawGridLines(true)
+
+            // Style grid lines
+            xAxis.gridColor = Color.LTGRAY
+            axisLeft.gridColor = Color.LTGRAY
+
+            // Remove right axis
             axisRight.isEnabled = false
-            axisLeft.setDrawGridLines(false)
-            xAxis.setDrawGridLines(false)
+
+            // Add description
+            description.text = "Daily Spending Trend"
+            description.textSize = 12f
+
+            setExtraOffsets(10f, 0f, 10f, 20f) // Left, Top, Right, Bottom padding
+            xAxis.setLabelCount(7, false) // Force maximum of 7 labels
+            axisLeft.spaceTop = 15f // Add space at top of Y-axis
         }
 
         // Bar chart specific
@@ -121,26 +142,72 @@ class BudgetAnalysisActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateLineChart(transactions: List<Transaction>) {
-        val groupedData = transactions.groupBy {
-            when (currentPeriod) {
-                "DAILY" -> it.date
-                "WEEKLY" -> "Week ${LocalDate.parse(it.date).getWeekOfMonth()}"
-                else -> LocalDate.parse(it.date).month.toString()
-            }
-        }.mapValues { (_, values) -> values.sumOf { abs(it.amount) } }
+        // Create a map of dates to daily totals
+        val dailyData = transactions.groupBy { it.date }
+            .mapValues { (_, transactions) -> transactions.sumOf { abs(it.amount) } }
 
-        val entries = groupedData.entries.mapIndexed { index, entry ->
-            Entry(index.toFloat(), entry.value.toFloat())
+        // Create sorted list of dates in the period
+        val dates = getDatesInPeriod().sorted()
+
+        // Create entries for each day in the period (including days with 0 spending)
+        val entries = dates.mapIndexed { index, date ->
+            val amount = dailyData[date] ?: 0.0
+            Entry(index.toFloat(), amount.toFloat())
         }
 
-        val dataSet = LineDataSet(entries, "Spending Trend").apply {
+        val dataSet = LineDataSet(entries, "Daily Spending").apply {
             color = Color.BLUE
             valueTextColor = Color.BLACK
             lineWidth = 2f
+            mode = LineDataSet.Mode.CUBIC_BEZIER // Creates the smooth "wave" effect
+            cubicIntensity = 0.2f
+            setDrawCircles(true)
+            circleRadius = 4f
+            circleHoleRadius = 2f
+            setCircleColor(Color.BLUE)
+        }
+
+        // Configure X-axis to show dates
+        binding.lineChart.xAxis.apply {
+            valueFormatter = object : ValueFormatter() {
+                private val formatter = DateTimeFormatter.ofPattern("M/d") // Shorter format
+
+                override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                    return dates.getOrNull(value.toInt())?.let {
+                        try {
+                            LocalDate.parse(it).format(formatter)
+                        } catch (e: Exception) {
+                            ""
+                        }
+                    } ?: ""
+                }
+            }
+            granularity = when (currentPeriod) {
+                "DAILY" -> 1f
+                "WEEKLY" -> 1f
+                else -> 2f // Show every other day for monthly
+            }
+            setLabelCount(7, true) // Show max 7 labels
+            labelRotationAngle = -45f // Rotate labels for better fit
+            position = XAxis.XAxisPosition.BOTTOM
+            setAvoidFirstLastClipping(true) // Prevent edge labels from being cut off
         }
 
         binding.lineChart.data = LineData(dataSet)
         binding.lineChart.invalidate()
+        binding.lineChart.animateX(1000)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getDatesInPeriod(): List<String> {
+        val now = LocalDate.now()
+        return when (currentPeriod) {
+            "DAILY" -> listOf(now.toString())
+            "WEEKLY" -> (0..6).map { now.minusDays(6 - it.toLong()) }.map { it.toString() }
+            else -> (1..now.lengthOfMonth()).map { day ->
+                LocalDate.of(now.year, now.month, day).toString()
+            }
+        }
     }
 
     private fun updateBarChart(transactions: List<Transaction>) {
@@ -170,7 +237,7 @@ class BudgetAnalysisActivity : AppCompatActivity() {
         // Configure X-axis labels
         binding.barChart.xAxis.apply {
             valueFormatter = object : ValueFormatter() {
-                override fun getFormattedValue(value: Float): String {
+                override fun getAxisLabel(value: Float, axis: AxisBase?): String {
                     return labels.getOrNull(value.toInt()) ?: ""
                 }
             }
@@ -214,5 +281,12 @@ class BudgetAnalysisActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun LocalDate.getWeekOfMonth(): Int {
         return (dayOfMonth - 1) / 7 + 1
+    }
+
+    //Dollar formatter
+    private val dollarFormatter = object : ValueFormatter() {
+        override fun getFormattedValue(value: Float): String {
+            return "$${String.format("%.2f", value)}"
+        }
     }
 }
