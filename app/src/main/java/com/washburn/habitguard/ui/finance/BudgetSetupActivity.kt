@@ -30,7 +30,7 @@ class BudgetSetupActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun saveBudget() {
         val amountInput = binding.amountInput.text.toString()
-        val period = binding.periodSpinner.selectedItemPosition
+        val periodSelection = binding.periodSpinner.text.toString()
 
         if (amountInput.isBlank()) {
             Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show()
@@ -42,11 +42,11 @@ class BudgetSetupActivity : AppCompatActivity() {
             return
         }
 
-        val periodType = when(period) {
-            0 -> "DAILY"
-            1 -> "WEEKLY"
-            2 -> "MONTHLY"
-            else -> "MONTHLY"
+        val periodType = when(periodSelection.uppercase()) {
+            "DAILY" -> "DAILY"
+            "WEEKLY" -> "WEEKLY"
+            "MONTHLY" -> "MONTHLY"
+            else -> "MONTHLY" // Default to monthly
         }
 
         firestoreHelper.addUserBudget(

@@ -26,4 +26,9 @@
     <color name="green_600">#43A047</color>
 
     <color name="warning_color">#FFCDD2</color>
+
+    <color name="chart_line">#2196F3</color>
+    <color name="chart_bar_1">#F44336</color>
+    <color name="chart_bar_2">#4CAF50</color>
+    <color name="chart_bar_3">#2196F3</color>
 </resources>

@@ -34,7 +34,7 @@
         <item>On the same weekday each month</item>
     </string-array>
 
-    <!-- Finance Summary Spinner -->
+    <!-- Finance period spinner -->
     <string-array name="period_options">
         <item>Daily</item>
         <item>Weekly</item>

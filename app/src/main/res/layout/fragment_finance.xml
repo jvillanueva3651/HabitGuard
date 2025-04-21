@@ -211,32 +211,16 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Summary Section (Outside Card) -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Summary"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
-            tools:ignore="HardcodedText" />
-
-        <!-- Income and Expense Summary -->
-        <Spinner
-            android:id="@+id/periodSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:entries="@array/period_options"
-            android:layout_marginBottom="8dp"/>
-
+        <!-- Budget Analysis Button -->
         <Button
-            android:id="@+id/viewAllButton"
-            android:layout_width="wrap_content"
+            android:id="@+id/budgetAnalysisButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="View All Transactions"
+            android:text="Budget Analysis"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
-            android:onClick="onViewAllClicked"/>
+            android:backgroundTint="@color/teal_700"
+            android:textColor="@color/white"
+            tools:ignore="HardcodedText"/>
     </LinearLayout>
 </ScrollView>

@@ -77,6 +77,10 @@ class FinanceFragment : Fragment() {
             // TODO: Implement receipt scanning logic
             Toast.makeText(context, "Receipt scanning placeholder", Toast.LENGTH_SHORT).show()
         }
+
+        binding.budgetAnalysisButton.setOnClickListener {
+            startActivity(Intent(requireContext(), BudgetAnalysisActivity::class.java))
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
