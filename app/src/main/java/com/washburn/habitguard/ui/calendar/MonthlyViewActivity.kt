@@ -86,6 +86,8 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
                 },
                 onDeleteSuccess = {
                     // Refresh data after deletion
+
+                    loadEvents()
                     loadTransactionsForDate()
                 }
             )
@@ -124,6 +126,12 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
 
                 // Update UI on main thread
                 activity?.runOnUiThread {
+                    // Add date to summary title
+                    binding.financeDescription.text = getString(
+                        R.string.description_finance_fragment_calendar,
+                        CalendarUtils.formattedDate(selectedDate)
+                    )
+
                     var totalIncome = 0.0
                     var totalExpense = 0.0
                     var totalCredit = 0.0
@@ -277,6 +285,7 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
         selectedDate = date
         setMonthView()
         setEventAdapter() // Update events list when date changes
+        loadTransactionsForDate() //Update finance summary when new date selected
     }
 
     override fun onResume() {
