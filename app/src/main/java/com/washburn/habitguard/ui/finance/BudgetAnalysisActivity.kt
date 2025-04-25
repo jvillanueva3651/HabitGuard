@@ -227,11 +227,19 @@ class BudgetAnalysisActivity : AppCompatActivity() {
 
         val dataSet = BarDataSet(entries, "Spending by Category").apply {
             colors = listOf(
-                Color.rgb(255, 99, 132),  // Red
-                Color.rgb(54, 162, 235),  // Blue
-                Color.rgb(255, 206, 86)   // Yellow
+                Color.rgb(65, 105, 225),  // Royal Blue
+                Color.rgb(255, 140, 0),    // Dark Orange
+                Color.rgb(50, 205, 50),    // Lime Green
+                Color.rgb(220, 20, 60),    // Crimson
+                Color.rgb(138, 43, 226)     // Blue Violet
             )
             valueTextColor = Color.BLACK
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString() // Show whole numbers only
+                }
+            }
+            setDrawValues(true) // Ensure values are displayed
         }
 
         // Configure X-axis labels
@@ -243,10 +251,47 @@ class BudgetAnalysisActivity : AppCompatActivity() {
             }
             granularity = 1f
             setDrawGridLines(false)
+            labelRotationAngle = -45f // Rotate labels 45 degrees
+            position = XAxis.XAxisPosition.BOTTOM
+            setLabelCount(labels.size, true)
+            textSize = 10f // Smaller font size
+            setCenterAxisLabels(true)
         }
 
-        binding.barChart.data = BarData(dataSet)
-        binding.barChart.invalidate()
+        // Configure Y-axis
+        binding.barChart.axisLeft.apply {
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString() // Show only integers
+                }
+            }
+            granularity = 1f // Only show whole numbers
+            axisMinimum = 0f // Start from zero
+            setDrawGridLines(true)
+            gridColor = Color.LTGRAY
+        }
+
+        // Additional chart styling
+        with(binding.barChart) {
+            setExtraOffsets(10f, 0f, 10f, 40f) // Add bottom offset for rotated labels
+            description.text = "Category Spending Frequency"
+            description.textSize = 12f
+            legend.isEnabled = true
+            animateY(1000) // Add animation
+            isDoubleTapToZoomEnabled = false
+            setPinchZoom(false)
+            setDrawBarShadow(false)
+            setDrawValueAboveBar(true)
+
+            // Set bar width
+            data = BarData(dataSet).apply {
+                barWidth = 0.4f // Adjust bar width for better spacing
+            }
+
+            // Remove right axis
+            axisRight.isEnabled = false
+            invalidate()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
