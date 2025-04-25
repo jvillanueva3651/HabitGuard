@@ -47,7 +47,13 @@ class CalendarAdapter(
     override fun onBindViewHolder(holder: CalendarViewHolder, position: Int) {
         val date = days[position]
         val habitCount = habits.count { it["date"] == date.toString() }
-        val transactionCount = transactions.count { it["date"] == date.toString() }
+        val transactionCount = transactions.count { transaction ->
+            try {
+                LocalDate.parse(transaction["date"] ?: "") == date
+            } catch (e: Exception) {
+                false
+            }
+        }
 
         with(holder) {
             val dayOfTheMonthText = date.dayOfMonth.toString()

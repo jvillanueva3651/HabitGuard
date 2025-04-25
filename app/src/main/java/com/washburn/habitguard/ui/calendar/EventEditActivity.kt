@@ -77,6 +77,11 @@ class EventEditActivity : AppCompatActivity() {
             isTransactionMode = true
         }
 
+        currentTransactionId = intent.getStringExtra(EXTRA_TRANSACTION_ID)
+        if (currentTransactionId != null) {
+            isTransactionMode = true
+        }
+
         binding = ActivityEventEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -521,6 +526,13 @@ class EventEditActivity : AppCompatActivity() {
                 transactionMinutePicker.value = time.minute
             }
 
+            val type = transactionData["transactionType"] as? String ?: "INCOME"
+            currentType = when (type) {
+                "INCOME" -> TransactionType.INCOME
+                "EXPENSE" -> TransactionType.EXPENSE
+                "CREDIT" -> TransactionType.CREDIT
+                else -> TransactionType.INCOME
+            }
             updateUI()
         }
     }

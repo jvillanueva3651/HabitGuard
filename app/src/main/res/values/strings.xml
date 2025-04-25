@@ -167,7 +167,7 @@
     <string name="remaining_format">$%.2f remaining</string>
     <string name="budget_total_format">Budget: $%.2f (%d%%)</string>
     <string name="balance_format">Balance: $%1$.2f</string>
-    <string name="description_finance_fragment_calendar">Finance Summary</string>
+    <string name="description_finance_fragment_calendar">Finance Summary for %s</string>
     <string name="description_income_fragment_calendar">Income</string>
     <string name="description_expense_fragment_calendar">Expense</string>
     <string name="description_credit_fragment_calendar">Credit</string>

@@ -32,6 +32,8 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
 
     private lateinit var eventAdapter: EventAdapter // Updated Event view
 
+    private lateinit var transactionAdapter: TransactionAdapter
+
     private lateinit var firestoreHelper: FirestoreHelper // Access to Firestore
 
     private var allEvents: List<Pair<String, Map<String, Any>>> = emptyList() // Store all events
@@ -69,6 +71,27 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
             calendarRecyclerView.layoutManager = GridLayoutManager(requireContext(), 7)
             // Setup events list
             itemsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+            binding.transactionsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+            transactionAdapter = TransactionAdapter(
+                context = requireContext(),
+                transactions = emptyList(),
+                firestoreHelper = firestoreHelper,
+                onEditClick = { transactionId ->
+                    // Launch EventEditActivity in transaction mode
+                    startActivity(Intent(requireContext(), EventEditActivity::class.java).apply {
+                        putExtra(EventEditActivity.EXTRA_TRANSACTION_ID, transactionId)
+                        putExtra(EventEditActivity.EXTRA_IS_TRANSACTION, true)
+                    })
+                },
+                onDeleteSuccess = {
+                    // Refresh data after deletion
+
+                    loadEvents()
+                    loadTransactionsForDate()
+                }
+            )
+            binding.transactionsRecyclerView.adapter = transactionAdapter
         }
     }
 
@@ -91,40 +114,54 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
     private fun loadTransactionsForDate() {
         firestoreHelper.getAllUserTransactions(
             onSuccess = { transactions ->
-                allTransaction = transactions.sortedWith(compareBy(
-                    { it.second["date"] as? String ?: "" },
-                    { it.second["time"] as? String ?: "00:00" }
-                ))
-
-                // Filter transactions for the specific date
-                val dailyTransactions = allTransaction
+                // Filter transactions for the selected date
+                allTransaction = transactions
+                val dailyTransactions = transactions
                     .filter { (_, transaction) ->
                         transaction["date"] == selectedDate.toString()
                     }
-
-                var totalIncome = 0.0
-                var totalExpense = 0.0
-                var totalCredit = 0.0
-
-                dailyTransactions.forEach { (_, data) ->
-                    val type = data["transactionType"] as? String ?: ""
-                    val amount = data["amount"] as? Double ?: 0.0
-                    when (type) {
-                        "INCOME" -> totalIncome += amount
-                        "EXPENSE" -> totalExpense += amount
-                        "CREDIT" -> totalCredit += amount
+                    .sortedBy { (_, transaction) ->
+                        transaction["transactionTime"] as? String ?: "00:00"
                     }
-                }
 
-                // Update UI
+                // Update UI on main thread
                 activity?.runOnUiThread {
+                    // Add date to summary title
+                    binding.financeDescription.text = getString(
+                        R.string.description_finance_fragment_calendar,
+                        CalendarUtils.formattedDate(selectedDate)
+                    )
+
+                    var totalIncome = 0.0
+                    var totalExpense = 0.0
+                    var totalCredit = 0.0
+
+                    dailyTransactions.forEach { (_, data) ->
+                        val type = data["transactionType"] as? String ?: ""
+                        val amount = data["amount"] as? Double ?: 0.0
+                        when (type) {
+                            "INCOME" -> totalIncome += amount
+                            "EXPENSE" -> totalExpense += amount
+                            "CREDIT" -> totalCredit += amount
+                        }
+                    }
+
                     binding.incomeValue.text = getString(R.string.income_label, totalIncome)
                     binding.expenseValue.text = getString(R.string.expense_label, totalExpense)
                     binding.creditValue.text = getString(R.string.credit_label, totalCredit)
+
+                    // 2. Update RecyclerView with transactions
+                    transactionAdapter.updateTransactions(dailyTransactions)
                 }
             },
             onFailure = { e ->
-                showToast(requireContext(), "Error loading transactions: $e")
+                activity?.runOnUiThread {
+                    Toast.makeText(
+                        requireContext(),
+                        "Error loading transactions: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         )
     }
@@ -194,7 +231,7 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
                 mapOf(
                     "name" to (transactionData["name"] as? String ?: ""),
                     "date" to (transactionData["date"] as? String ?: ""),
-                    "time" to (transactionData["time"] as? String ?: "00:00")
+                    "time" to (transactionData["time"] as? String ?: "00:00") // ❌ Wrong field name
                 )
             }
         )
@@ -248,6 +285,7 @@ class MonthlyViewActivity : Fragment(), OnItemListener {
         selectedDate = date
         setMonthView()
         setEventAdapter() // Update events list when date changes
+        loadTransactionsForDate() //Update finance summary when new date selected
     }
 
     override fun onResume() {
