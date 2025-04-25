@@ -3,15 +3,19 @@ package com.washburn.habitguard.ui.finance
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.data.*
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.washburn.habitguard.databinding.ActivityBudgetAnalysisBinding
 import com.washburn.habitguard.FirestoreHelper
+import com.washburn.habitguard.R
 import com.washburn.habitguard.ui.calendar.TransactionType
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -25,6 +29,7 @@ class BudgetAnalysisActivity : AppCompatActivity() {
     private lateinit var firestoreHelper: FirestoreHelper
     private var transactions = listOf<Transaction>()
     private var currentPeriod = "MONTHLY"
+    private val periodOptions by lazy { resources.getStringArray(R.array.period_options) }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,13 +45,31 @@ class BudgetAnalysisActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun setupPeriodSpinner() {
-        binding.periodSpinner.setOnItemClickListener { _, _, position, _ ->
-            currentPeriod = when (position) {
-                0 -> "DAILY"
-                1 -> "WEEKLY"
-                else -> "MONTHLY"
+        val adapter = ArrayAdapter(
+            this,
+            R.layout.dropdown_menu_item,
+            periodOptions
+        )
+
+        (binding.periodSpinner as? MaterialAutoCompleteTextView)?.apply {
+            setAdapter(adapter)
+            setText(periodOptions.first(), false) // Set initial value
+            setOnItemClickListener { _, _, position, _ ->
+                currentPeriod = when (position) {
+                    0 -> "DAILY"
+                    1 -> "WEEKLY"
+                    else -> "MONTHLY"
+                }
+                updateCharts()
             }
-            updateCharts()
+
+            // Add visual improvements
+            var dropDownBackgroundDrawable =
+                ContextCompat.getDrawable(
+                    this@BudgetAnalysisActivity,
+                    R.drawable.spinner_dropdown_bg
+                )
+            dropDownVerticalOffset = resources.getDimensionPixelSize(R.dimen.spinner_dropdown_offset)
         }
     }
 
