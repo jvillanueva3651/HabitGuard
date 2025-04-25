@@ -27,7 +27,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -44,6 +43,7 @@ import com.washburn.habitguard.databinding.GeminiDialogBinding
 import com.washburn.habitguard.firebase.AuthUtils.showToast
 import com.washburn.habitguard.notification.NotificationHelper
 import com.washburn.habitguard.settings.SettingActivity
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -95,8 +95,8 @@ class SideActivity : AppCompatActivity() {
 
     private fun initializeGemini() {
         generativeModel = GenerativeModel(
-            modelName = "gemini-pro",
-            apiKey = getString(R.string.gemini_api_key)
+            modelName = "gemini-2.0-flash",
+            apiKey = "AIzaSyB0xO9Zd-aaWpVE5XAem2B7tjddHPPuNpM"
         )
         binding.appBarSide.fab.setOnClickListener { showGeminiDialog() }
     }
@@ -199,7 +199,7 @@ class SideActivity : AppCompatActivity() {
                 dialogBinding.progressBar.isVisible = true
                 dialogBinding.tvResponse.text = ""
 
-                lifecycleScope.launch {
+                MainScope().launch {
                     try {
                         val response = generativeModel.generateContent(query)
                         dialogBinding.tvResponse.text = response.text ?: "No response received"

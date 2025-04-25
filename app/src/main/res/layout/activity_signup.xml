@@ -134,6 +134,15 @@
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/by_signing_up_you_agree_to_the_terms_of_service_and_data_processing_agreement"
+                android:textColor="@color/teal_700"
+                android:textSize="8sp"
+                app:layout_constraintTop_toBottomOf="@id/btnSSignUp" />
+
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>

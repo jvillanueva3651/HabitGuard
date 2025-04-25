@@ -136,6 +136,7 @@ class LoginActivity : AppCompatActivity() {
             showToast(this, "Google Sign-In requires internet connection")
             return
         }
+
         val googleIdOption = GetGoogleIdOption.Builder()
             .setServerClientId(getString(R.string.default_web_client_id))
             .setFilterByAuthorizedAccounts(false)
