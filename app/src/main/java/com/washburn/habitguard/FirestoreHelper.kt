@@ -12,8 +12,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.LocalDate
 import java.time.LocalTime
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.resume
 
 @RequiresApi(Build.VERSION_CODES.O)
 class FirestoreHelper {
@@ -427,3 +432,28 @@ class FirestoreHelper {
         val events: List<EventData>
     )
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
+suspend fun FirestoreHelper.getAllUserHabitsSuspended(): List<Pair<String, Map<String, Any>>> =
+    suspendCancellableCoroutine { continuation ->
+        getAllUserHabits(
+            onSuccess = { habits -> continuation.resume(habits) },
+            onFailure = { e -> continuation.resumeWithException(e) }
+        )
+    }
+@RequiresApi(Build.VERSION_CODES.O)
+suspend fun FirestoreHelper.getUserBudgetSuspended(): Pair<Double, String>? =
+    suspendCancellableCoroutine { continuation ->
+        getUserBudget(
+            onSuccess = { budget -> continuation.resume(budget) },
+            onFailure = { e -> continuation.resumeWithException(e) }
+        )
+    }
+@RequiresApi(Build.VERSION_CODES.O)
+suspend fun FirestoreHelper.getAllUserTransactionsSuspended(): List<Pair<String, Map<String, Any>>> =
+    suspendCancellableCoroutine { continuation ->
+        getAllUserTransactions(
+            onSuccess = { transactions -> continuation.resume(transactions) },
+            onFailure = { e -> continuation.resumeWithException(e) }
+        )
+    }

@@ -43,8 +43,10 @@ import com.washburn.habitguard.databinding.GeminiDialogBinding
 import com.washburn.habitguard.firebase.AuthUtils.showToast
 import com.washburn.habitguard.notification.NotificationHelper
 import com.washburn.habitguard.settings.SettingActivity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -180,6 +182,8 @@ class SideActivity : AppCompatActivity() {
 
         val dialogBinding = GeminiDialogBinding.inflate(LayoutInflater.from(this))
 
+        val firestoreHelper = FirestoreHelper()
+
         geminiDialog = AlertDialog.Builder(this)
             .setView(dialogBinding.root)
             .setCancelable(true)
@@ -194,24 +198,18 @@ class SideActivity : AppCompatActivity() {
             }
 
         dialogBinding.btnSubmit.setOnClickListener {
-            val query = dialogBinding.etUserQuery.text.toString()
-            if (query.isNotEmpty()) {
+            val userQuery = dialogBinding.etUserQuery.text.toString()
+            if (userQuery.isNotEmpty()) {
                 dialogBinding.progressBar.isVisible = true
-                dialogBinding.tvResponse.text = ""
+                val tvResponse = "Processing your question..."
+                dialogBinding.tvResponse.text = tvResponse
 
                 MainScope().launch {
                     try {
-                        val response = generativeModel.generateContent(query)
+                        val response = generativeModel.generateContent(userQuery)
                         dialogBinding.tvResponse.text = response.text ?: "No response received"
                     } catch (e: Exception) {
-                        val errorMsg = when (e) {
-                            is SocketTimeoutException -> "Request timed out"
-                            is UnknownHostException -> "No internet connection"
-                            is IOException -> "Network error"
-                            else -> "Error: ${e.localizedMessage}"
-                        }
-                        dialogBinding.tvResponse.text = errorMsg
-                        showToast(this@SideActivity, errorMsg)
+                        handleGeminiError(e, dialogBinding)
                     } finally {
                         dialogBinding.progressBar.isVisible = false
                     }
@@ -221,11 +219,96 @@ class SideActivity : AppCompatActivity() {
             }
         }
 
+        dialogBinding.btnAnalyze.setOnClickListener {
+            dialogBinding.progressBar.isVisible = true
+            val tvResponse = "Analyzing your data..."
+            dialogBinding.tvResponse.text = tvResponse
+
+            MainScope().launch {
+                try {
+                    val habits = withContext(Dispatchers.IO) {
+                        firestoreHelper.getAllUserHabitsSuspended()
+                    }
+
+                    val budget = withContext(Dispatchers.IO) {
+                        firestoreHelper.getUserBudgetSuspended()
+                    }
+
+                    val transactions = withContext(Dispatchers.IO) {
+                        firestoreHelper.getAllUserTransactionsSuspended()
+                    }
+
+                    val prompt = buildString {
+                        appendLine("Analyze this user's data and provide a concise summary with suggestions:")
+
+                        if (habits.isNotEmpty()) {
+                            appendLine("\n=== Habits Summary ===")
+                            val completedHabits = habits.count { (_, habit) ->
+                                (habit["completed"] as? Boolean) == true
+                            }
+                            appendLine("- Total habits: ${habits.size}")
+                            appendLine("- Completed today: $completedHabits")
+
+                            val bestStreak = habits.maxByOrNull { (_, habit) ->
+                                (habit["currentStreak"] as? Long) ?: 0
+                            }
+                            bestStreak?.let { (_, habit) ->
+                                appendLine("- Best streak: ${habit["name"]} (${habit["currentStreak"]} days)")
+                            }
+                        }
+
+                        if (budget != null) {
+                            appendLine("\n=== Financial Summary ===")
+                            appendLine("- Budget: ${budget.first} (${budget.second})")
+
+                            if (transactions.isNotEmpty()) {
+                                val totalSpent = transactions.sumOf { (_, t) ->
+                                    (t["amount"] as? Double) ?: 0.0
+                                }
+                                appendLine("- Total spent this period: $totalSpent")
+                                appendLine("- Remaining: ${budget.first - totalSpent}")
+
+                                val topCategory = transactions
+                                    .groupBy { (_, t) -> t["category"] as? String ?: "Other" }
+                                    .maxByOrNull { it.value.size }
+                                topCategory?.let {
+                                    appendLine("- Top spending category: ${it.key} (${it.value.size} transactions)")
+                                }
+                            }
+                        }
+
+                        appendLine("\nPlease provide:")
+                        appendLine("1. A quick overview of their progress")
+                        appendLine("2. Specific habit suggestions")
+                        appendLine("3. Financial recommendations if applicable")
+                        appendLine("4. Motivational encouragement")
+                    }
+
+                    // 3. Get Gemini response
+                    val response = generativeModel.generateContent(prompt)
+                    dialogBinding.tvResponse.text = response.text ?: "No analysis available"
+                } catch (e: Exception) {
+                    handleGeminiError(e, dialogBinding)
+                } finally {
+                    dialogBinding.progressBar.isVisible = false
+                }
+            }
+        }
+
         dialogBinding.btnClose.setOnClickListener {
             geminiDialog?.dismiss()
         }
 
         geminiDialog?.show()
+    }
+
+    private fun handleGeminiError(e: Exception, binding: GeminiDialogBinding) {
+        binding.tvResponse.text = when (e) {
+            is SocketTimeoutException -> "Request timed out"
+            is UnknownHostException -> "No internet connection"
+            else -> "Error: ${e.localizedMessage}"
+        }
+        showToast(this, "Failed to get response")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
