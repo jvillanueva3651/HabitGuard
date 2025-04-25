@@ -3,15 +3,19 @@ package com.washburn.habitguard.ui.finance
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.data.*
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.washburn.habitguard.databinding.ActivityBudgetAnalysisBinding
 import com.washburn.habitguard.FirestoreHelper
+import com.washburn.habitguard.R
 import com.washburn.habitguard.ui.calendar.TransactionType
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -25,6 +29,7 @@ class BudgetAnalysisActivity : AppCompatActivity() {
     private lateinit var firestoreHelper: FirestoreHelper
     private var transactions = listOf<Transaction>()
     private var currentPeriod = "MONTHLY"
+    private val periodOptions by lazy { resources.getStringArray(R.array.period_options) }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,13 +45,31 @@ class BudgetAnalysisActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun setupPeriodSpinner() {
-        binding.periodSpinner.setOnItemClickListener { _, _, position, _ ->
-            currentPeriod = when (position) {
-                0 -> "DAILY"
-                1 -> "WEEKLY"
-                else -> "MONTHLY"
+        val adapter = ArrayAdapter(
+            this,
+            R.layout.dropdown_menu_item,
+            periodOptions
+        )
+
+        (binding.periodSpinner as? MaterialAutoCompleteTextView)?.apply {
+            setAdapter(adapter)
+            setText(periodOptions.first(), false) // Set initial value
+            setOnItemClickListener { _, _, position, _ ->
+                currentPeriod = when (position) {
+                    0 -> "DAILY"
+                    1 -> "WEEKLY"
+                    else -> "MONTHLY"
+                }
+                updateCharts()
             }
-            updateCharts()
+
+            // Add visual improvements
+            var dropDownBackgroundDrawable =
+                ContextCompat.getDrawable(
+                    this@BudgetAnalysisActivity,
+                    R.drawable.spinner_dropdown_bg
+                )
+            dropDownVerticalOffset = resources.getDimensionPixelSize(R.dimen.spinner_dropdown_offset)
         }
     }
 
@@ -227,11 +250,19 @@ class BudgetAnalysisActivity : AppCompatActivity() {
 
         val dataSet = BarDataSet(entries, "Spending by Category").apply {
             colors = listOf(
-                Color.rgb(255, 99, 132),  // Red
-                Color.rgb(54, 162, 235),  // Blue
-                Color.rgb(255, 206, 86)   // Yellow
+                Color.rgb(65, 105, 225),  // Royal Blue
+                Color.rgb(255, 140, 0),    // Dark Orange
+                Color.rgb(50, 205, 50),    // Lime Green
+                Color.rgb(220, 20, 60),    // Crimson
+                Color.rgb(138, 43, 226)     // Blue Violet
             )
             valueTextColor = Color.BLACK
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString() // Show whole numbers only
+                }
+            }
+            setDrawValues(true) // Ensure values are displayed
         }
 
         // Configure X-axis labels
@@ -243,10 +274,47 @@ class BudgetAnalysisActivity : AppCompatActivity() {
             }
             granularity = 1f
             setDrawGridLines(false)
+            labelRotationAngle = -45f // Rotate labels 45 degrees
+            position = XAxis.XAxisPosition.BOTTOM
+            setLabelCount(labels.size, true)
+            textSize = 10f // Smaller font size
+            setCenterAxisLabels(true)
         }
 
-        binding.barChart.data = BarData(dataSet)
-        binding.barChart.invalidate()
+        // Configure Y-axis
+        binding.barChart.axisLeft.apply {
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString() // Show only integers
+                }
+            }
+            granularity = 1f // Only show whole numbers
+            axisMinimum = 0f // Start from zero
+            setDrawGridLines(true)
+            gridColor = Color.LTGRAY
+        }
+
+        // Additional chart styling
+        with(binding.barChart) {
+            setExtraOffsets(10f, 0f, 10f, 40f) // Add bottom offset for rotated labels
+            description.text = "Category Spending Frequency"
+            description.textSize = 12f
+            legend.isEnabled = true
+            animateY(1000) // Add animation
+            isDoubleTapToZoomEnabled = false
+            setPinchZoom(false)
+            setDrawBarShadow(false)
+            setDrawValueAboveBar(true)
+
+            // Set bar width
+            data = BarData(dataSet).apply {
+                barWidth = 0.4f // Adjust bar width for better spacing
+            }
+
+            // Remove right axis
+            axisRight.isEnabled = false
+            invalidate()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

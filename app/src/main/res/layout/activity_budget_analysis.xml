@@ -17,6 +17,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            app:startIconDrawable="@drawable/ic_calendar"
+            app:boxStrokeColor="@color/teal_700"
+            app:endIconMode="dropdown_menu"
             app:hintEnabled="false">
 
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -25,8 +28,12 @@
                 android:layout_height="wrap_content"
                 android:hint="Select Period"
                 android:inputType="none"
-                android:entries="@array/period_options"
-                android:textSize="16sp"/>
+                android:textSize="16sp"
+                android:textColor="@color/teal_700"
+                android:dropDownHeight="300dp"
+                android:dropDownVerticalOffset="@dimen/spinner_dropdown_offset"
+                android:overlapAnchor="false"/>
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Spending Trend Chart -->

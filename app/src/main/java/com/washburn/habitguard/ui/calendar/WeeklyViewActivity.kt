@@ -33,6 +33,7 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
     private lateinit var firestoreHelper: FirestoreHelper
     private var allEvents: List<Pair<String, Map<String, Any>>> = emptyList()
     private var allTransaction: List<Pair<String, Map<String, Any>>> = emptyList() // Store all transaction
+    private lateinit var transactionAdapter: TransactionAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +80,18 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
         )
     }
 
+    private fun loadTransactions() {
+        firestoreHelper.getAllUserTransactions(
+            onSuccess = { transactions ->
+                allTransaction = transactions
+                setWeekView()
+            },
+            onFailure = { e ->
+                Toast.makeText(this, "Error loading transactions: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
     private fun setWeekView() {
         binding.monthYearTV.text = CalendarUtils.monthYearFromDate(selectedDate)
         val days = CalendarUtils.daysInWeekArray(selectedDate)
@@ -99,7 +112,7 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
                 mapOf(
                     "name" to (transactionData["name"] as? String ?: ""),
                     "date" to (transactionData["date"] as? String ?: ""),
-                    "time" to (transactionData["time"] as? String ?: "00:00")
+                    "time" to (transactionData["transactionTime"] as? String ?: "00:00") // Changed from "time"
                 )
             }
         )
@@ -137,6 +150,7 @@ class WeeklyViewActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
     override fun onResume() {
         super.onResume()
         loadEvents() // Refresh data when returning from other screens
+        loadTransactions()
     }
 
     private fun previousWeekAction() {
