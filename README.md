@@ -120,7 +120,7 @@ To enter transactions the user will click the Add Event button below the Calenda
 and then click the Transaction button on the Habit screen. This screen will allow
 users to enter a title, amount, time, recurring, tags, location, and description.
 
-![transaction_home_screen.png](app/src/main/res/drawable/transaction_home_screen.png)
+![add_transaction.png](app/src/main/res/drawable/add_transaction.png)
 
 The user has an icon to the right of the amount that can be used to identify if the 
 transaction is income, debit, or future debit.
