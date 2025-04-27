@@ -133,5 +133,19 @@ summary.
 
 ![habit_transaction_summary.png](app/src/main/res/drawable/habit_transaction_summary.png)
 
+The user can also enter and view their budget by clicking the hamburger and then choosing 
+Finance. This screen will also allow users to see Transaction History. The user can also
+hit the Add Transaction to enter more transactions.
 
+![transaction_home_screen.png](app/src/main/res/drawable/transaction_home_screen.png)
+
+Users can scroll to the bottom of the Finance view to find a button for labeled Budget
+Analysis.
+
+![budget_analysis_button.png](app/src/main/res/drawable/budget_analysis_button.png)
+
+The Budget Analysis button will give users their spending habits in three different graph
+formats.
+
+![budget_analysis_graphs.png](app/src/main/res/drawable/budget_analysis_graphs.png)
 
