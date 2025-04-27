@@ -89,17 +89,49 @@ stating the profile has been updated.
 
 ![profile_updated_toast.png](app/src/main/res/drawable/profile_updated_toast.png)
 
-The next step is for the user to click the hamburger in the upper left corner to 
-expand the menu for the Home, Calendar, and Finance menu.
+The next step is for the user to swipe out of the profile to return to the home screen and then click 
+the hamburger in the upper left corner to expand the menu for the Home, Calendar, and Finance menu.
 
 ![hamburger_screen.png](app/src/main/res/drawable/hamburger_screen.png)
 
 The user can click Calendar which opens the calendar home screen. This screen will 
-show the user ........ 
+show the user a calendar of the month and automatically lists the weekly habits below
+the calendar. The green arrows on each side of the name of the month allow the user to 
+switch to different months. The user can click the Weekly button to change it to a Daily
+view. If the user clicks the Daily button it will then switch to an Hourly view for that
+day. To enter a habit the user can click the Add Event button below the calendar.
 
-![calendar_home_screen.png](app/src/main/res/drawable/calendar_home_screen.png)
+![cisichabod_calendar_home.png](app/src/main/res/drawable/cisichabod_calendar_home.png)
 
+The Add Event screen gives the user several options that can be completed about their 
+habit such as, title, time, recurring, location, and description.
 
+![add_habit_screen.png](app/src/main/res/drawable/add_habit_screen.png)
+
+The user can check the Recurring Event box which will expand to let the user enter more
+information about their habit including repeat frequency;day, week, month, year. A user 
+can also set the habit to end after a certain number of occurrences or on a certain date.
+Once the user is done entering their information they can hit the Save button at the bottom
+of the screen.
+
+![recurring_event.png](app/src/main/res/drawable/recurring_event.png)
+
+To enter transactions the user will click the Add Event button below the Calendar
+and then click the Transaction button on the Habit screen. This screen will allow
+users to enter a title, amount, time, recurring, tags, location, and description.
+
+![transaction_home_screen.png](app/src/main/res/drawable/transaction_home_screen.png)
+
+The user has an icon to the right of the amount that can be used to identify if the 
+transaction is income, debit, or future debit.
+
+![transaction_icon.png](app/src/main/res/drawable/transaction_icon.png)
+
+Once a user has entered their habits and transactions they can edit or delete both by clicking
+on the day and then scrolling down below the calendar to the Habit and Transaction
+summary.
+
+![habit_transaction_summary.png](app/src/main/res/drawable/habit_transaction_summary.png)
 
 
 
