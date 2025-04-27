@@ -63,7 +63,7 @@ After hitting the Login button users will see the Home Screen.
 To complete their profile information users will need to click the three dots in the 
 upper left-hand corner to display the settings button.
 
-![settings.png](app/src/main/res/drawable/settings.png)
+![settings_button.png](app/src/main/res/drawable/settings_button.png)
 
 Once the user clicks settings they will navigate to the Accounting Settings screen. This screen
 contains the Edit Profile button.
@@ -72,7 +72,7 @@ contains the Edit Profile button.
 
 The user will be sent to a new screen once the Edit Profile button is clicked.
 
-![profile_screen.png](app/src/main/res/drawable/profile_screen.png)
+![cisichabod_profile.png](app/src/main/res/drawable/cisichabod_profile.png)
 
 The user can add name information, birthdate, gender, address, and telephone numbers. 
 The user will receive a pop-up notification when entering their gender.
