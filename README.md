@@ -54,7 +54,7 @@ The screen will then return to the original login screen where the user will ent
 newly created login and password. Users can click the Remember me option which will populate 
 the saved login and password to make future logins easier.
 
-![new_user_login.png](app/src/main/res/drawable/new_user_login.png)
+![user_login.png](app/src/main/res/drawable/user_login.png)
 
 After hitting the Login button users will see the Home Screen.
 
