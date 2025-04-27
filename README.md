@@ -58,7 +58,7 @@ the saved login and password to make future logins easier.
 
 After hitting the Login button users will see the Home Screen.
 
-![New Home Screen.png](app/src/main/res/drawable/New%20Home%20Screen.png)
+![New_Home_Screen.png](app/src/main/res/drawable/New_Home_Screen.png)
 
 To complete their profile information users will need to click the three dots in the 
 upper left-hand corner to display the settings button.
