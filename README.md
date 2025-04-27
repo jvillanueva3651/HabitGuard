@@ -77,14 +77,14 @@ The user will be sent to a new screen once the Edit Profile button is clicked.
 The user can add name information, birthdate, gender, address, and telephone numbers. 
 The user will receive a pop-up notification when entering their gender.
 
-![profile_gender_toast.png](app/src/main/res/drawable/profile_gender_toast.png)
+![toast_gender_profile.png](app/src/main/res/drawable/toast_gender_profile.png)
 
 The user will hit the save button at the bottom of the screen once they are done
 modify their profile information.
 
-![profile_address_save.png](app/src/main/res/drawable/profile_address_save.png)
+![profile_address.png](app/src/main/res/drawable/profile_address.png)
 
-The screen will return to the home summary screen where a toast notification will appear
+The screen will return to the account settings summary screen where a toast notification will appear
 stating the profile has been updated.
 
 ![profile_updated_toast.png](app/src/main/res/drawable/profile_updated_toast.png)
