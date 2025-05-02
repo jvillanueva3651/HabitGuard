@@ -2,22 +2,21 @@ package com.washburn.habitguard.ui.home
 
 import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.LayoutInflater
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
-import com.washburn.habitguard.R
 import com.washburn.habitguard.FirestoreHelper
+import com.washburn.habitguard.R
 import com.washburn.habitguard.databinding.FragmentHomeBinding
 import com.washburn.habitguard.firebase.AuthUtils.showToast
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
 @RequiresApi(Build.VERSION_CODES.O)

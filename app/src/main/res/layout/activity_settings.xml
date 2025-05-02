@@ -1,5 +1,6 @@
 <!-- res/layout/activity_settings.xml -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -16,7 +17,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Account Settings"
+            android:text="@string/account_settings"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/teal_700"
@@ -27,7 +28,7 @@
             android:id="@+id/accountSettingsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Edit Profile"
+            android:text="@string/edit_profile"
             android:backgroundTint="@color/teal_700"
             android:textColor="@android:color/white"
             android:layout_marginBottom="16dp" />
@@ -42,7 +43,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Notifications"
+            android:text="@string/notifications"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/teal_700"
@@ -53,14 +54,15 @@
             android:id="@+id/notificationsSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enable Notifications"
-            android:textColor="@android:color/black" />
+            android:text="@string/enable_notifications"
+            android:textColor="@android:color/black"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
 
         <!-- Theme Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Appearance"
+            android:text="@string/appearance"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/teal_700"
@@ -77,21 +79,21 @@
                 android:id="@+id/lightThemeRadio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Light Theme"
+                android:text="@string/light_theme"
                 android:textColor="@android:color/black" />
 
             <RadioButton
                 android:id="@+id/darkThemeRadio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dark Theme"
+                android:text="@string/dark_theme"
                 android:textColor="@android:color/black" />
 
             <RadioButton
                 android:id="@+id/systemDefaultRadio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="System Default"
+                android:text="@string/system_default"
                 android:textColor="@android:color/black" />
         </RadioGroup>
 
@@ -99,7 +101,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Music Settings"
+            android:text="@string/music_settings"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/teal_700"
@@ -110,7 +112,7 @@
             android:id="@+id/playMusicButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Play Music"
+            android:text="@string/play_music"
             android:backgroundTint="@color/teal_700"
             android:textColor="@android:color/white"
             android:layout_marginBottom="8dp" />
@@ -119,7 +121,7 @@
             android:id="@+id/pauseMusicButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Pause Music"
+            android:text="@string/pause_music"
             android:backgroundTint="@color/teal_700"
             android:textColor="@android:color/white"
             android:layout_marginBottom="8dp" />
@@ -128,7 +130,7 @@
             android:id="@+id/stopMusicButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Stop Music"
+            android:text="@string/stop_music"
             android:backgroundTint="@color/teal_700"
             android:textColor="@android:color/white"
             android:layout_marginBottom="16dp" />
@@ -152,7 +154,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="App Info"
+            android:text="@string/app_info"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/teal_700"
@@ -163,7 +165,7 @@
             android:id="@+id/appVersionTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Version 1.0.0"
+            android:text="@string/version_1_0_0"
             android:textSize="16sp"
             android:textColor="@android:color/black" />
 
@@ -179,7 +181,7 @@
             android:id="@+id/logoutButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Logout"
+            android:text="@string/logout"
             android:backgroundTint="@color/red"
             android:textColor="@android:color/white"
             android:layout_marginTop="24dp" />

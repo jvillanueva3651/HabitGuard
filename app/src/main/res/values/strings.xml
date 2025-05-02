@@ -175,6 +175,26 @@
     <string name="_70">-70</string>
     <string name="_10">10</string>
     <string name="by_signing_up_you_agree_to_the_terms_of_service_and_data_processing_agreement">By signing up, you agree to the Terms of Service and Data Processing Agreement</string>
+    <string name="account_settings">Account Settings</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="notifications">Notifications</string>
+    <string name="appearance">Appearance</string>
+    <string name="light_theme">Light Theme</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="system_default">System Default</string>
+    <string name="music_settings">Music Settings</string>
+    <string name="play_music">Play Music</string>
+    <string name="pause_music">Pause Music</string>
+    <string name="stop_music">Stop Music</string>
+    <string name="app_info">App Info</string>
+    <string name="version_1_0_0">Version 1.0.0</string>
+    <string name="logout">Logout</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="gemini_ai_assistant">Gemini AI Assistant</string>
+    <string name="ask_me_anything">Ask me anything...</string>
+    <string name="ask_gemini">Ask Gemini</string>
+    <string name="close">Close</string>
+    <string name="quick_summary">Quick summary</string>
 
 
 </resources>

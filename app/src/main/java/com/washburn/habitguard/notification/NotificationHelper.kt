@@ -120,7 +120,7 @@ class NotificationHelper(private val context: Context) {
         }
     }
 
-    private fun scheduleDailyChecks() {
+    fun scheduleDailyChecks() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()

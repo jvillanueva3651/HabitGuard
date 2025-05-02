@@ -16,7 +16,7 @@
             android:id="@+id/tvDialogTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Gemini AI Assistant"
+            android:text="@string/gemini_ai_assistant"
             android:textSize="18sp"
             android:textStyle="bold"
             android:gravity="center"/>
@@ -26,7 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="Ask me anything..."
+            android:hint="@string/ask_me_anything"
+            android:importantForAutofill="no"
             android:inputType="textMultiLine"
             android:minLines="3" />
 
@@ -35,8 +36,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Ask Gemini"
+            android:text="@string/ask_gemini"
             android:backgroundTint="@color/purple_500"
+            android:textColor="@android:color/white"/>
+
+        <Button
+            android:id="@+id/btnAnalyze"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/quick_summary"
+            android:backgroundTint="@color/teal_200"
             android:textColor="@android:color/white"/>
 
         <ProgressBar
@@ -66,7 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Close"
+            android:text="@string/close"
             android:backgroundTint="@android:color/darker_gray"
             android:textColor="@android:color/white"/>
     </LinearLayout>
