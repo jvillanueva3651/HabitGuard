@@ -20,8 +20,13 @@ Overflow.
 
 #### Requirements
    Latest version of Android OS.
+   
 #### Installation
-
+1. Install Android Studio
+2. Open Android Studio, select 'Projects', then click 'Clone Repository'
+3. Enter https://github.com/jvillanueva3651/HabitGuard for the URL and select a directory to save the project in. Ensure Version control is Git and nothing else. Then hit Clone. The project should automatically load and import the project.
+4. Sync the project with Gradle files (Ctrl+Shift+O) then click the green play button to run the app, or hit Shift+F10.
+5. The Android emulator should start and the app should build within it. This may take anywhere from a few seconds to several minutes depending on your hardware.
 
 #### Features
 * Account Creation with Authentication Tokens: Securely create accounts using
