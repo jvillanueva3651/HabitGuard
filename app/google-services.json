@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1039653439392",
+    "project_id": "habitguard-2abee",
+    "storage_bucket": "habitguard-2abee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1039653439392:android:92fe7dbad3293ab04f06c5",
+        "android_client_info": {
+          "package_name": "com.washburn.habitguard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8TjKNLRsM_g2ey7BdcBBrrS8rFIPRevQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
